@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>4</title>
+
+  <link rel="stylesheet" href="../style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/bootstrap.css">
+  <script src="../js/bootstrap.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+
+</head>
+
+<body onload="onLoad()">
+<script src="script.js"></script>
+<div class="row m-0 mt-5 mb-5" style="height:90vh">
+
+  <div class="col-lg-3 d-flex align-items-end btn-group dropstart" role="group">
+    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split d-lg-none" data-bs-toggle="dropdown" aria-expanded="false"
+    style="height: 88px; width: 6px !important;">
+    </button>
+
+    <ul class="dropdown-menu d-none d-lg-block">
+      <span class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(1)" id="optionMessage1"></span>
+      <div class="dropdown-divider"></div>
+      <span class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(2)" id="optionMessage2"></span>
+      <div class="dropdown-divider"></div>
+      <span class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(3)" id="optionMessage3"></span>
+      <div class="dropdown-divider"></div>
+      <button class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(4)" id="optionMessage4"></button>
+    </ul>
+
+  </div>
+
+  <div class="col-lg-6 offset-lg-0 col-md-8 offset-md-2 col-sm-12 offset-sm-0 h-100">
+    <div class="card h-100">
+      <div class="card-header">
+
+        <div class="row">
+
+          <div class="p-0" id="alerts">
+            <div class="alert alert-danger alert-dismissible fade show p-2 mt-0 mb-2 ms-2 me-2 flex-shrink-1 d-flex align-items-center" id="WaitingAlert" role="alert">
+              <svg class="bi bi-check-circle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" fill="currentColor" width="24" height="24" role="img" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+              </svg>
+              <div id="WaitingAlertText">You are the only person in the room right now.</div>
+            </div>
+          </div>
+
+
+          <div class="col-md-6 ps-2 pe-2 mb-2">
+            <div class="input-group">
+              <span class="input-group-text grey2" id="trialNumberLbl">Trial Number: </span> <!--text-white bg-primary-->
+              <input type="text" class="form-control" placeholder="Trial Number" id="trialNumber" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-6 ps-2 pe-2 mb-2">
+            <div class="input-group">
+              <span class="input-group-text grey2" id="clockLbl">Time Since Start: </span> <!--text-white bg-primary-->
+              <input type="text" class="form-control" placeholder="00:00" id="clock" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-6 ps-2 pe-2">
+            <div class="input-group">
+              <span class="input-group-text left-color" id="receiverLbl">To: </span>
+              <input type="text" class="form-control" placeholder="Who you're messaging" id="receiverID" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-6 ps-2 pe-2">
+            <div class="input-group">
+              <span class="input-group-text right-color" id="senderLbl">You: </span>
+              <input type="text" class="form-control" placeholder="Your ID" id="senderID" readonly>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-body overflow-auto" id="chatWindow">
+      </div>
+
+      <div class="card-footer ps-2 pe-2">
+        <div class="alert alert-primary p-1" style="padding-left: 12px !important;
+         padding-right: 12px !important; margin: 0px; margin-bottom: 8px" role="alert" id="typingAlert" hidden>
+          alert!
+        </div>
+
+        <div class="input-group" id="translateGroup">
+          <span class="textarea form-control" role="textbox" placeholder="Type a message..." id="message" oninput="notifyTyping()"
+                onkeydown="keyDown(event,translateMessage,this)" onkeyup="keyUp(event)" tabindex="1" contenteditable></span>
+          <button class="btn btn-same btn-primary" type="button" onclick="translateBtn()" id="translateBtn" tabindex="2">
+            Translate
+          </button>
+        </div>
+        <div class="input-group mt-2" id="sendGroup">
+<!--          <div class="btn-group dropstart" role="group">-->
+<!--            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">-->
+<!--            </button>-->
+<!--            <ul class="dropdown-menu">-->
+<!--              <span class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(1)" id="optionMessage1"></span>-->
+<!--              <div class="dropdown-divider"></div>-->
+<!--              <span class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(2)" id="optionMessage2"></span>-->
+<!--              <div class="dropdown-divider"></div>-->
+<!--              <span class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(3)" id="optionMessage3"></span>-->
+<!--              <div class="dropdown-divider"></div>-->
+<!--              <button class="form-control textarea-small dropdown-item btn-primary border-0 mt-2 mb-2" onclick="switchMessage(4)" id="optionMessage4"></button>-->
+<!--            </ul>-->
+<!--          </div>-->
+          <span class="textarea form-control" role="textbox" placeholder="Translated Message" id="translatedMessage"
+                oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="3"
+                onmouseup="checkCursor()" contenteditable></span>
+          <button class="btn btn-same btn-primary" type="button" onclick="submit()"tabindex="4">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <div id = "optionGroup" hidden>
+          <p class="mb-2 text-center" id="optionsLbl">Paraphrases Of The Translation:</p>
+<!--          <button class="form-control btn-primary mb-2" onclick="switchMessage(1)" id="optionMessage1">-->
+<!--            Message Option 1</button>-->
+<!--          <button class="form-control btn-primary mb-2" onclick="switchMessage(2)" id="optionMessage2">-->
+<!--            Message Option 2</button>-->
+<!--          <button class="form-control btn-primary mb-2" onclick="switchMessage(3)" id="optionMessage3">-->
+<!--            Message Option 3</button>-->
+<!--          <button class="form-control btn-primary" onclick="switchMessage(4)" id="optionMessage4">-->
+<!--            Message Option 4</button>-->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+</html>

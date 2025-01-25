@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>6</title>
+
+  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/bootstrap.css">
+  <script src="../js/bootstrap.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-style@0.8.13/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="onLoad()">
+<script src="script.js"></script>
+
+<div class="row d-flex justify-content-center m-0 mt-2 mb-5" style="height:90vh">
+  <div class="col-lg-6 col-md-8 col-sm-8 h-100">
+
+    <div class="d-flex align-items-center justify-content-center mb-2">
+
+      <div class="nav-pill nav-pill-bordered      nav-width d-flex align-items-center justify-content-center">
+        <a class="nav-link pt-1 pb-1 link-width" id="nav1">Conversation</a>
+      </div>
+
+      <div class="d-flex flex-shrink-1 align-items-center justify-content-center">
+        <img src="../arrow.png" height="32" width="32"/>
+      </div>
+
+      <div class="nav-pill nav-pill-bordered      nav-width d-flex align-items-center justify-content-center">
+        <a class="nav-link pt-1 pb-1 link-width disabled" id="nav2">Post-Survey & Compensation</a>
+      </div>
+
+    </div>
+
+    <div class="card h-100">
+      <div class="card-header">
+
+        <div class="row">
+
+          <div class="p-0" id="alerts">
+            <div class="alert alert-danger alert-dismissible fade show p-2 mt-0 mb-2 ms-2 me-2 flex-shrink-1 d-flex align-items-center" id="WaitingAlert" role="alert">
+              <svg class="bi bi-check-circle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" fill="currentColor" width="24" height="24" role="img" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+              </svg>
+              <div id="WaitingAlertText">You are the only person in the room right now.</div>
+              <!-- <button type="button" class="btn-close flex-shrink-0" style="padding: 12px" data-bs-dismiss="alert" aria-label="Close"></button> -->
+            </div>
+          </div>
+
+
+          <div class="col-md-6 ps-2 pe-2 mb-2">
+            <div class="input-group">
+              <span class="input-group-text grey2" id="trialNumberLbl">Trial Number: </span> <!--text-white bg-primary-->
+              <input type="text" class="form-control" placeholder="Trial Number" id="trialNumber" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-6 ps-2 pe-2 mb-2">
+            <div class="input-group">
+              <span class="input-group-text grey2" id="clockLbl">Time Since Start: </span> <!--text-white bg-primary-->
+              <input type="text" class="form-control" placeholder="00:00" id="clock" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-6 ps-2 pe-2">
+            <div class="input-group">
+              <span class="input-group-text left-color" id="receiverLbl">To: </span>
+              <input type="text" class="form-control" placeholder="Who you're messaging" id="receiverID" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-6 ps-2 pe-2">
+            <div class="input-group">
+              <span class="input-group-text right-color" id="senderLbl">You: </span>
+              <input type="text" class="form-control" placeholder="Your ID" id="senderID" readonly>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2 ps-2 pe-2">
+            <a class="btn btn-primary w-100" type="button" id="nextStepBtn" onclick="downloadConvoData()" href="#" hidden>
+              Continue
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="card-body overflow-auto" id="chatWindow">
+
+      </div>
+      <div class="card-footer ps-2 pe-2">
+        <div class="alert alert-primary p-1" style="padding-left: 12px !important;
+         padding-right: 12px !important; margin: 0px; margin-bottom: 8px" role="alert" id="typingAlert" hidden>
+          alert!
+        </div>
+
+        <button class="btn btn-primary w-100" type="button" id="fileDownloadButton" onclick="downloadConvoData()" hidden>
+          Download
+        </button>
+
+        <div class="input-group mb-2" id="translateGroup">
+          <span class="textarea form-control" role="textbox" id="messageContainer">
+            <span
+                    class="textarea textarea-nested"
+                    id="message"
+                    contenteditable
+                    oninput="notifyTyping()"
+                    onkeydown="keyDown(event, translateMessage, this)"
+                    onkeyup="keyUp(event)"
+                    tabindex="1"
+                    placeholder="Type a message..."
+                    style="border-width: 0"
+            ></span>
+            <span id="charCountLabel">0/35</span>
+          </span>
+          <button class="btn btn-primary short-button" type="button" onclick="translateBtn()" id="translateBtn" tabindex="2">
+            Translate
+          </button>
+        </div>
+        <div class="input-group d-flex" id="sendGroup">
+          <span class="textarea colored-select form-control" role="textbox" placeholder="Translated Message" id="translatedMessage"
+                oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="3"
+                onmouseup="checkCursor()" inputmode="none" contenteditable></span>
+
+<!--            <div class="btn-group dropup">-->
+<!--                <button class="btn btn-primary dropdown-toggle" type="button" id="optionsMenuBtn" data-bs-toggle="dropdown" aria-expanded="false" tabindex="4">-->
+<!--                Regen-->
+<!--                </button>-->
+<!--                <ul class="dropdown-menu" aria-labelledby="optionsMenuBtn">-->
+<!--                <li><a class="dropdown-item" href="#" onclick="submit()">Submit</a></li>-->
+<!--                <li><a class="dropdown-item" href="#" onclick="skip()">Skip</a></li>-->
+<!--                </ul>-->
+<!--            </div>-->
+          <button class="btn btn-primary short-button" type="button" id="engSendBtn" onclick="submit()"tabindex="4">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+
+          <div class="flex-shrink-1" id="optionsMenu">
+            <div class="row d-flex flex-shrink-1 m-0">
+              <button class="btn btn-primary short-button d-flex flex-shrink-1 col align-items-center pt-1 pb-1"
+                      style="border-radius: 0; border-top-right-radius: 6px;" type="button" onclick="paraphrase()"
+                      id="paraBtn" tabindex="2">
+                改写
+              </button>
+            </div>
+
+            <div class="row d-flex flex-shrink-1 m-0">
+              <button class="btn btn-primary short-button d-flex flex-shrink-1 col align-items-center pt-1 pb-1"
+                      style="border-radius: 0; border-bottom-right-radius: 6px; border-top: 1px solid #dee2e6;"
+                      type="button" onclick="submit()" tabindex="2">
+                发送
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <div class="col-lg-3 col-md-4 col-sm-4 d-flex align-items-end btn-group" style="height: 95vh; padding-bottom: 1rem" role="group" id="parasGroup">
+
+  </div>
+
+</div>
+</body>
+
+</html>

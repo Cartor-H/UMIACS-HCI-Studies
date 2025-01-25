@@ -1,0 +1,65 @@
+.btn-circle {
+    width: 2rem!important;
+    height: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.btn-circle i {
+    position: relative;
+    top: -1px;
+}
+
+.check-label:hover {
+    color: white !important;
+    background-color: #0D6EFD !important;
+    border-color: #0D6EFD !important;
+}
+
+thumb-icon {
+    color: #0d6efd;
+}
+
+thumb-icon:hover {
+    color: #ffffff;
+}
+
+.grey-border {
+    border: 8px solid #888888;
+}
+
+.green-border {
+    border: 8px solid #55aa55;
+}
+
+.circle {
+    width: 50px !important;
+    height: 50px !important;
+    /*border: 8px solid #000;*/
+    border-radius: 50%; /* Make it a circle */
+    background-color: #fff; /* Background color */
+}
+
+#message::-webkit-outer-spin-button,
+#message::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#message {
+    /* Ensure spinner arrows are hidden in Firefox */
+    appearance: none;
+    margin: 0;
+}
+
+.para-item:hover {
+    /*color: #FFFFFFFF;*/
+    background-color: #e7e7e7 !important;
+}
+
+.colored-select::selection {
+    background-color: #fbfdc1; /* Change to your desired highlight color */
+    color: #000; /* Change to your desired text color */
+}

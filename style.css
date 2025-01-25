@@ -1,0 +1,175 @@
+html {
+    height: 100%;
+    width: 100%;
+}
+
+.left-color {
+    background-color: #C4E4FF !important;
+    color: #000000;
+    border: none !important;
+}
+
+.right-color {
+    background-color: #FDFFC2 !important;
+    color: #000000;
+    border: none !important;
+}
+
+.secondary-color {
+    color: #999999;
+}
+
+.grey1 {
+    background-color: #F0F0F0 !important;
+}
+
+.grey2 {
+    background-color: #D9D9D9 !important;
+}
+
+.grey3 {
+    background-color: #BDBDBD !important;
+}
+
+.grey4 {
+    background-color: #969696 !important;
+}
+
+.grey5 {
+    background-color: #525252 !important;
+}
+
+.toggle-box {
+    display: inherit;
+}
+
+.textarea-small {
+    display: block;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 24px;
+    line-height: 24px;
+    max-height: 15rem;
+
+    word-wrap: break-word !important;
+    white-space: normal !important;
+}
+
+.textarea {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    min-height: 40px;
+    line-height: 20px;
+    max-height: 15rem;
+}
+
+.textarea[contenteditable]:empty::before {
+    content: attr(placeholder);
+    color: gray;
+}
+
+.textarea[contenteditable]:focus {
+    outline: none;
+    border: none;
+}
+
+.textarea-nested{
+    min-height: 20px;
+}
+
+/* Use flexbox to align the label to the right */
+#messageContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Adjust label's appearance as needed */
+#charCountLabel {
+    margin-left: 10px; /* Add some space between the text and label */
+    color: gray; /* Optional: Adjust label color */
+}
+
+.dropdown-menu {
+    width: calc(25vw - 6px);
+    margin-right: 16px !important;
+    padding: 0 !important;}
+
+@media (max-width: 990px) {
+    .dropdown-menu {
+        width: calc(58vw - 6px) !important;
+        margin: 0
+    }
+}
+
+@media (max-width: 767px) {
+    .dropdown-menu {
+        width: calc(92vw - 80px) !important;
+    }
+}
+
+.nav-pill-bordered {
+    border: 2px solid rgba(0, 0, 0, 0.176);
+    border-radius: 10px;
+    /*border-width: 2px;*/
+    /*border-color: #000000 !* *!;*/
+}
+
+.bg-light-red {
+    background-color: #f8d7da;
+    border-color: #f1aeb5;
+    color: #58151c;
+}
+
+.bg-light-green {
+    background-color: #d1e7dd;
+    border-color: #a3cfbb;
+    color: #0A3622;
+}
+
+/* Main content div */
+.pulsing-div {
+    position: relative; /* Position it relative to its parent */
+}
+
+/* Pulsing background div */
+.pulsing-div::before {
+    content: ''; /* Required for pseudo-elements */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #a3cfbb;
+    border: inherit; /* Initial border */
+    border-radius: inherit;
+    animation: pulse 2s infinite;
+    z-index: -1; /* Behind the content */
+}
+
+/* Define the CSS for the pulsing effect */
+@keyframes pulse {
+    0% {
+        transform: scale(1); /* Start with normal size */
+        border-width: 2px; /* Start with a border */
+    }
+    50% {
+        transform: scaleX(1.08) scaleY(1.5); /* Expand to 1.2 times size */
+        border-width: 2px; /* Start with a border */
+    }
+    100% {
+        transform: scale(1); /* Return to normal size */
+        border-width: 2px; /* Start with a border */
+    }
+}
+
+.nav-width {
+    width: 45%
+}
+
+.link-width {
+    width: 100%;
+    text-align: center;
+}

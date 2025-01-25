@@ -1,0 +1,27 @@
+.btn-circle {
+    width: 2rem!important;
+    height: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.btn-circle i {
+    position: relative;
+    top: -1px;
+}
+
+.check-label:hover {
+    color: white !important;
+    background-color: #0D6EFD !important;
+    border-color: #0D6EFD !important;
+}
+
+thumb-icon {
+    color: #0d6efd;
+}
+
+thumb-icon:hover {
+    color: #ffffff;
+}
