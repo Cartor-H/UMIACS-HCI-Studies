@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modern Webpage</title>
+  <link href="../style.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="../css/bootstrap.css">
+  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="../js/bootstrap.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .card {
+      border-radius: 15px;
+    }
+
+    .input-group .form-control {
+      border-top-left-radius: 15px;
+      border-bottom-left-radius: 15px;
+    }
+
+    .input-group .btn {
+      border-top-right-radius: 15px;
+      border-bottom-right-radius: 15px;
+    }
+
+    .textarea {
+      min-height: 50px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    ::selection {
+      background-color: rgb(154, 204, 154);
+      color: rgb(0, 0, 0);
+    }
+  </style>
+</head>
+
+<body onload="onLoad()">
+  <script src="script.js"></script>
+  <div class="row m-5 mt-5 mb-5" style="height:90vh">
+    <div class="col-lg-6 mb-4 h-100">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Article</h5>
+        </div>
+        <div class="card-body overflow-auto" id="articleWindow">
+          <!-- Article content goes here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Chat</h5>
+        </div>
+        <div class="card-body overflow-auto" id="chatWindow">
+          <!-- Chat content goes here -->
+        </div>
+        <div class="card-footer">
+          <div class="alert alert-primary p-1" role="alert" id="typingAlert" hidden>
+            Someone is typing...
+          </div>
+          <div class="input-group">
+            <div class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
+              oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="1"
+              onmouseup="checkCursor()" contenteditable></div>
+            <button class="btn btn-primary" type="button" onclick="submit()" tabindex="2">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+
+<!-- ----------------------------------------------------- OLD STYLE ------------------------------------------------------ -->
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>1</title>
+  <link href="../style.css" rel="stylesheet" type="text/css" />
+
+  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
+  <script src="../js/bootstrap.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="../css/bootstrap.css">
+</head>
+
+<body onload="onLoad()">
+<script src="script.js"></script>
+<div class="row m-0 mt-5 mb-5" style="height:90vh">
+  <div class="col-6 ps-4 h-100">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="row">
+        </div>
+      </div>
+
+      <div class="card-body overflow-auto" id="articleWindow">
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 pe-4 h-100">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="row">
+        </div>
+      </div>
+
+      <div class="card-body overflow-auto" id="chatWindow">
+      </div>
+      <div class="card-footer ps-2 pe-2">
+        <div class="alert alert-primary p-1" style="padding-left: 12px !important;
+         padding-right: 12px !important; margin: 0px; margin-bottom: 8px" role="alert" id="typingAlert" hidden>
+          alert!
+        </div>
+        <div class="input-group">
+          <span class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
+                oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="1"
+                onmouseup="checkCursor()" contenteditable></span>
+          <button class="btn btn-primary" type="button" onclick="submit()" tabindex="2">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+
+</html> -->

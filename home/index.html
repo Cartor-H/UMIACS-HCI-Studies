@@ -15,44 +15,9 @@
 
 <body onload="onLoad()">
 <script src="script.js"></script>
-<div class="row m-0 mt-5 mb-5" style="height:90vh">
-  <div class="col-6 ps-4 h-100">
-    <div class="card h-100">
-      <div class="card-header">
-        <div class="row">
-        </div>
-      </div>
-
-      <div class="card-body overflow-auto" id="articleWindow">
-      </div>
+<div class="ms-5 me-5 mt-5 mb-5" style="height:90vh">
+    <div class="row" id="articleWindow">
     </div>
-  </div>
-
-  <div class="col-6 pe-4 h-100">
-    <div class="card h-100">
-      <div class="card-header">
-        <div class="row">
-        </div>
-      </div>
-
-      <div class="card-body overflow-auto" id="chatWindow">
-      </div>
-      <div class="card-footer ps-2 pe-2">
-        <div class="alert alert-primary p-1" style="padding-left: 12px !important;
-         padding-right: 12px !important; margin: 0px; margin-bottom: 8px" role="alert" id="typingAlert" hidden>
-          alert!
-        </div>
-        <div class="input-group">
-          <span class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
-                oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="1"
-                onmouseup="checkCursor()" contenteditable></span>
-          <button class="btn btn-primary" type="button" onclick="submit()" tabindex="2">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 </body>
 

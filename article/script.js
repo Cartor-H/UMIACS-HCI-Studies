@@ -13,7 +13,10 @@ function submit() {
         addMessageRight(message);
 
         //Send Message to Receiver
-        sendMessage(to,message);
+        // sendMessage(to,message);
+
+        //Send Message to ChatBot
+        sendMessageToChatBot(message);
 
         //-------------------------------------------------------------------------------------Add Message To SQL Server
         //Ajax Call To Serverside Python
@@ -54,7 +57,7 @@ function sendMessage(to, message) {
 function onLoad(){
 
     //---------------------------------------------------------------------------------------------------Read URL Params
-    // const params = new URLSearchParams(document.location.search);
+    const params = new URLSearchParams(document.location.search);
     // if(params.get('editable')!=null){
     //     document.getElementById("senderID").readOnly = false;
     //     document.getElementById("receiverID").readOnly = false;
@@ -71,25 +74,24 @@ function onLoad(){
     // document.getElementById("trialNumber").value = trial;
 
     // document.getElementById("typingAlert").innerText = receiver+" is Typing"
+    let articleID = params.get('articleID');
 
 
-    //---------------------------------------------------------------------------------------------------Get Articles
-    //Ajax Python Call To Get Messages From SQL Server
+    //---------------------------------------------------------------------------------------------------Get Article
     $.ajax({
-        url: 'getArticles.py',
+        url: 'getArticle.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
+        data: {articleID: articleID},
         success: function (data) {
             console.log(data)
             if (data["Status"] == "Success") {
-                articles = JSON.parse(data["Data"])
-
-                //---------------------------------------------------------------------------------------------------Add Articles
-                for (let i = 0; i < articles.length; i++) {
-                    let formattedDate = new Date(articles[i]["Published_Date"]).toLocaleDateString();
-                    addArticle(articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
-                }
+                let article = JSON.parse(data["Data"])[0]
+                
+                //---------------------------------------------------------------------------------------------------Add Article
+                addArticleTittle(article["Title"]);
+                addArticleLine(article["Content"]);
             } else {
                 console.log("Something Went Wrong On Data Retrieval");
                 console.log(data);
@@ -100,6 +102,7 @@ function onLoad(){
             alert("Error: " + errorThrown);
         }
     });
+
 
 
     //---------------------------------------------------------------------Connect to Server and Listen For New Messages
@@ -180,7 +183,7 @@ function onLoad(){
     }
 
 
-    // document.getElementById("message").focus();
+    document.getElementById("message").focus();
 }
 
 //----------------------------------------------------Clock Update----------------------------------------------------//
@@ -447,7 +450,6 @@ let articles = [];
 //       "date": "2023-11-12"
 //     }
 //   ]
-  
 
 function addArticleLine (line) {
     document.getElementById("articleWindow").innerHTML +=
@@ -464,31 +466,34 @@ function addArticleTittle (line) {
         '</p>' +
         '</div>';
 }
-function addArticle (title, description, date, id, photo = 'default_news_photo.png') {
-    document.getElementById("articleWindow").innerHTML +=
-        `<div class="col-md-3 mb-3">\n` +
-        `  <a href="../article?articleID=${id}" class="card-link" style="text-decoration: none; color: inherit;" target="_blank">\n` +
-        `    <div class="card h-100" style="transition: transform 0.2s, background-color 0.2s; cursor: pointer; background-color: #f8f9fa; border: none;">\n` +
-        `      <div class="card-img-top" style="background-image: url('${photo}'); background-size: cover; background-position: center; aspect-ratio: 4 / 2;"></div>\n` +
-        `      <div class="card-body p-3" style="font-family: 'Times New Roman', Times, serif;">\n` +
-        `        <h5 class="card-title fs-4 font-weight-bold">${title}</h5>\n` +
-        `        <p class="card-date">${date}</p>\n` +
-        `        <p class="card-text">${description}</p>\n` +
-        `      </div>\n` +
-        `    </div>\n` +
-        `  </a>\n` +
-        `</div>\n`;
 
-    // Add hover effect
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.addEventListener('mouseover', () => {
-            card.style.transform = 'scale(1.05)';
-            card.style.backgroundColor = '#e2e6ef';
-        });
-        card.addEventListener('mouseout', () => {
-            card.style.transform = 'scale(1)';
-            card.style.backgroundColor = '#f8f9fa';
-        });
+
+//------------------------------------------------- Chat Bot -------------------------------------------------//
+
+function sendMessageToChatBot(message) {
+    let context, classification = classifyMessage(message);
+    
+    if (classification == "PRACTICAL_GUIDANCE") {
+    }
+}
+
+function classifyMessage(message) {
+    $.ajax({
+        url: 'gptClassifyMessage.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {message: message, selectStart: selectStart , selectEnd: selectEnd, prompt: prompt},
+        success: function (data) {
+            parasArray = JSON.parse(data["Data"])["paraphrases"]
+            console.log(parasArray)
+            showParas(parasArray)
+            hideProgressBar()
+            paraReturnTime = getTime();
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
     });
 }
