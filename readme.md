@@ -4,8 +4,14 @@
 
 
 # Accessing Server
+* Currently the server is accessed based on allowed IP addresses, which I change depending on where I'm working from.
+  I will attempt to make it based on a vpn network instead. That way others can log in regardless of where they are,
+  and it's more secure.
 
-
+## File Transfer
+- `ssh -i "<Path>/ResearchServerKey.pem" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com`
+- `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/home" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/`
+- `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/article" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/`
 
 
 # Adding Functions
