@@ -38,7 +38,7 @@ def outputSQLQuery(form):
     # )
 
     # data = completion.choices[0].message.content
-    data = json.dumps({"response" : "woohoo!"})
+    data = json.dumps({"response" : "woohoo!", "chain of thought" : "No thoughts, no brain, thus: woohooo!"})
 
     if data:
         # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
