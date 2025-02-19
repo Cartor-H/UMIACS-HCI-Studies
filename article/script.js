@@ -36,6 +36,7 @@ function clientSendMsg() {
                 timeSent: new Date().toISOString()
             },
             success: function (data) {
+
             console.log(data)
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -444,6 +445,34 @@ function sendMessageToChatBot(message) {
     // } else if (classification == "VIEWPOINT_SYNTHESIS") {
     // } else if (classification == "LITERARY_COMPREHENSION") {
     // }
+    
+}
+
+/*
+Demo of how to run a prompt on the gpt api.
+    chainOfThought: json {} | Contains the chain of thought as a json. Or any
+                            | other data format you need for the msg history.
+    promptVariant: string | The variant of the prompt you want to run.
+                          | DO NOT SEND THE PROMPT ITSELF. JUST THE VARIANT.
+                          | This is to prevent people from using our website
+                          | as a free chat gpt api.
+*/
+function gptDemoAPI(chainOfThought, promptVariant) {
+    $.ajax({
+        url: 'functions/gpt_demo_api.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {chainOfThought: chainOfThought, promptVariant: promptVariant},
+        success: function (data) {
+            data = JSON.parse(data["Data"])
+            addMessageLeft(data["response"])
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
     
 }
 
