@@ -25,7 +25,7 @@ function onLoad(){
     //---------------------------------------------------------------------------------------------------Get Articles
     //Ajax Python Call To Get Messages From SQL Server
     $.ajax({
-        url: 'functions/getArticles.py',
+        url: 'functions/get_articles.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
@@ -103,38 +103,38 @@ function onLoad(){
     // }
 
     //-------------------------------------------------------------------------------------------Get Messages On Refresh
-    //Ajax Python Call To Get Messages From SQL Server
-    if(sender && receiver && sender!="" && receiver!="") {
-        $.ajax({
-            url: 'functions/getMessages.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {to: receiver, from: sender, trial: trial},
-            success: function (data) {
-                console.log(data)
-                if (data["Status"] == "Success") {
-                    let messages = JSON.parse(data["Data"])
-                    for (let i = 0; i < messages.length; i++) {
-                        if (messages[i]["SenderID"] == sender) {
-                            addMessageRight(messages[i]["Message"]);
-                        } else {
-                            addMessageLeft(messages[i]["Message"]);
-                        }
-                    }
-                } else {
-                    console.log("Something Went Wrong On Data Retrieval");
-                    console.log(data);
-                }
+    // //Ajax Python Call To Get Messages From SQL Server
+    // if(sender && receiver && sender!="" && receiver!="") {
+    //     $.ajax({
+    //         url: 'functions/getMessages.py',
+    //         type: 'POST',
+    //         loading: false,
+    //         dataType: 'json',
+    //         data: {to: receiver, from: sender, trial: trial},
+    //         success: function (data) {
+    //             console.log(data)
+    //             if (data["Status"] == "Success") {
+    //                 let messages = JSON.parse(data["Data"])
+    //                 for (let i = 0; i < messages.length; i++) {
+    //                     if (messages[i]["SenderID"] == sender) {
+    //                         addMessageRight(messages[i]["Message"]);
+    //                     } else {
+    //                         addMessageLeft(messages[i]["Message"]);
+    //                     }
+    //                 }
+    //             } else {
+    //                 console.log("Something Went Wrong On Data Retrieval");
+    //                 console.log(data);
+    //             }
 
-                scrollBottom();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-    }
+    //             scrollBottom();
+    //         },
+    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //             alert("Status: " + textStatus);
+    //             alert("Error: " + errorThrown);
+    //         }
+    //     });
+    // }
 
 
     // document.getElementById("message").focus();
@@ -250,32 +250,6 @@ function keyUp(e) {
     if (e.keyCode == 16) {
         shift = false;
     }
-}
-
-
-
-
-function getGPTMessage(message) {
-
-
-    $.ajax({
-        url: 'functions/getGPTMessage.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {message: message, selectStart: selectStart , selectEnd: selectEnd, prompt: prompt},
-        success: function (data) {
-            parasArray = JSON.parse(data["Data"])["paraphrases"]
-            console.log(parasArray)
-            showParas(parasArray)
-            hideProgressBar()
-            paraReturnTime = getTime();
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
 }
 
 

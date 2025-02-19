@@ -21,7 +21,7 @@ function clientSendMsg() {
         //Add Message To SQL Server
         //Ajax Call To Serverside Python
         $.ajax({
-            url: 'functions/handleMessages.py',
+            url: 'functions/save_message.py',
             type: 'POST',
             loading: false,
             dataType: 'json',
@@ -96,7 +96,7 @@ function onLoad(){
     // Retrieve Previously Sent Messages From SQL Server
     if(articleID && userID && articleID!="" && userID!="") {
         $.ajax({
-            url: 'functions/getMessages.py',
+            url: 'functions/get_messages.py',
             type: 'POST',
             loading: false,
             dataType: 'json',
@@ -419,21 +419,25 @@ Just MAKE SURE that the python script never takes a prompt as a parameter. Other
 without having to know it.
 */
 function sendMessageToChatBot(message) {
-    let context, classification = classifyMessage(message);
-    
-    if (classification == "PRACTICAL_GUIDANCE") {
+    // Commented Out For Now - Bc Not Implemented Yet //
 
-    } else if (classification == "BROADER IMPACT") {
-    } else if (classification == "REFERENTIAL_FACT") {
-    } else if (classification == "VIEWPOINT_SYNTHESIS") {
-    } else if (classification == "LITERARY_COMPREHENSION") {
-    }
+
+
+    // let context, classification = classifyMessage(message);
+    
+    // if (classification == "PRACTICAL_GUIDANCE") {
+
+    // } else if (classification == "BROADER IMPACT") {
+    // } else if (classification == "REFERENTIAL_FACT") {
+    // } else if (classification == "VIEWPOINT_SYNTHESIS") {
+    // } else if (classification == "LITERARY_COMPREHENSION") {
+    // }
     
 }
 
 function classifyMessage(message) {
     $.ajax({
-        url: 'functions/gptClassifyMessage.py',
+        url: 'functions/gpt_classify_message.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
@@ -458,7 +462,7 @@ function getGPTMessage(message) {
 
 
     $.ajax({
-        url: 'functions/getGPTMessage.py',
+        url: 'functions/gpt_generate_message.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
