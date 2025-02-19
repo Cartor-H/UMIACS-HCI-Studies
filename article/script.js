@@ -1,3 +1,7 @@
+//---------------------------------------------------Global Variables-----------------------------------------------------//
+let articleID = "-1";
+let userID = "-1";
+
 
 //---------------------------------------------------Send Message-----------------------------------------------------//
 
@@ -11,13 +15,12 @@ function clientSendMsg() {
 
     let message = document.getElementById("message").innerText;
 
-    if (message!="" && to!="" && from!=""){
+    if (message!="" && articleID!="-1" && userID!="-1"){
         //Show Message Locally
         addMessageRight(message);
 
         //Send Message to ChatBot
         sendMessageToChatBot(message);
-
         //Add Message To SQL Server
         //Ajax Call To Serverside Python
         $.ajax({
@@ -25,13 +28,19 @@ function clientSendMsg() {
             type: 'POST',
             loading: false,
             dataType: 'json',
-            data: {message: message},
+            data: {
+                message: message,
+                userID: userID,
+                articleID: articleID,
+                sender: "Client",
+                timeSent: new Date().toISOString()
+            },
             success: function (data) {
-                console.log(data)
+            console.log(data)
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
             }
         });
 
@@ -56,13 +65,11 @@ function onLoad(){
     const params = new URLSearchParams(document.location.search);
     
     // Get User ID From URL
-    let userID = "-1";
     if (params.get('userID') != null) {
         userID = params.get('userID');
     }
 
     // Get Article ID From URL
-    let articleID = "-1"
     if (params.get('articleID') != null) {
         articleID = params.get('articleID');
     }
@@ -133,70 +140,75 @@ function onLoad(){
 
 //----------------------------------------------------Clock Update----------------------------------------------------//
 
-// MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
+// // MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
 
-let startTime = null;
+// let startTime = null;
 
-/*
-A function primarily used to inform the user of how much time they're taking, and how much time they have left in the
-istant messagin session.
-*/
-function updateClock() {
-    const clockElement = document.getElementById("clock");
-    if (clockElement) {
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - startTime;
+// /*
+// A function primarily used to inform the user of how much time they're taking, and how much time they have left in the
+// istant messagin session.
+// */
+// function updateClock() {
+//     const clockElement = document.getElementById("clock");
+//     if (clockElement) {
+//         const currentTime = Date.now();
+//         const elapsedTime = currentTime - startTime;
 
-        // Calculate minutes and seconds
-        const minutes = Math.floor(elapsedTime / 60000);
-        const seconds = Math.floor((elapsedTime % 60000) / 1000);
+//         // Calculate minutes and seconds
+//         const minutes = Math.floor(elapsedTime / 60000);
+//         const seconds = Math.floor((elapsedTime % 60000) / 1000);
 
-        // Format minutes and seconds with leading zeros
-        const formattedMinutes = String(minutes).padStart(2, "0");
-        const formattedSeconds = String(seconds).padStart(2, "0");
+//         // Format minutes and seconds with leading zeros
+//         const formattedMinutes = String(minutes).padStart(2, "0");
+//         const formattedSeconds = String(seconds).padStart(2, "0");
 
-        // Update the clock display
-        clockElement.value = `${formattedMinutes}:${formattedSeconds}`;
+//         // Update the clock display
+//         clockElement.value = `${formattedMinutes}:${formattedSeconds}`;
 
-        // Schedule the next update in 1 second
-        setTimeout(updateClock, 1000);
-    }
-}
+//         // Schedule the next update in 1 second
+//         setTimeout(updateClock, 1000);
+//     }
+// }
 
 //--------------------------------------------------Typing Detection--------------------------------------------------//
 
-// MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
-// Might be useful to display a notice of typing when chat gpt is thinking.
+// // MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
+// // Might be useful to display a notice of typing when chat gpt is thinking.
 
-var typingTimeout;
+function checkCursor() {
 
-/*
-A function that detects when the user is typing, and sends a notification to the server.
-*/
-function notifyTyping () {
-    if (typingTimeout != undefined) {
-        clearTimeout(typingTimeout);
-    } else {
-        notifyTypingHelper(document.getElementById("receiverID").value,"Start")
-    }
-    typingTimeout = setTimeout(function() {
-        notifyTypingHelper(document.getElementById("receiverID").value,"Stop");
-        typingTimeout = undefined;
-    }, 1000);
 }
 
-function notifyTypingHelper(to, status){
-    fetch(`http://52.15.204.7:8080/notify-typing?to=${to}&status=${status}&section=${document.title}`)
-        .then(response => response.text())
-        .then(result => {
-            console.log(result);
-        })
-        .catch(error => {
-            console.error(error);
-        });
-    console.log(typingTimeout)
-    console.log("Typing " + status + " to " + to)
-}
+
+// var typingTimeout;
+
+// /*
+// A function that detects when the user is typing, and sends a notification to the server.
+// */
+// function notifyTyping () {
+//     if (typingTimeout != undefined) {
+//         clearTimeout(typingTimeout);
+//     } else {
+//         notifyTypingHelper(document.getElementById("receiverID").value,"Start")
+//     }
+//     typingTimeout = setTimeout(function() {
+//         notifyTypingHelper(document.getElementById("receiverID").value,"Stop");
+//         typingTimeout = undefined;
+//     }, 1000);
+// }
+
+// function notifyTypingHelper(to, status){
+//     fetch(`http://52.15.204.7:8080/notify-typing?to=${to}&status=${status}&section=${document.title}`)
+//         .then(response => response.text())
+//         .then(result => {
+//             console.log(result);
+//         })
+//         .catch(error => {
+//             console.error(error);
+//         });
+//     console.log(typingTimeout)
+//     console.log("Typing " + status + " to " + to)
+// }
 
 //----------------------------------------------Adding Messages To Screen---------------------------------------------//
 

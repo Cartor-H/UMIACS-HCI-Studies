@@ -50,26 +50,42 @@ To maintain a consistent and organized project structure, follow these naming co
 To ensure a structured and maintainable web application, organize your files as follows:
 
 ```
+/history
+│── index.html
+│── script.js
+└── /functions
+    │── get_history.py
+    ...
 /articles
 │── index.html
 │── script.js
 └── /functions
     │── get_messages.py
     │── save_message.py
-    │── gpt_classify_message.py
+    │── get_article.py
+    ...
+/home
+│── index.html
+│── script.js
+│── style.css
+└── /functions
+    │── get_articles.py
 ```
 
 ### Why This Structure?
 - **Separation of Concerns:** Keeps Python logic separate from front-end files.
 - **Scalability:** Facilitates growth and modularity.
 - **Clarity:** Ensures each file’s role is easily identifiable.
-
-By following these conventions and structures, you ensure consistency, maintainability, and ease of collaboration across the project.
-
+- **Security** Helps prevent exploitation of sql queries and api keys.
 
 
+## Saving and Adding to the Server
 
-
+### Python Functions
+1) Make sure to run `chmod +x <file path>` or `chmod +x /var/www/html/*/*/*.py` so that the file is executable by the server.
+2) When installing packages, use `sudo python3.11 -m pip install <package>` otherwise server errors (code 500) will occur
+   Ideally a virtual environment should be used, but this started as a simple script and doing so now would cause too much downtime and take time away from making new features.
+3) If updloading files from a windows system be sure to run `dos2unix <file_path>` or `dos2unix /var/www/html/*/*/*.py` so that the file is readable by the server.
 
 
 
@@ -81,11 +97,3 @@ Certificate: /etc/pki/tls/certs/ssl_cert.pem
 Private Key: /etc/pki/tls/private/ssl_priv_key.key
 
 Chain Certificate: /etc/pki/tls/certs/origin_ca_rsa_root.pem
-
-
-
-# IMPORTANT!!
-When installing packages, use `sudo python3.11 -m pip install <package>` otherwise server errors (code 500) will occur
-
-Ideally a virtual environment should be used, but this started as a simple script and doing so now would cause too much downtime
-and take time away from making new features

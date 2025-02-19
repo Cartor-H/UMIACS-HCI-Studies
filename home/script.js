@@ -378,23 +378,6 @@ let articles = [];
 //       "date": "2023-11-12"
 //     }
 //   ]
-  
-
-function addArticleLine (line) {
-    document.getElementById("articleWindow").innerHTML +=
-        '<div class="text-left mb-3 pt-2 pb-2">' +
-        line +
-        '</div>';
-}
-
-function addArticleTittle (line) {
-    document.getElementById("articleWindow").innerHTML +=
-        '<div class="text-center mb-3 pt-2 pb-2">' +
-        '<p class="fs-4 font-weight-bold">' +
-        line +
-        '</p>' +
-        '</div>';
-}
 
 function addArticle (location, title, description, date, id, photo = 'default_news_photo.png') {
     document.getElementById(location).innerHTML +=

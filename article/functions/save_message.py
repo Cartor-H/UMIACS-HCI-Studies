@@ -29,11 +29,14 @@ def outputSQLQuery(form):
 
     cursor=con.cursor()
 
-    # form = cgi.FieldStorage()
     message = form['message']
+    userID = form["userID"]
+    articleID = form['articleID']
+    sender = form['sender']
+    timeSent = form['timeSent']
 
-    # cursor.execute("INSERT INTO Messages (SenderID, ReceiverID, Message, TrialNumber) VALUES (%s, %s, %s, %s)",
-    #                (sender, to, message, trial))
+    cursor.execute("INSERT INTO Messages (UserID, ArticleID, TimeSent, Sender, Message) VALUES (%s, %s, %s, %s, %s)",
+                   (userID, articleID, timeSent, sender, message))
     con.commit()
 
 

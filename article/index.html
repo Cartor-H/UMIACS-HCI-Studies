@@ -52,7 +52,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav w-100 d-flex justify-content-between">
           <li class="nav-item flex-fill text-center">
-            <a class="nav-link" href="">Home</a>
+            <a class="nav-link" href="#" onclick="window.close(); return false;">Home</a>
           </li>
           <li class="nav-item flex-fill text-center">
             <a class="nav-link" href="../history">History</a>
@@ -67,7 +67,7 @@
     </div>
   </nav>
 
-  <div class="row m-5 mt-5 mb-5" style="height:90vh">
+  <div class="row m-5 mt-1 mb-5" style="height:90vh">
     <div class="col-lg-6 mb-4 h-100">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-primary text-white">
@@ -93,7 +93,7 @@
           </div>
           <div class="input-group">
             <div class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
-              oninput="notifyTyping()" onkeydown="keyDown(event,clientSendMsg,this)" onkeyup="keyUp(event)" tabindex="1"
+              onkeydown="keyDown(event,clientSendMsg,this)" onkeyup="keyUp(event)" tabindex="1"
               onmouseup="checkCursor()" contenteditable></div>
             <button class="btn btn-primary" type="button" onclick="clientSendMsg()" tabindex="2">
               <i class="fa-solid fa-paper-plane"></i>
