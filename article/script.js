@@ -21,34 +21,39 @@ function clientSendMsg() {
 
         //Send Message to ChatBot
         sendMessageToChatBot(message);
-        //Add Message To SQL Server
-        //Ajax Call To Serverside Python
-        $.ajax({
-            url: 'functions/save_message.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {
-                message: message,
-                userID: userID,
-                articleID: articleID,
-                sender: "Client",
-                timeSent: new Date().toISOString()
-            },
-            success: function (data) {
 
-            console.log(data)
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-            }
-        });
+        //Add Message To SQL Server
+        saveMessage(message, "Client");
 
         //Clear Message and Scroll to Bottom
         document.getElementById("message").innerText = ""
         scrollBottom();
     }
+}
+
+//---------------------------------------------------Save Message-----------------------------------------------------//
+function saveMessage(message, sender) {
+    //Ajax Call To Serverside Python
+    $.ajax({
+        url: 'functions/save_message.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {
+            message: message,
+            userID: userID,
+            articleID: articleID,
+            sender: sender,
+            timeSent: new Date().toISOString()
+        },
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
 }
 
 
@@ -434,7 +439,7 @@ without having to know it.
 function sendMessageToChatBot(message) {
     // Commented Out For Now - Bc Not Implemented Yet //
 
-
+    gptRespondMessage(message);
 
     // let context, classification = classifyMessage(message);
     
@@ -457,16 +462,18 @@ Demo of how to run a prompt on the gpt api.
                           | This is to prevent people from using our website
                           | as a free chat gpt api.
 */
-function gptDemoAPI(chainOfThought, promptVariant) {
+function gptRespondMessage(message) {
     $.ajax({
-        url: 'functions/gpt_demo_api.py',
+        url: 'functions/gpt_respond_message.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
-        data: {chainOfThought: chainOfThought, promptVariant: promptVariant},
+        data: {message: message},
         success: function (data) {
             data = JSON.parse(data["Data"])
             addMessageLeft(data["response"])
+            saveMessage(data["response"], "ChatBot")
+            scrollBottom();
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             alert("Status: " + textStatus);
@@ -474,50 +481,4 @@ function gptDemoAPI(chainOfThought, promptVariant) {
         }
     });
     
-}
-
-function classifyMessage(message) {
-    $.ajax({
-        url: 'functions/gpt_classify_message.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {message: message, selectStart: selectStart , selectEnd: selectEnd, prompt: prompt},
-        success: function (data) {
-            parasArray = JSON.parse(data["Data"])["paraphrases"]
-            console.log(parasArray)
-            showParas(parasArray)
-            hideProgressBar()
-            paraReturnTime = getTime();
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
-}
-
-
-//
-function getGPTMessage(message) {
-
-
-    $.ajax({
-        url: 'functions/gpt_generate_message.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {message: message, selectStart: selectStart , selectEnd: selectEnd, prompt: prompt},
-        success: function (data) {
-            parasArray = JSON.parse(data["Data"])["paraphrases"]
-            console.log(parasArray)
-            showParas(parasArray)
-            hideProgressBar()
-            paraReturnTime = getTime();
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
 }
