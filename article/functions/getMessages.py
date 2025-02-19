@@ -1,9 +1,6 @@
 #!/usr/bin/env python3.11
-# dos2unix /var/www/html/1/handleMessages.py
+# dos2unix /var/www/html/1/getMessages.py
 # nano /var/log/httpd/error_log
-
-# import cgitb
-# cgitb.enable()
 
 import json
 import sys
@@ -15,24 +12,9 @@ from dotenv import load_dotenv
 sys.path.append('/home/ec2-user/.local/lib/python3.11/site-packages')
 
 # Load environment variables from .env file
-load_dotenv('/var/www/html/9/.env')
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 def outputSQLQuery(form):
-    # print(sys.path)
-
-    # import pyodbc
-    # server = 'database-2.c2upl2uwejtd.us-east-2.rds.amazonaws.com'
-    # database = '1'
-    # username = 'admin'
-    # password = 'L3arn2Le4rn'
-    # driver = '{ODBC Driver 18 for SQL Server}' # Driver you need to connect to the database {SQL Server}
-    # port = '1433'
-    # cnxn = pyodbc.connect('DRIVER='+driver+';PORT=port;SERVER='+server
-    #                       +';PORT='+port+';DATABASE='+database
-    #                       +';UID='+username+';PWD={'+password
-    #                       +';Encrypt=no;TrustServerCertificate=yes}')
-
-    # import pymssql
 
     connection = {
         'host': os.getenv('DB_HOST'),
@@ -41,19 +23,22 @@ def outputSQLQuery(form):
         'db': os.getenv('DB_NAME')
     }
     con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
-
     cursor=con.cursor()
 
-    # form = cgi.FieldStorage()
-    to = form["to"]
-    sender = form['from']
-    trial = form['trial']
-    message = form['message']
+    userID = form["userID"]
+    articleID = form['articleID']
 
-    cursor.execute("INSERT INTO Messages (SenderID, ReceiverID, Message, TrialNumber) VALUES (%s, %s, %s, %s)",
-                   (sender, to, message, trial))
-    con.commit()
+    cursor.execute("SELECT * FROM Messages WHERE UserID = %s AND ArticleID = %s FOR JSON AUTO",
+                   (userID, articleID))
+    data = cursor.fetchall()
 
+    if data:
+        json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
+        print(json.dumps({
+            "Status" : "Success",
+            "Data" : json_data}))
+    else:
+        print(json.dumps({"Status" : "No Data"}))
 
     cursor.close()
     con.close()
@@ -77,7 +62,6 @@ def outputSQLQuery(form):
     #     print(data[0][0])
     # else:
     #     print('[]')
-    print(json.dumps({"Status" : "Success"}))
 
 try:
     print("Content-type: text/html\n\n")   # say generating html

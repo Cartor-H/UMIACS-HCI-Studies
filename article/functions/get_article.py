@@ -7,12 +7,13 @@ import sys
 import os
 import urllib.parse
 import pymssql
+import traceback
 from dotenv import load_dotenv
 
 sys.path.append('/home/ec2-user/.local/lib/python3.11/site-packages')
 
 # Load environment variables from .env file
-load_dotenv('/var/www/html/9/.env')
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 def outputSQLQuery(form):
 
@@ -25,13 +26,9 @@ def outputSQLQuery(form):
     con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
     cursor=con.cursor()
 
-    to = form["to"]
-    sender = form['from']
-    trial = form['trial']
+    ID = form["articleID"]
 
-    cursor.execute("SELECT * FROM Messages where ((SenderID = %s AND ReceiverID = %s)"
-                   "OR (SenderID = %s and ReceiverID = %s)) AND TrialNumber = %s FOR JSON AUTO",
-                   (sender, to, to, sender, trial))
+    cursor.execute("SELECT ID, Title, Published_Date, Description, Image_ID, Content, Author FROM articles WHERE ID=%s FOR JSON AUTO", (ID,))
     data = cursor.fetchall()
 
     if data:
@@ -78,8 +75,10 @@ try:
 except Exception as e:
     print("{error:")
     print(f"An error occurred: {str(e)}")
-    print(f"\nTrace: {str(e.traceback)}")
-    print("}")
+    print(json.dumps({
+        "error": str(e),
+        "trace": traceback.format_exc()
+    }))
 
 # try:
 #     # import cgi
@@ -92,79 +91,3 @@ except Exception as e:
 #     # cgitb.handler()
 #     # cgi.print_exception()                 # catch and print errors
 
-
-"""
-
-#!/usr/bin/env python3
-
-# print("Hello World")
-import cgitb
-cgitb.enable()
-
-def textToImage():
-  import json
-
-  form = cgi.FieldStorage()
-  promt = form.getvalue('prompt')
-  seed = form.getvalue('seed')
-
-
-  # import sys
-  # sys.path.append('/var/www/stable-diffusion-webui/modules')
-  # sys.path.append('/var/www/stable-diffusion-webui') # Add the directory containing txt2img to the system path
-  # print(sys.path)
-  # #from ..stable-diffusion-webui.modules.txt2img import txt2img
-  # #from ........home.'ec2-user'.stable-diffusion-webui.modules.txt2img import txt2img
-  # txt2img = __import__("txt2img.txt2img")
-
-  import torch
-  from diffusers import StableDiffusionPipeline
-
-  model_id = "CompVis/stable-diffusion-v1-4"
-  device = "cuda"
-
-
-  pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
-  pipe = pipe.to(device)
-
-  prompt = "a photo of an astronaut riding a horse on mars"
-  image = pipe(prompt).images[0]
-
-  image.save("astronaut_rides_horse.png")
-
-  # Do something with the prompt and seed variables, such as generating an image.
-  print(json.dumps({"success": True, "message": "Image generated successfully"}))
-
-try:
-  import cgi
-  print("Content-type: text/html\n\n")   # say generating html
-  textToImage()
-except:
-  import cgi
-  cgitb.handler()
-  cgi.print_exception()                 # catch and print errors
-
-
-#
-# import cgi
-# textToImage()
-
-# import json
-# import sys
-# sys.path.insert(0, '/home/ec2-user/stable-diffusion-webui/modules/') # Add the directory containing txt2img to the system path
-# from txt2img import txt2img
-#
-# # from /home/ec2-user/stable-diffusion-webui/modules/txt2img.py import txt2img
-#
-#
-# def textToImage():
-#   data = json.loads(input())
-#   prompt = data["prompt"]
-#   seed = data["seed"]
-#   # Do something with the prompt and seed variables, such as generating an image.
-#   response = {"success": True, "message": "Image generated successfully"}
-#   print(json.dumps(response))
-#
-# textToImage()
-
-"""

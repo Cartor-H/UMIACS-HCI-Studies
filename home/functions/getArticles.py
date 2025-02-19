@@ -12,13 +12,13 @@ import sys
 import os
 import urllib.parse
 import pymssql
-# import traceback
+import traceback
 from dotenv import load_dotenv
 
 sys.path.append('/home/ec2-user/.local/lib/python3.11/site-packages')
 
 # Load environment variables from .env file
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 def outputSQLQuery(form):
 
@@ -32,7 +32,7 @@ def outputSQLQuery(form):
     cursor=con.cursor()
 
 
-    cursor.execute("SELECT ID, Title, Published_Date, Description, Image_ID, Content, Author FROM articles FOR JSON AUTO")
+    cursor.execute("SELECT ID, Title, Published_Date, Description, Image_ID, Content, Author FROM articles ORDER BY Published_Date DESC FOR JSON AUTO")
     data = cursor.fetchall()
 
     if data:
@@ -77,10 +77,11 @@ try:
 
     outputSQLQuery(form)
 except Exception as e:
-    print("{error:")
-    print(f"An error occurred: {str(e)}")
-    print(f"\nTrace: {str(e.__traceback__)}")
-    print("}")
+    print(json.dumps({
+        "Status": "Error",
+        "Message": str(e),
+        "Traceback": traceback.format_exc()
+    }))
 
 # try:
 #     # import cgi
@@ -92,4 +93,15 @@ except Exception as e:
 #     # import cgi
 #     # cgitb.handler()
 #     # cgi.print_exception()                 # catch and print errors
-
+"""
+Traceback (most recent call last):
+    File "/var/www/html/home/functions/getArticles.py", line 78, in <module>
+        outputSQLQuery(form)
+    File "/var/www/html/home/functions/getArticles.py", line 31, in outputSQLQuery
+        con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "src/pymssql/_pymssql.pyx", line 647, in pymssql._pymssql.connect
+    File "src/pymssql/_mssql.pyx", line 2109, in pymssql._mssql.connect
+    File "src/pymssql/_mssql.pyx", line 609, in pymssql._mssql.MSSQLConnection.__init__
+TypeError: argument of type 'NoneType' is not iterable
+"""

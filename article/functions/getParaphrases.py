@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 sys.path.append('/home/ec2-user/.local/lib/python3.11/site-packages')
 
 # Load environment variables from .env file
-load_dotenv('/var/www/html/9/.env')
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 # Set OpenAI API key from environment variable
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')

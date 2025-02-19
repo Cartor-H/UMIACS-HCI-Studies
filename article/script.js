@@ -1,31 +1,31 @@
-function submit() {
-    console.log("'" + document.getElementById("message").innerText
-        + "' From: " + document.getElementById("senderID").value
-        + " To: " + document.getElementById("receiverID").value);
+
+//---------------------------------------------------Send Message-----------------------------------------------------//
+
+/*
+Contains all the necessary steps for the act of "sending" a message.
+- Show the message locally.
+- Starting the Chatbot message response process.
+- Updating the SQL database with the new message.
+*/
+function clientSendMsg() {
 
     let message = document.getElementById("message").innerText;
-    let from = document.getElementById("senderID").value;
-    let to = document.getElementById("receiverID").value;
-    let trial = document.getElementById("trialNumber").value;
 
     if (message!="" && to!="" && from!=""){
         //Show Message Locally
         addMessageRight(message);
 
-        //Send Message to Receiver
-        // sendMessage(to,message);
-
         //Send Message to ChatBot
         sendMessageToChatBot(message);
 
-        //-------------------------------------------------------------------------------------Add Message To SQL Server
+        //Add Message To SQL Server
         //Ajax Call To Serverside Python
         $.ajax({
-            url: 'handleMessages.py',
+            url: 'functions/handleMessages.py',
             type: 'POST',
             loading: false,
             dataType: 'json',
-            data: {to: to, from: from, trial: trial, message: message},
+            data: {message: message},
             success: function (data) {
                 console.log(data)
             },
@@ -41,45 +41,35 @@ function submit() {
     }
 }
 
-function sendMessage(to, message) {
-    fetch(`http://52.15.204.7:8080/send-message?to=${to}&message=${message}&section=${document.title}`)
-        .then(response => response.text())
-        .then(result => {
-            console.log(result);
-        })
-        .catch(error => {
-            console.error(error);
-        });
-}
 
 //------------------------------------------------------On Load-------------------------------------------------------//
 
+/*
+Performs necessary actions imdeiately upon loading the page.
+- Reads URL parameters to determine the article and user IDs.
+- Loads the news article content.
+- Retrieves any existing messages from the SQL database.
+*/
 function onLoad(){
 
-    //---------------------------------------------------------------------------------------------------Read URL Params
+    // Read URL Params
     const params = new URLSearchParams(document.location.search);
-    // if(params.get('editable')!=null){
-    //     document.getElementById("senderID").readOnly = false;
-    //     document.getElementById("receiverID").readOnly = false;
-    //     document.getElementById("trialNumber").readOnly = false;
-    // }
-    let sender = "";
-    let receiver = "";
-    // sender = params.get('from');
-    // receiver = params.get('to');
-    // document.getElementById("senderID").value = sender;
-    // document.getElementById("receiverID").value = receiver;
-    // //Trial
-    // let trial = params.get('trial');
-    // document.getElementById("trialNumber").value = trial;
+    
+    // Get User ID From URL
+    let userID = "-1";
+    if (params.get('userID') != null) {
+        userID = params.get('userID');
+    }
 
-    // document.getElementById("typingAlert").innerText = receiver+" is Typing"
-    let articleID = params.get('articleID');
+    // Get Article ID From URL
+    let articleID = "-1"
+    if (params.get('articleID') != null) {
+        articleID = params.get('articleID');
+    }
 
-
-    //---------------------------------------------------------------------------------------------------Get Article
+    // Get Article Content From SQL Server
     $.ajax({
-        url: 'getArticle.py',
+        url: 'functions/get_article.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
@@ -89,7 +79,7 @@ function onLoad(){
             if (data["Status"] == "Success") {
                 let article = JSON.parse(data["Data"])[0]
                 
-                //---------------------------------------------------------------------------------------------------Add Article
+                // Add Article Content To Page
                 addArticleTittle(article["Title"]);
                 addArticleLine(article["Content"]);
             } else {
@@ -103,66 +93,21 @@ function onLoad(){
         }
     });
 
-
-
-    //---------------------------------------------------------------------Connect to Server and Listen For New Messages
-    // let sse = new EventSource(`http://52.15.204.7:8080/stream?sender=${sender}&to=${receiver}&section=${document.title}`);
-    // sse.onmessage = console.log;
-    // sse.onmessage = (event) => {
-    //     if(event.data!=null){
-    //         const data = event.data
-    //         let dataJSON = JSON.parse(data);
-    //         console.log(dataJSON);
-
-    //         if(dataJSON["connected"] && dataJSON["startTime"]){
-    //             console.log("Start Clock")
-    //             startTime = dataJSON["startTime"];
-    //             document.getElementById("alerts").innerHTML =
-    //                 '<div class="alert alert-success alert-dismissible fade show p-2 mt-0 mb-2 ms-2 me-2 flex-shrink-1 d-flex align-items-center" id="ConnectedAlert" role="alert">\n' +
-    //                 '  <svg class="bi bi-check-circle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" fill="currentColor" width="24" height="24" role="img" xmlns="http://www.w3.org/2000/svg">\n' +
-    //                 '     <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>\n' +
-    //                 '  </svg>\n' +
-    //                 '  Both people have joined the room.\n' +
-    //                 '  <!-- <button type="button" class="btn-close flex-shrink-0" style="padding: 12px" data-bs-dismiss="alert" aria-label="Close"></button> -->\n' +
-    //                 '</div>'
-    //             updateClock();
-    //         }
-
-    //         //------------------------------------------------------------------------Local Response To Notice Of Typing
-    //         if(dataJSON["Status"]!=null){
-    //             if(dataJSON["Status"]=="Start"){
-    //                 document.getElementById("typingAlert").hidden = false
-    //             } else {
-    //                 document.getElementById("typingAlert").hidden = true
-    //             }
-    //         }
-
-    //         //-----------------------------------------------------------------------------Local Response To New Message
-    //         if(dataJSON["message"]!=null){
-    //             const {to, message} = dataJSON;
-    //             // if (to == document.getElementById("senderID").value) {
-    //             addMessageLeft(message);
-    //             scrollBottom();
-    //             // }
-    //         }
-    //     }
-    // }
-
-    //-------------------------------------------------------------------------------------------Get Messages On Refresh
-    //Ajax Python Call To Get Messages From SQL Server
-    if(sender && receiver && sender!="" && receiver!="") {
+    // Retrieve Previously Sent Messages From SQL Server
+    if(articleID && userID && articleID!="" && userID!="") {
         $.ajax({
-            url: 'getMessages.py',
+            url: 'functions/getMessages.py',
             type: 'POST',
             loading: false,
             dataType: 'json',
-            data: {to: receiver, from: sender, trial: trial},
+            data: {articleID: articleID, userID: userID},
             success: function (data) {
-                console.log(data)
                 if (data["Status"] == "Success") {
+
+                    // Add Messages To Page
                     let messages = JSON.parse(data["Data"])
                     for (let i = 0; i < messages.length; i++) {
-                        if (messages[i]["SenderID"] == sender) {
+                        if (messages[i]["Sender"] == "Client") {
                             addMessageRight(messages[i]["Message"]);
                         } else {
                             addMessageLeft(messages[i]["Message"]);
@@ -182,14 +127,20 @@ function onLoad(){
         });
     }
 
-
+    // Focus on text input area
     document.getElementById("message").focus();
 }
 
 //----------------------------------------------------Clock Update----------------------------------------------------//
 
+// MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
+
 let startTime = null;
 
+/*
+A function primarily used to inform the user of how much time they're taking, and how much time they have left in the
+istant messagin session.
+*/
 function updateClock() {
     const clockElement = document.getElementById("clock");
     if (clockElement) {
@@ -214,8 +165,14 @@ function updateClock() {
 
 //--------------------------------------------------Typing Detection--------------------------------------------------//
 
+// MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
+// Might be useful to display a notice of typing when chat gpt is thinking.
+
 var typingTimeout;
 
+/*
+A function that detects when the user is typing, and sends a notification to the server.
+*/
 function notifyTyping () {
     if (typingTimeout != undefined) {
         clearTimeout(typingTimeout);
@@ -243,6 +200,9 @@ function notifyTypingHelper(to, status){
 
 //----------------------------------------------Adding Messages To Screen---------------------------------------------//
 
+/*
+Add's a txt msg as if the client sent it.
+*/
 function addMessageRight (message) {
     document.getElementById("chatWindow").innerHTML +=
         '<div class="card right-color offset-6 mb-3">' +
@@ -252,6 +212,9 @@ function addMessageRight (message) {
         '</div>';
 }
 
+/*
+Add's a txt msg as if the client was sent a msg by someone else.
+*/
 function addMessageLeft (message) {
     document.getElementById("chatWindow").innerHTML +=
         '<div class="card left-color col-6 mb-3">' +
@@ -268,6 +231,9 @@ function scrollBottom() {
     messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
 }
 
+
+
+//-------------------------------------------------Multiline Textbox--------------------------------------------------//
 
 let shift = false;
 
@@ -296,32 +262,6 @@ function keyUp(e) {
     if (e.keyCode == 16) {
         shift = false;
     }
-}
-
-
-
-
-function getGPTMessage(message) {
-
-
-    $.ajax({
-        url: 'getGPTMessage.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {message: message, selectStart: selectStart , selectEnd: selectEnd, prompt: prompt},
-        success: function (data) {
-            parasArray = JSON.parse(data["Data"])["paraphrases"]
-            console.log(parasArray)
-            showParas(parasArray)
-            hideProgressBar()
-            paraReturnTime = getTime();
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
 }
 
 
@@ -470,16 +410,55 @@ function addArticleTittle (line) {
 
 //------------------------------------------------- Chat Bot -------------------------------------------------//
 
+/*
+This function should containt the logic for the chat bot pipeline.
+Each different prompt should be a different function.
+It is also possible to have one function that takes prompt type as a parameter, or have the python script take
+the prompt type as a parameter.
+Just MAKE SURE that the python script never takes a prompt as a parameter. Otherwise people can use our api key
+without having to know it.
+*/
 function sendMessageToChatBot(message) {
     let context, classification = classifyMessage(message);
     
     if (classification == "PRACTICAL_GUIDANCE") {
+
+    } else if (classification == "BROADER IMPACT") {
+    } else if (classification == "REFERENTIAL_FACT") {
+    } else if (classification == "VIEWPOINT_SYNTHESIS") {
+    } else if (classification == "LITERARY_COMPREHENSION") {
     }
+    
 }
 
 function classifyMessage(message) {
     $.ajax({
-        url: 'gptClassifyMessage.py',
+        url: 'functions/gptClassifyMessage.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {message: message, selectStart: selectStart , selectEnd: selectEnd, prompt: prompt},
+        success: function (data) {
+            parasArray = JSON.parse(data["Data"])["paraphrases"]
+            console.log(parasArray)
+            showParas(parasArray)
+            hideProgressBar()
+            paraReturnTime = getTime();
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
+}
+
+
+//
+function getGPTMessage(message) {
+
+
+    $.ajax({
+        url: 'functions/getGPTMessage.py',
         type: 'POST',
         loading: false,
         dataType: 'json',

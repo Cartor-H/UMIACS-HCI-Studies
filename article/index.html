@@ -43,6 +43,30 @@
 
 <body onload="onLoad()">
   <script src="script.js"></script>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav w-100 d-flex justify-content-between">
+          <li class="nav-item flex-fill text-center">
+            <a class="nav-link" href="">Home</a>
+          </li>
+          <li class="nav-item flex-fill text-center">
+            <a class="nav-link" href="../history">History</a>
+          </li>
+          <li class="nav-item flex-fill text-center">
+            <span class="navbar-text">
+              User ID: <span id="userId">12345</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
   <div class="row m-5 mt-5 mb-5" style="height:90vh">
     <div class="col-lg-6 mb-4 h-100">
       <div class="card shadow-sm h-100">
@@ -69,9 +93,9 @@
           </div>
           <div class="input-group">
             <div class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
-              oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="1"
+              oninput="notifyTyping()" onkeydown="keyDown(event,clientSendMsg,this)" onkeyup="keyUp(event)" tabindex="1"
               onmouseup="checkCursor()" contenteditable></div>
-            <button class="btn btn-primary" type="button" onclick="submit()" tabindex="2">
+            <button class="btn btn-primary" type="button" onclick="clientSendMsg()" tabindex="2">
               <i class="fa-solid fa-paper-plane"></i>
             </button>
           </div>
@@ -134,9 +158,9 @@
         </div>
         <div class="input-group">
           <span class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
-                oninput="notifyTyping()" onkeydown="keyDown(event,submit,this)" onkeyup="keyUp(event)" tabindex="1"
+                oninput="notifyTyping()" onkeydown="keyDown(event,clientSendMsg,this)" onkeyup="keyUp(event)" tabindex="1"
                 onmouseup="checkCursor()" contenteditable></span>
-          <button class="btn btn-primary" type="button" onclick="submit()" tabindex="2">
+          <button class="btn btn-primary" type="button" onclick="clientSendMsg()" tabindex="2">
             <i class="fa-solid fa-paper-plane"></i>
           </button>
         </div>

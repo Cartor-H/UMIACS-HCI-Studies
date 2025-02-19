@@ -1,54 +1,3 @@
-function submit() {
-    console.log("'" + document.getElementById("message").innerText
-        + "' From: " + document.getElementById("senderID").value
-        + " To: " + document.getElementById("receiverID").value);
-
-    let message = document.getElementById("message").innerText;
-    let from = document.getElementById("senderID").value;
-    let to = document.getElementById("receiverID").value;
-    let trial = document.getElementById("trialNumber").value;
-
-    if (message!="" && to!="" && from!=""){
-        //Show Message Locally
-        addMessageRight(message);
-
-        //Send Message to Receiver
-        sendMessage(to,message);
-
-        //-------------------------------------------------------------------------------------Add Message To SQL Server
-        //Ajax Call To Serverside Python
-        $.ajax({
-            url: 'handleMessages.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {to: to, from: from, trial: trial, message: message},
-            success: function (data) {
-                console.log(data)
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-
-        //Clear Message and Scroll to Bottom
-        document.getElementById("message").innerText = ""
-        scrollBottom();
-    }
-}
-
-function sendMessage(to, message) {
-    fetch(`http://52.15.204.7:8080/send-message?to=${to}&message=${message}&section=${document.title}`)
-        .then(response => response.text())
-        .then(result => {
-            console.log(result);
-        })
-        .catch(error => {
-            console.error(error);
-        });
-}
-
 //------------------------------------------------------On Load-------------------------------------------------------//
 
 function onLoad(){
@@ -76,7 +25,7 @@ function onLoad(){
     //---------------------------------------------------------------------------------------------------Get Articles
     //Ajax Python Call To Get Messages From SQL Server
     $.ajax({
-        url: 'getArticles.py',
+        url: 'functions/getArticles.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
@@ -86,9 +35,17 @@ function onLoad(){
                 articles = JSON.parse(data["Data"])
 
                 //---------------------------------------------------------------------------------------------------Add Articles
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
                 for (let i = 0; i < articles.length; i++) {
-                    let formattedDate = new Date(articles[i]["Published_Date"]).toLocaleDateString();
-                    addArticle(articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                    let articleDate = new Date(articles[i]["Published_Date"]);
+                    let formattedDate = articleDate.toLocaleDateString();
+                    if (articleDate >= oneWeekAgo) {
+                        addArticle("recentlyUpdatedArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                    } else {
+                        addArticle("olderNewsArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                    }
                 }
             } else {
                 console.log("Something Went Wrong On Data Retrieval");
@@ -149,7 +106,7 @@ function onLoad(){
     //Ajax Python Call To Get Messages From SQL Server
     if(sender && receiver && sender!="" && receiver!="") {
         $.ajax({
-            url: 'getMessages.py',
+            url: 'functions/getMessages.py',
             type: 'POST',
             loading: false,
             dataType: 'json',
@@ -302,7 +259,7 @@ function getGPTMessage(message) {
 
 
     $.ajax({
-        url: 'getGPTMessage.py',
+        url: 'functions/getGPTMessage.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
@@ -464,9 +421,10 @@ function addArticleTittle (line) {
         '</p>' +
         '</div>';
 }
-function addArticle (title, description, date, id, photo = 'default_news_photo.png') {
-    document.getElementById("articleWindow").innerHTML +=
-        `<div class="col-md-3 mb-3">\n` +
+
+function addArticle (location, title, description, date, id, photo = 'default_news_photo.png') {
+    document.getElementById(location).innerHTML +=
+        `<div class="col-md-2 mb-3">\n` +
         `  <a href="../article?articleID=${id}" class="card-link" style="text-decoration: none; color: inherit;" target="_blank">\n` +
         `    <div class="card h-100" style="transition: transform 0.2s, background-color 0.2s; cursor: pointer; background-color: #f8f9fa; border: none;">\n` +
         `      <div class="card-img-top" style="background-image: url('${photo}'); background-size: cover; background-position: center; aspect-ratio: 4 / 2;"></div>\n` +
