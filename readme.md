@@ -7,10 +7,13 @@
 * Currently the server is accessed based on allowed IP addresses, which I change depending on where I'm working from.
   I will attempt to make it based on a vpn network instead. That way others can log in regardless of where they are,
   and it's more secure.
+* https://system-fai-im.info/
+* http://52.15.204.7/
+* When checking for updates make sure to do command + shift + r
 
 ## File Transfer
 - `ssh -i "<Path>/ResearchServerKey.pem" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com`
-- `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/home/gpt_resond_message.py" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/home/gpt_resond_message.py`
+- `scp -i "<Path>/ResearchServerKey.pem" -r "<Local_Path>/gpt_resond_message.py" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/home/gpt_resond_message.py`
 - `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/home" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/`
 - `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/article" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/`
 
