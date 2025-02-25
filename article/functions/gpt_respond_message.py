@@ -21,10 +21,8 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 # Set OpenAI API key from environment variable
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 
+
 def outputSQLQuery(form):
-
-
-
     message = form["message"]
 
     # prompt = ""
@@ -38,22 +36,23 @@ def outputSQLQuery(form):
     # )
 
     # data = completion.choices[0].message.content
-    data = json.dumps({"response" : "woohoo!", "chain of thought" : "No thoughts, no brain, thus: woohooo!"})
+    data = json.dumps({"response": "yuhang test", "chain of thought": "No thoughts, no brain, thus: woohooo!"})
 
     if data:
         # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
         print(json.dumps({
-            "Status" : "Success",
-            "Data" : data}))
+            "Status": "Success",
+            "Data": data}))
     else:
-        print(json.dumps({"Status" : "No Data"}))
+        print(json.dumps({"Status": "No Data"}))
+
 
 try:
-    print("Content-type: text/html\n\n")   # say generating html
+    print("Content-type: text/html\n\n")  # say generating html
     if 'REQUEST_METHOD' in os.environ and os.environ['REQUEST_METHOD'] == 'POST':
         content_length = int(os.environ.get('CONTENT_LENGTH', 0))
         post_data = sys.stdin.read(content_length)
-        form = json.loads(json.dumps(dict(urllib.parse.parse_qsl(post_data)))) # json.loads(post_data)
+        form = json.loads(json.dumps(dict(urllib.parse.parse_qsl(post_data))))  # json.loads(post_data)
     else:
         form = json.loads(json.dumps(dict(urllib.parse.parse_qsl(os.environ['QUERY_STRING']))))
 
