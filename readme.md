@@ -16,7 +16,7 @@
 
 ## File Transfer
 - `ssh -i "<Path>/ResearchServerKey.pem" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com`
-- `scp -i "<Path>/ResearchServerKey.pem" -r "<Local_Path>/gpt_resond_message.py" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/home/gpt_resond_message.py`
+- `scp -i "<Path>/ResearchServerKey.pem" -r "<Local_Path>/gpt_resond_message.py" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/article/gpt_resond_message.py`
 - `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/home" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/`
 - `scp -i "<Path>/ResearchServerKey.pem" -r "<Path>/Research Server/www/html/article" ec2-user@ec2-52-15-204-7.us-east-2.compute.amazonaws.com:/var/www/html/`
 
