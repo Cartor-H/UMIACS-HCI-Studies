@@ -8,7 +8,8 @@
   I will attempt to make it based on a vpn network instead. That way others can log in regardless of where they are,
   and it's more secure.
 ## Website
-* Testing Link: https://system-fai-im.info/home/?userID=1
+* Testing Link: http://52.15.204.7/home/?userID=1
+* https://system-fai-im.info/home/?userID=1
 * https://system-fai-im.info/
 * http://52.15.204.7/
 * When checking for updates make sure to do command + shift + r
