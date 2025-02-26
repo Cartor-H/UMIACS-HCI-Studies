@@ -1,3 +1,8 @@
+//---------------------------------------------------Global Variables-----------------------------------------------------//
+let articleID = "-1";
+let userID = "-1";
+
+
 //------------------------------------------------------On Load-------------------------------------------------------//
 
 function onLoad(){
@@ -20,6 +25,19 @@ function onLoad(){
     // document.getElementById("trialNumber").value = trial;
 
     // document.getElementById("typingAlert").innerText = receiver+" is Typing"
+
+    // Read URL Params
+    const params = new URLSearchParams(document.location.search);
+
+    // Get User ID From URL
+    if (params.get('userID') != null) {
+        userID = params.get('userID');
+    }
+
+    // Get Article ID From URL
+    if (params.get('articleID') != null) {
+        articleID = params.get('articleID');
+    }
 
 
     //---------------------------------------------------------------------------------------------------Get Articles
@@ -382,7 +400,7 @@ let articles = [];
 function addArticle (location, title, description, date, id, photo = 'default_news_photo.png') {
     document.getElementById(location).innerHTML +=
         `<div class="col-md-2 mb-3">\n` +
-        `  <a href="../article?articleID=${id}" class="card-link" style="text-decoration: none; color: inherit;" target="_blank">\n` +
+        `  <a href="../article?articleID=${id}&userID=${userID}" class="card-link" style="text-decoration: none; color: inherit;" target="_blank">\n` +
         `    <div class="card h-100" style="transition: transform 0.2s, background-color 0.2s; cursor: pointer; background-color: #f8f9fa; border: none;">\n` +
         `      <div class="card-img-top" style="background-image: url('${photo}'); background-size: cover; background-position: center; aspect-ratio: 4 / 2;"></div>\n` +
         `      <div class="card-body p-3" style="font-family: 'Times New Roman', Times, serif;">\n` +
