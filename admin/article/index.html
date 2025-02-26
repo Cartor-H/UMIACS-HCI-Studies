@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Article</title>
+  <link href="../../style.css" rel="stylesheet" type="text/css" />
+  <link href="style.css" rel="stylesheet" type="text/css" />
+
+  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
+  <script src="../../js/bootstrap.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="../../css/bootstrap.css">
+</head>
+
+<body onload="onLoad()">
+  <script src="script.js"></script>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav w-100 d-flex justify-content-between">
+          <li class="nav-item flex-fill text-center">
+            <a class="nav-link" href="..">Users</a>
+          </li>
+          <li class="nav-item flex-fill text-center">
+            <a class="nav-link" href="../articles" style="background-color: #e2e6ef;">Articles</a>
+          </li>
+          <li class="nav-item flex-fill text-center">
+            <span class="navbar-text">
+              User ID: <span id="userId">12345</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container mt-5">
+    <div class="row mb-4">
+      <div class="col">
+        <h2>Add New Article</h2>
+        <form id="articleForm">
+          <div class="mb-3">
+            <label for="articleTitle" class="form-label">Title</label>
+            <input type="text" class="form-control" id="articleTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="articleDate" class="form-label">Published Date</label>
+            <input type="date" class="form-control" id="articleDate" required>
+          </div>
+          <div class="mb-3">
+            <label for="articleDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="articleDescription" rows="3" required></textarea>
+          </div>
+            <div class="mb-3"></div>
+            <label for="articleImage" class="form-label">Image</label>
+            <input type="file" class="form-control" id="articleImage" required>
+            </div>
+          <div class="mb-3">
+            <label for="articleContent" class="form-label">Content</label>
+            <textarea class="form-control" id="articleContent" rows="6" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="articleAuthor" class="form-label">Author</label>
+            <input type="text" class="form-control" id="articleAuthor" required>
+          </div>
+          <div class="mb-3">
+            <label for="articleCategory" class="form-label">Category</label>
+            <input type="text" class="form-control" id="articleCategory" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('articleForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const newArticle = {
+        ID: Date.now(),
+        Title: document.getElementById('articleTitle').value,
+        Published_Date: document.getElementById('articleDate').value,
+        Description: document.getElementById('articleDescription').value,
+        Image_ID: document.getElementById('articleImage').value,
+        Content: document.getElementById('articleContent').value,
+        Author: document.getElementById('articleAuthor').value,
+        Category: document.getElementById('articleCategory').value
+      };
+      articles.push(newArticle);
+      const articleCard = document.createElement('div');
+      articleCard.className = 'col-12 mb-4 article-card';
+      articleCard.innerHTML = `
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title article-title">${newArticle.Title}</h5>
+            <div class="card-text article-description">
+              <p>${newArticle.Description}</p>
+            </div>
+            <div class="card-text">
+              <p><strong>Published Date:</strong> <span class="published_date">${new Date(newArticle.Published_Date).toLocaleDateString()}</span></p>
+              <p><strong>Author:</strong> <span class="author">${newArticle.Author}</span></p>
+              <p><strong>Category:</strong> <span class="category">${newArticle.Category}</span></p>
+            </div>
+          </div>
+        </div>
+      `;
+      articleList.appendChild(articleCard);
+      this.reset();
+    });
+  </script>
+</body>
+
+</html>

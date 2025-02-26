@@ -102,7 +102,58 @@ To ensure a structured and maintainable web application, organize your files as 
 
 
 
+# SQL Structure
 
+## Tables:
+
+### Users
+  **goal:** A list of all the user ID's that you want to keep track of. If they aren't listed here, they are not included in the study.
+            This is helpful for sorting out test userIDs from the real userIDs.
+
+```SQL
+USE News_Interface;
+
+-- make table `UserReadArticleHistory`
+-- ID prim key, identity
+-- UserID foreign key
+-- ArticleID foreign key
+-- ReadTime datetime2(7)
+
+CREATE TABLE UserReadArticleHistory (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    UserID INT NOT NULL,
+    ArticleID INT NOT NULL,
+    ReadTime DATETIME2(7) NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ArticleID) REFERENCES Articles(ID)
+);
+
+-- make table `ArticleOpenHistory`
+-- ID - prim key , identity
+-- Action nvarchar(50)
+-- ActionDate datetime2(7)
+-- ArticleID int
+-- UserID int
+
+CREATE TABLE [dbo].[ArticleOpenHistory](
+    [ID] [int] IDENTITY(1,1) NOT NULL,
+    [Action] [nvarchar](50) NULL,
+    [ActionDate] [datetime2](7) NULL,
+    [ArticleID] [int] NULL,
+    [UserID] [int] NULL,
+)
+
+-- make table `Users`
+-- UserID prim key , identity
+-- DisplayName nvarchar(50)
+-- TestUser boolean
+
+CREATE TABLE Users (
+    UserID INT IDENTITY(1,1) PRIMARY KEY,
+    DisplayName NVARCHAR(50),
+    TestUser BIT
+);
+```
 
 # SSL / https
 Certificate: /etc/pki/tls/certs/ssl_cert.pem

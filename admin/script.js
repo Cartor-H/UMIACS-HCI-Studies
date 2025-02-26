@@ -32,7 +32,6 @@ function onLoad(){
     // Get User ID From URL
     if (params.get('userID') != null) {
         userID = params.get('userID');
-        document.getElementById("userID").innerText = userID;
     }
 
     // Get Article ID From URL

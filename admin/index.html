@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Users</title>
+  <link href="../style.css" rel="stylesheet" type="text/css" />
+  <link href="style.css" rel="stylesheet" type="text/css" />
+
+  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
+  <script src="../js/bootstrap.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="../css/bootstrap.css">
+</head>
+
+<body onload="onLoad()">
+  <script src="script.js"></script>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav w-100 d-flex justify-content-between">
+          <li class="nav-item flex-fill text-center">
+            <a class="nav-link" href="" style="background-color: #e2e6ef;">Users</a>
+          </li>
+          <li class="nav-item flex-fill text-center">
+            <a class="nav-link" href="articles">Articles</a>
+          </li>
+          <li class="nav-item flex-fill text-center">
+            <span class="navbar-text">
+              User ID: <span id="userId">12345</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container mt-5">
+    <div class="row mb-4">
+      <div class="col">
+        <h2>Admin Dashboard</h2>
+        <div class="d-flex">
+          <input type="text" id="searchBar" class="form-control flex-grow-1 me-2" placeholder="Search users...">
+          <select id="sortOptions" class="form-control flex-shrink-1 me-2">
+            <option value="articles">Sort by Articles Read</option>
+            <option value="messages">Sort by Messages Sent</option>
+            <option value="screentime">Sort by Screentime</option>
+          </select>
+          <select id="sortOrder" class="form-control flex-shrink-1">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="row" id="userList">
+      <!-- User cards will be dynamically inserted here -->
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('searchBar').addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const userCards = document.querySelectorAll('.user-card');
+      userCards.forEach(card => {
+        const userName = card.querySelector('.user-name').textContent.toLowerCase();
+        const userStats = card.querySelector('.user-stats').textContent.toLowerCase();
+        if (userName.includes(searchTerm) || userStats.includes(searchTerm)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+
+    document.getElementById('sortOptions').addEventListener('change', function() {
+      const sortBy = this.value;
+      const sortOrder = document.getElementById('sortOrder').value;
+      sortUsers(sortBy, sortOrder);
+    });
+
+    document.getElementById('sortOrder').addEventListener('change', function() {
+      const sortBy = document.getElementById('sortOptions').value;
+      const sortOrder = this.value;
+      sortUsers(sortBy, sortOrder);
+    });
+
+    function sortUsers(criteria, order) {
+      const userCards = Array.from(document.querySelectorAll('.user-card'));
+      userCards.sort((a, b) => {
+        const aValue = parseInt(a.querySelector(`.${criteria}`).textContent);
+        const bValue = parseInt(b.querySelector(`.${criteria}`).textContent);
+        return order === 'asc' ? aValue - bValue : bValue - aValue;
+      });
+      const userList = document.getElementById('userList');
+      userList.innerHTML = '';
+      userCards.forEach(card => userList.appendChild(card));
+    }
+
+    // Example data
+    const users = [
+      { id: 1, name: 'John Doe', articles: 10, messages: 5, screentime: 20, messageTypes: [1, 2, 3, 4, 5, 6] },
+      { id: 2, name: 'Jane Smith', articles: 8, messages: 12, screentime: 15, messageTypes: [1, 2, 3, 4, 5, 6] },
+      // Add more users as needed
+    ];
+
+    const userList = document.getElementById('userList');
+    users.forEach(user => {
+      const userCard = document.createElement('div');
+      userCard.className = 'col-12 mb-4 user-card';
+      userCard.innerHTML = `
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title user-name">${user.name}</h5>
+            <div class="card-text user-stats">
+              <div class="d-flex justify-content-between">
+          <div class="card mb-2 flex-fill mx-1">
+            <div class="card-body">
+              <h6>Articles Read</h6>
+              <p class="articles">${user.articles}</p>
+            </div>
+          </div>
+          <div class="card mb-2 flex-fill mx-1">
+            <div class="card-body">
+              <h6>Messages Sent</h6>
+              <p class="messages">${user.messages}</p>
+            </div>
+          </div>
+          <div class="card mb-2 flex-fill mx-1">
+            <div class="card-body">
+              <h6>Screentime (hrs)</h6>
+              <p class="screentime">${user.screentime}</p>
+            </div>
+          </div>
+          <div class="card mb-2 flex-fill mx-1">
+            <div class="card-body">
+              <h6>Message Types</h6>
+              <p class="messageTypes">${user.messageTypes.join(', ')}</p>
+            </div>
+          </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      userList.appendChild(userCard);
+    });
+  </script>
+</body>
+
+</html>
