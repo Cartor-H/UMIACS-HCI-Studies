@@ -36,7 +36,19 @@ def outputSQLQuery(form):
     # )
 
     # data = completion.choices[0].message.content
-    data = json.dumps({"response": "yuhang test", "chain of thought": "No thoughts, no brain, thus: woohooo!"})
+
+    # Msg to be sent to the user
+    response = "yuhang test"
+
+    # Chain of thought or state for internal use (JSON object)
+    chain_of_thought = {}
+    
+    # Classification of user msg
+    # - ""/null: no classification
+    # - "%d": classification number if classified
+    classification = ""
+    
+    data = json.dumps({"response": response, "chain of thought": chain_of_thought, "classification": classification})
 
     if data:
         # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
