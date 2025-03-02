@@ -23,7 +23,10 @@ os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 
 
 def outputSQLQuery(form):
-    message = form["message"]
+    message = form["message"] # User message | str
+    article = json.load(form["article"]) # Article | JSON object
+    prev_chain_of_thought = json.load(form["chainOfThought"]) # Chain of thought | JSON object
+
 
     # prompt = ""
 
@@ -48,7 +51,10 @@ def outputSQLQuery(form):
     # - "%d": classification number if classified
     classification = ""
     
-    data = json.dumps({"response": response, "chain of thought": chain_of_thought, "classification": classification})
+    data = json.dumps({
+        "response"         : response         ,
+        "chain of thought" : chain_of_thought ,
+        "classification"   : classification   })
 
     if data:
         # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row

@@ -2,6 +2,9 @@
 let articleID = "-1";
 let userID = "-1";
 
+let chainOfThought = {};
+let article = {};
+
 
 //---------------------------------------------------Send Message-----------------------------------------------------//
 
@@ -90,8 +93,8 @@ function onLoad(){
         success: function (data) {
             console.log(data)
             if (data["Status"] == "Success") {
-                let article = JSON.parse(data["Data"])[0]
-                
+                article = JSON.parse(data["Data"])[0]
+
                 // Add Article Content To Page
                 addArticleTittle(article["Title"]);
                 addArticleLine(article["Content"]);
@@ -468,11 +471,21 @@ function gptRespondMessage(message) {
         type: 'POST',
         loading: false,
         dataType: 'json',
-        data: {message: message},
+        data: {
+            message: message,
+            article: JSON.stringify(article).toISOString(),
+            chainOfThought: JSON.stringify(chainOfThought).toISOString()
+        },
         success: function (data) {
             data = JSON.parse(data["Data"])
-            addMessageLeft(data["response"])
-            saveMessage(data["response"], "ChatBot")
+
+            chainOfThought = data["chainOfThought"]
+            let classification = data["classification"]
+            let response = data["response"]
+
+            addMessageLeft(response)
+            saveMessage(response, "ChatBot")
+            // saveClassification(message, classification)
             scrollBottom();
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
