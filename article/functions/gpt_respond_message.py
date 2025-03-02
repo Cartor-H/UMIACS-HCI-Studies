@@ -10,6 +10,7 @@ import os
 import re
 import urllib.parse
 import pymssql
+import traceback
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -23,9 +24,9 @@ os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 
 
 def outputSQLQuery(form):
-    message = form["message"] # User message | str
-    article = json.load(form["article"]) # Article | JSON object
-    prev_chain_of_thought = json.load(form["chainOfThought"]) # Chain of thought | JSON object
+    message               =            form["message"]         # User message     | String
+    article               = json.loads(form["article"])        # Article          | JSON object
+    prev_chain_of_thought = json.loads(form["chainOfThought"]) # Chain of thought | JSON object
 
 
     # prompt = ""
@@ -44,17 +45,17 @@ def outputSQLQuery(form):
     response = "yuhang test"
 
     # Chain of thought or state for internal use (JSON object)
-    chain_of_thought = {}
+    chain_of_thought = {"chain_of_thought" : prev_chain_of_thought} # Dummy value, change however you want
     
     # Classification of user msg
     # - ""/null: no classification
     # - "%d": classification number if classified
     classification = ""
-    
+
     data = json.dumps({
-        "response"         : response         ,
-        "chain of thought" : chain_of_thought ,
-        "classification"   : classification   })
+        "response"       : response         ,
+        "chainOfThought" : chain_of_thought ,
+        "classification" : classification   })
 
     if data:
         # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
@@ -78,5 +79,7 @@ try:
 except Exception as e:
     print("{error:")
     print(f"An error occurred: {str(e)}")
-    print(f"\nTrace: {str(e.traceback)}")
-    print("}")
+    print(json.dumps({
+        "error": str(e),
+        "trace": traceback.format_exc().splitlines()
+    }, indent=4))

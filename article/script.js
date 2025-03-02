@@ -473,8 +473,8 @@ function gptRespondMessage(message) {
         dataType: 'json',
         data: {
             message: message,
-            article: JSON.stringify(article).toISOString(),
-            chainOfThought: JSON.stringify(chainOfThought).toISOString()
+            article: JSON.stringify(article),
+            chainOfThought: JSON.stringify(chainOfThought)
         },
         success: function (data) {
             data = JSON.parse(data["Data"])
