@@ -326,9 +326,8 @@ def classify_user_message(user_message, article, state):
         - Elif D=1: Category=3
         - Elif D=2: Category=5
         - Elif C=1: Category=4
-        - Else: Choose closest category
 
-        RESPOND WITH JSON ONLY: {"A": 0 or 1, "B": 0 or 1, "C": 0 or 1, "D": 0 or 1 or 2, "E": 0 or 1, "category": 1-6}
+        RESPOND WITH ONLY ONE WORD FOR CATEGORY: 1, 2, 3, 4, 5 or 6
         """
     elif state == "Waiting_User_Response_to_Thought":
         # Classify response to a thought
@@ -364,13 +363,11 @@ def classify_user_message(user_message, article, state):
             # If expecting JSON, try to parse it
             if state == "User_Question_Processing":
                 try:
-                    # Extract JSON if embedded in text
-                    json_match = re.search(r'\{.*\}', result, re.DOTALL)
-                    if json_match:
-                        result = json.loads(json_match.group(0))
+                    digits = re.findall(r'[1-6]', result)
+                    if digits:
+                        result = {"category": int(digits[-1])}
                     else:
-                        # Default if no JSON found
-                        result = {"category": 4}  # Default to factual question
+                        result = {"category": 4}
                 except:
                     result = {"category": 4}  # Default to factual question
 
@@ -445,6 +442,7 @@ def outputSQLQuery(form):
                 stored_messages,
                 classification_result
             )
+            next_state = determine_next_state(next_state, classification_result)
         else:
             # For response states, classify if needed
             if current_state in ["Waiting_User_Input", "Waiting_User_Response_to_Thought"]:
@@ -514,7 +512,7 @@ def outputSQLQuery(form):
 
         # Step 9: Return response
         data = json.dumps({
-            "response": cleaned_response,
+            "response": cleaned_response + "\ncurrent state:" + current_state + '\nnext state:' + next_state,
             "chainOfThought": chain_of_thought,
             "classification": category_value
         })
