@@ -185,6 +185,7 @@ Please follow these steps in your response:
    - Offer to explore additional information or alternative perspectives
 
 Your response should be thoughtful but conversational, inviting further discussion rather than presenting a definitive answer.
+Put your response into natural language paragraphs without displaying the words "Thought" and "Information" to the user.
 """
 
     elif state == "Waiting_User_Response_to_Thought":
@@ -212,6 +213,7 @@ Based on this classification, respond accordingly:
 - If new point-of-view: Consider what information would be relevant from this new perspective and share an updated thought.
 
 Your response should maintain the conversational flow while deepening the analysis.
+Put your response into natural language paragraphs without displaying the words "Thought", "Information", or "Updated Thought", "New Thought" to the user.
 """
 
     else:
@@ -307,28 +309,69 @@ def classify_user_message(user_message, article, state):
         """
     elif state == "User_Question_Processing":
         # Classify question type into categories 1-6
-        classification_prompt = f"""
-        Classify this user question about a news article by determining these variables:
+        classification_prompt = f"""You are a classifier. You will be given a news article and a message discussing that article. Your task is to classify the message into one of seven possible categories by following a two-step process.
+Instruction:
 
-        A: Is about word explanation? (1=yes, 0=no)
-        B: Is about text summary? (1=yes, 0=no)
-        C: Is about factual information with definite answers? (1=yes, 0=no)
-        D: Is about interpretation? (0=no, 1=mentioned in article, 2=extended from article)
-        E: Is about potential action to be taken? (1=yes, 0=no)
+Step 1: For each question, firstly determine the value for variables A, B, C, D, and E.
+1. A: Determine whether this question is about explanation of the meaning of a word. 
+If yes, set A = 1; if not, set A = 0.
+2. B: Determine whether this question is about summary of texts.
+If yes, set B = 1; if not, set B = 0.
+3. C: Determine whether this question is about factual information. Factual information includes data, facts, figures or statements that can be directly found on the news article or external sources. It should have definite answers. Questions that do not have definite answers or are open to alternative answers are NOT about factual information, such as "Why" questions or questions that asks for explanation, reasoning or opinions.
+If yes, set C = 1; if not, set C = 0.
+4. D: Determine whether this question is about interpretation of things mentioned in the article or anything extended from the article. Interpretation refers to the explanation, reasoning or opinions on issues, facts, or data. 
+If interpreting things mentioned in the article, set D = 1; if interpreting things extended from the article, set D = 2; if not about the interpretation of content, set D = 0.
+5. E: Determine whether this question is about a potential action, e.g., a question following the “first-person (me/us) pronoun + verb” or “what if [potential action]” structure. If yes, Set E = 1; if not, set E = 0.
 
-        NEWS ARTICLE TITLE: {article["Title"]}
-        USER QUESTION: "{user_message}"
+Step 2: based on the values you assigned to the variables, determine the category for this message based on the rules below:
+If A = 1: Category = 1, 
+Elif B = 1: Category = 2,
+Elif E = 1: Category = 6,
+ElIf D = 1: Category = 3, 
+Elif D = 2: Category = 5,
+Elif C = 1: Category = 4,
+Else: Choose the category that this message is closest to based on the reasoning above.
 
-        Determine category:
-        - If A=1: Category=1
-        - Elif B=1: Category=2
-        - Elif E=1: Category=6
-        - Elif D=1: Category=3
-        - Elif D=2: Category=5
-        - Elif C=1: Category=4
+For each [Message-Article] pair, respond in this format:
+[A Value, A Reasoning; B Value, B Reasoning; C Value, C Reasoning: D Value, D Reasoning; E Value, E Reasoning; Final Category]
 
-        RESPOND WITH ONLY ONE WORD FOR CATEGORY: 1, 2, 3, 4, 5 or 6
-        """
+Here is an example:
+News article: I do think we've seen the peak rent price for 2023," Danielle Hale, Realtor.com chief economist, told Yahoo Finance Live.
+For the third consecutive month, asking rent prices — or vacant units advertised by landlords — have fallen, declining 1% over the same period a year ago, according to Realtor.com’s Mid-year rental report.
+"We're at the point in the season where we typically see rents decline. And rents are down from a year ago as they have been for the past few months and so that means we are likely to see that 2022 was the peak for rents. And we're starting to see some decline," Hale added.
+The big reason for the slowdown: more housing. In the past three years, builders have added 1.2 million apartments to the market, with 2023 shaping up to be a peak year as developers expect to open 460,860 rentals by year-end, according to RentCafe's construction report.
+"While the time-to-completion on multifamily properties is much longer than single-family homes, in our view this glut of multifamily supply will eventually suppress apartment rent growth," Vinay Viswanathan, a fixed income strategist at Goldman Sachs, wrote in a note for the firm's housing team.
+But new financing challenges are emerging that could threaten the supply — and rental price — outlook beyond next year.
+Already, West Coast metro areas are facing an apartment construction slump.
+Data from CoStar Group shows developers are on pace to build less than 32,000 apartments in Los Angeles, San Francisco, San Diego, San Jose, Seattle, and Portland this year — marking a roughly 20% drop compared with 2021 levels.
+"It's the worst thing that could be happening," Jay Lybik, national director of multifamily analytics at CoStar Group, said in a statement. "The region still doesn't have enough housing."
+So far this year has been the slowest for the West Coast, developing less than half as many apartments as the first two quarters of 2021. The tally hit 10,687 in 2023. That falls short of the 19,434 starts recorded in the first half of 2021.
+A memo from a Los Angeles project’s development team revealed in June that it wanted to reduce the project’s total units and commercial space in response to "rising construction costs and the increasingly uncertain climate for capital sources to fund the project."
+But the lack of construction could become a bigger problem nationwide after next year.
+The number of new apartments is expected to drop by nearly 16% to 408,000 in 2025 from 484,000 in 2024, with new completions bottoming out in 2026 at approximately 400,000 units, according to RentCafe's construction report.
+"We're seeing a pullback in projects moving forward across the country right now because developers are unable to get financing for construction loans and they're also struggling to get equity to start new projects," Lybik said.
+As a result, Lybik warned that by 2025, vacancies could decrease, pushing the rate of rental growth nationwide to triple from the 1.1% increase seen in the second quarter to between 3% and 3.5%. He forecasts average monthly rent to increase to $1,799 from $1,677.
+"At the end of 2025, the average renter will be paying about $1,500 more a year for housing costs," Lybik said.
+
+Message:
+What are the implications for Southern Virginia?
+
+Response:
+[ A Value: 0, The message does not ask for the explanation of a word;  
+B Value: 0, The message does not ask for a summary of the article;  
+C Value: 0, The message does not ask for factual information directly found in the article;  
+D Value: 2, The message extends the discussion to a new geographical area (Southern Virginia) and seeks an interpretation of potential outcomes based on the article’s information;  
+E Value: 1, The message is asking about potential implications, which relates to future consequences or actions;  
+Final Category: 6]
+
+
+Your task:
+News article: {article["Content"]}
+Message: 
+{user_message}
+
+Response:
+"""
     elif state == "Waiting_User_Response_to_Thought":
         # Classify response to a thought
         classification_prompt = f"""
@@ -352,24 +395,21 @@ def classify_user_message(user_message, article, state):
 
     if classification_prompt:
         try:
-            # Use GPT-3.5 for classification to optimize cost/performance
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[{"role": "user", "content": classification_prompt}],
-                max_tokens=100
+                max_tokens=200
             )
             result = response.choices[0].message.content.strip()
 
             # If expecting JSON, try to parse it
             if state == "User_Question_Processing":
                 try:
-                    digits = re.findall(r'[1-6]', result)
-                    if digits:
-                        result = {"category": int(digits[-1])}
-                    else:
-                        result = {"category": 4}
+                    final = result.split("Category: ")[-1]
+                    final = final.split("\n\n")[0].strip().replace("]", "").replace("] ", "")
+                    result = {"category": int(final)}
                 except:
-                    result = {"category": 4}  # Default to factual question
+                    result = {"category": 5}  # Default to factual question
 
             return result
         except Exception as e:
@@ -425,32 +465,70 @@ def outputSQLQuery(form):
         # Step 1: Process current state
         classification_result = None
 
-        if is_classification_only_state(current_state):
-            # For classification-only states, just classify and move to next state
-            if current_state == "User_Question_Processing":
-                classification_result = classify_user_message(user_message, article, current_state)
+        # if is_classification_only_state(current_state):
+        #     # For classification-only states, just classify and move to next state
+        #     if current_state == "User_Question_Processing":
+        #         classification_result = classify_user_message(user_message, article, current_state)
+        #
+        #     # Determine next state based on classification
+        #     next_state = determine_next_state(current_state, classification_result)
+        #
+        #     # For classification-only states, we'll generate a response based on the next state
+        #     prompt = generate_prompt_for_state(
+        #         next_state,
+        #         user_message,
+        #         article,
+        #         prev_chain_of_thought,
+        #         stored_messages,
+        #         classification_result
+        #     )
+        #     next_state = determine_next_state(next_state, classification_result)
+        # else:
+        #     # For response states, classify if needed
+        #     if current_state in ["Waiting_User_Input", "Waiting_User_Response_to_Thought"]:
+        #         classification_result = classify_user_message(user_message, article, current_state)
+        #
+        #     next_state = determine_next_state(current_state, classification_result)
+        #
+        #     # Generate prompt based on CURRENT state for response states
+        #     prompt = generate_prompt_for_state(
+        #         current_state,
+        #         user_message,
+        #         article,
+        #         prev_chain_of_thought,
+        #         stored_messages,
+        #         classification_result
+        #     )
 
-            # Determine next state based on classification
+        if current_state in ["Waiting_User_Input", "Waiting_User_Response_to_Thought"]:
+            classification_result = classify_user_message(user_message, article, current_state)
             next_state = determine_next_state(current_state, classification_result)
 
-            # For classification-only states, we'll generate a response based on the next state
-            prompt = generate_prompt_for_state(
-                next_state,
-                user_message,
-                article,
-                prev_chain_of_thought,
-                stored_messages,
-                classification_result
-            )
-            next_state = determine_next_state(next_state, classification_result)
+            if next_state == "User_Question_Processing":
+                classification_result = classify_user_message(user_message, article, next_state)
+                next_state = determine_next_state(next_state, classification_result)
+                prompt = generate_prompt_for_state(
+                    next_state,
+                    user_message,
+                    article,
+                    prev_chain_of_thought,
+                    stored_messages,
+                    classification_result
+                )
+                next_state = determine_next_state(next_state, classification_result)
+
+            else:
+                # Generate prompt based on CURRENT state for response states
+                prompt = generate_prompt_for_state(
+                    current_state,
+                    user_message,
+                    article,
+                    prev_chain_of_thought,
+                    stored_messages,
+                    classification_result
+                )
         else:
-            # For response states, classify if needed
-            if current_state in ["Waiting_User_Input", "Waiting_User_Response_to_Thought"]:
-                classification_result = classify_user_message(user_message, article, current_state)
-
             next_state = determine_next_state(current_state, classification_result)
-
-            # Generate prompt based on CURRENT state for response states
             prompt = generate_prompt_for_state(
                 current_state,
                 user_message,
@@ -485,10 +563,9 @@ def outputSQLQuery(form):
         # Step 5: Update conversation history
         stored_messages.append({"role": "assistant", "content": cleaned_response})
 
-
         # Get category from classification or previous state
         category = None
-        if current_state == "User_Question_Processing" and isinstance(classification_result, dict):
+        if isinstance(classification_result, dict):
             category = classification_result.get("category")
         elif "category" in prev_chain_of_thought:
             category = prev_chain_of_thought["category"]
@@ -512,7 +589,8 @@ def outputSQLQuery(form):
 
         # Step 9: Return response
         data = json.dumps({
-            "response": cleaned_response + "\ncurrent state:" + current_state + '\nnext state:' + next_state,
+            "response": cleaned_response + " current state: " + current_state + ' next state: ' + next_state + \
+                        " category: " + category_value,
             "chainOfThought": chain_of_thought,
             "classification": category_value
         })
