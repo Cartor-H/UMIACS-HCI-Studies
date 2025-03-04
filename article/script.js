@@ -226,7 +226,7 @@ Add's a txt msg as if the client sent it.
 */
 function addMessageRight (message) {
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card right-color offset-6 mb-3">' +
+        '<div class="card right-color offset-2 mb-3">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
         '</div>' +
@@ -237,13 +237,25 @@ function addMessageRight (message) {
 Add's a txt msg as if the client was sent a msg by someone else.
 */
 function addMessageLeft (message) {
+    // console.log(message)
+    message = message.replace(    /(?:\r\n|\r|\n)/g , '<br>');                // New Line
+    message = message.replace( /(?:\*\*(.*?)\*\*)/g , '<strong>$1</strong>'); // Bold
+    message = message.replace(     /(?:\*(.*?)\*)/g , '<em>$1</em>');         // Italics
+    message = message.replace( /(?:\~\~(.*?)\~\~)/g , '<del>$1</del>');       // Strikethrough
+    message = message.replace(     /(?:\`(.*?)\`)/g , '<code>$1</code>');     // Code
+    message = message.replace( /(?:\_\_(.*?)\_\_)/g , '<span style="text-decoration: underline;">$1</span>'); // Underline
+
+
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card left-color col-6 mb-3">' +
+        '<div class="card left-color col-10 mb-3">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
         '</div>' +
         '</div>';
 }
+
+// function addMessagesLeft (messages) {
+//     for (let i = 0; i < messages.length; i++) {
 
 //---------------------------------------------------Scroll Bottom----------------------------------------------------//
 
@@ -481,10 +493,13 @@ function gptRespondMessage(message) {
 
             chainOfThought = data["chainOfThought"]
             let classification = data["classification"]
-            let response = data["response"]
+            let responses = data["response"]
 
-            addMessageLeft(response)
-            saveMessage(response, "ChatBot")
+            for (let i = 0; i < responses.length; i++) {
+                addMessageLeft(responses[i]);
+                saveMessage(responses[i], "ChatBot")
+            }
+            
             // saveClassification(message, classification)
             scrollBottom();
         },

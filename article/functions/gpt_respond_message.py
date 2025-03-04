@@ -589,8 +589,8 @@ def outputSQLQuery(form):
 
         # Step 9: Return response
         data = json.dumps({
-            "response": cleaned_response + " current state: " + current_state + ' next state: ' + next_state + \
-                        " category: " + category_value,
+            "response": [cleaned_response + "\n current state: " + current_state + ' next state: ' + next_state + \
+                        " category: " + category_value],
             "chainOfThought": chain_of_thought,
             "classification": category_value
         })
