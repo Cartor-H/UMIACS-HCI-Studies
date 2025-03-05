@@ -11,6 +11,8 @@
   <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
   <script src="../../js/bootstrap.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-style@0.8.13/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="../../css/bootstrap.css">
 </head>
 
@@ -59,9 +61,19 @@
     </div>
     <div class="row mb-4">
       <div class="col text-end">
-        <a href="../article" class="btn btn-primary btn-lg">
+        <a class="btn btn-primary btn-lg">
           <i class="fas fa-plus"></i> Create Article
         </a>
+      </div>
+      <div class="col text-end">
+        <a class="btn btn-primary btn-lg" onclick="downloadArticles()">
+          <i class="fas fa-plus"></i> Download Articles Excel
+        </a>
+      </div>
+      <div class="col text-end">
+        <button type="button" class="btn btn-primary btn-lg" onclick="uploadArticles()">
+          <i class="fas fa-upload"></i> Upload Articles Excel
+        </button>
       </div>
     </div>
     <div class="row" id="userList">

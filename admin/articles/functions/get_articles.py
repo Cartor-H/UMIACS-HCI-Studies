@@ -32,7 +32,7 @@ def outputSQLQuery(form):
     cursor=con.cursor()
 
 
-    cursor.execute("SELECT ID, Title, Published_Date, Description, Image_ID, Content, Author FROM articles ORDER BY Published_Date DESC FOR JSON AUTO")
+    cursor.execute("SELECT * FROM articles ORDER BY Published_Date DESC FOR JSON AUTO")
     data = cursor.fetchall()
 
     if data:

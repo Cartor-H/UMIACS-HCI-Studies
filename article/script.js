@@ -143,6 +143,31 @@ function onLoad(){
         });
     }
 
+    // Retreive Previous Chain Of Thought
+    if(articleID && userID && articleID!="" && userID!="") {
+        $.ajax({
+            url: 'functions/get_chain_of_thought.py',
+            type: 'POST',
+            loading: false,
+            dataType: 'json',
+            data: {articleID: articleID, userID: userID},
+            success: function (data) {
+                if (data["Status"] == "Success") {
+                    chainOfThought = JSON.parse(data["Data"])[0]
+                } else {
+                    console.log("No Data, Starting New Chain Of Thought");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus);
+                alert("Error: " + errorThrown);
+            }
+        });
+    }
+
+    // Call GPT
+    sendMessageToChatBot("")
+
     // Focus on text input area
     document.getElementById("message").focus();
 }
@@ -226,7 +251,7 @@ Add's a txt msg as if the client sent it.
 */
 function addMessageRight (message) {
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card right-color offset-6 mb-3">' +
+        '<div class="card right-color offset-2 mb-3">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
         '</div>' +
@@ -237,13 +262,25 @@ function addMessageRight (message) {
 Add's a txt msg as if the client was sent a msg by someone else.
 */
 function addMessageLeft (message) {
+    // console.log(message)
+    message = message.replace(    /(?:\r\n|\r|\n)/g , '<br>');                // New Line
+    message = message.replace( /(?:\*\*(.*?)\*\*)/g , '<strong>$1</strong>'); // Bold
+    message = message.replace(     /(?:\*(.*?)\*)/g , '<em>$1</em>');         // Italics
+    message = message.replace( /(?:\~\~(.*?)\~\~)/g , '<del>$1</del>');       // Strikethrough
+    message = message.replace(     /(?:\`(.*?)\`)/g , '<code>$1</code>');     // Code
+    message = message.replace( /(?:\_\_(.*?)\_\_)/g , '<span style="text-decoration: underline;">$1</span>'); // Underline
+
+
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card left-color col-6 mb-3">' +
+        '<div class="card left-color col-10 mb-3">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
         '</div>' +
         '</div>';
 }
+
+// function addMessagesLeft (messages) {
+//     for (let i = 0; i < messages.length; i++) {
 
 //---------------------------------------------------Scroll Bottom----------------------------------------------------//
 
@@ -443,6 +480,7 @@ function sendMessageToChatBot(message) {
     // Commented Out For Now - Bc Not Implemented Yet //
 
     gptRespondMessage(message);
+    document.getElementById("typingAlert").hidden = false
 
     // let context, classification = classifyMessage(message);
     
@@ -477,14 +515,22 @@ function gptRespondMessage(message) {
             chainOfThought: JSON.stringify(chainOfThought)
         },
         success: function (data) {
+            document.getElementById("typingAlert").hidden = true
+
             data = JSON.parse(data["Data"])
 
             chainOfThought = data["chainOfThought"]
             let classification = data["classification"]
-            let response = data["response"]
+            let responses = data["response"]
 
-            addMessageLeft(response)
-            saveMessage(response, "ChatBot")
+            for (let i = 0; i < responses.length; i++) {
+                addMessageLeft(responses[i]);
+                saveMessage(responses[i], "ChatBot")
+            }
+            
+            //Save Chain Of Thought
+            saveChainOfThought();
+
             // saveClassification(message, classification)
             scrollBottom();
         },
@@ -495,3 +541,48 @@ function gptRespondMessage(message) {
     });
     
 }
+
+function saveChainOfThought() {
+    $.ajax({
+        url: 'functions/save_chain_of_thought.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {
+            chainOfThought: JSON.stringify(chainOfThought),
+            articleID: articleID,
+            userID: userID
+        },
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
+}
+
+
+//---------------------------------------------------Close Page-----------------------------------------------------//
+
+function closeTab() {
+    if (window.opener && !window.opener.closed) {
+
+        window.opener.location.href = '/home';
+        
+        window.opener.focus();
+
+        
+        window.opener.postMessage({ action: 'focusHome', url: '/home' }, '*');
+    }
+    window.close();
+    
+    saveChainOfThought();
+
+    return false;
+}
+
+window.addEventListener('beforeunload', function (e) {
+    closeTab();
+});

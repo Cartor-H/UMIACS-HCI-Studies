@@ -31,47 +31,56 @@ def outputSQLQuery(form):
     con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
     cursor=con.cursor()
 
-    cursor.execute("SELECT * FROM Articles ORDER BY Published_Date DESC FOR JSON AUTO")
-    articles_data = cursor.fetchall()
+    articles = json.loads(form.get('articles', []))
 
-    cursor.execute("SELECT Category FROM ArticleCategories ORDER BY [Order] ASC FOR JSON AUTO")
-    categories_data = cursor.fetchall()
+    for article in articles:
+        article_id = article.get('ID')
 
-    if articles_data and categories_data:
-        articles_json = ''.join([row[0] for row in articles_data])  # Concatenate the values from each row
-        categories_json = ''.join([row[0] for row in categories_data])  # Concatenate the values from each row
+        # Check if the article already exists
+        cursor.execute("SELECT COUNT(*) FROM articles WHERE ID = %s", (article_id,))
+        exists = cursor.fetchone()[0]
+        if exists:
+            # Update existing article
+            update_fields = []
+            update_values = []
+            for key, value in article.items():
+                if key != 'ID' and key != 'Added_Date':
+                    update_fields.append(f"{key} = %s")
+                    update_values.append(value if value is not None else 'NULL')
+            update_values.append(article_id)
+            cursor.execute(f"""
+            UPDATE articles
+            SET {', '.join(update_fields)}
+            WHERE id = %s
+            """, tuple(update_values))
+        else:
+            # Insert new article
+            columns = ', '.join([key for key in article.keys() if key != 'ID'])
+            placeholders = ', '.join(['%s' if value is not None else 'NULL' for key, value in article.items() if key != 'ID'])
+            values = [value for key, value in article.items() if key != 'ID' and value is not None]
+            columns += ', Added_Date'
+            placeholders += ', GETDATE()'
+            cursor.execute(f"""
+            INSERT INTO articles ({columns})
+            VALUES ({placeholders})
+            """, tuple(values))
+
+    con.commit()
+
+    cursor.execute("SELECT * FROM articles ORDER BY published_date DESC FOR JSON AUTO")
+    data = cursor.fetchall()
+
+    if data:
+        json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
         print(json.dumps({
             "Status": "Success",
-            "Data": {
-                "Articles": articles_json,
-                "Categories": categories_json
-            }
+            "Data": json_data
         }))
     else:
         print(json.dumps({"Status": "No Data"}))
 
     cursor.close()
     con.close()
-
-    # cursor = cnxn.cursor()
-    # query = u"SELECT default_password FROM student2022 where Student_ID like ? and password like ? FOR JSON AUTO"
-    # cursor.execute(query,[sID, userPassword])
-    # data = cursor.fetchall()
-    # if data:
-    #     print('[]')
-    #     return
-    #
-    # cursor = cnxn.cursor()
-    # cursor.execute("INSERT INTO student2022 (Student_ID, First_Name, Last_Name, password, default_password)"
-    #                "VALUES (?,?,?,?,?)", [sID, fName, lName, userPassword, 0])
-    # cursor.commit()
-    #
-    # cursor.execute("SELECT CAST((SELECT * FROM student2022 FOR JSON AUTO) AS VARCHAR(MAX))", [])
-    # data = cursor.fetchall()
-    # if data:
-    #     print(data[0][0])
-    # else:
-    #     print('[]')
 
 try:
     print("Content-type: text/html\n\n")   # say generating html

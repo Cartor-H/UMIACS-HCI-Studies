@@ -8,23 +8,9 @@ let userID = "-1";
 function onLoad(){
 
     //---------------------------------------------------------------------------------------------------Read URL Params
-    // const params = new URLSearchParams(document.location.search);
-    // if(params.get('editable')!=null){
-    //     document.getElementById("senderID").readOnly = false;
-    //     document.getElementById("receiverID").readOnly = false;
-    //     document.getElementById("trialNumber").readOnly = false;
-    // }
+
     let sender = "";
     let receiver = "";
-    // sender = params.get('from');
-    // receiver = params.get('to');
-    // document.getElementById("senderID").value = sender;
-    // document.getElementById("receiverID").value = receiver;
-    // //Trial
-    // let trial = params.get('trial');
-    // document.getElementById("trialNumber").value = trial;
-
-    // document.getElementById("typingAlert").innerText = receiver+" is Typing"
 
     // Read URL Params
     const params = new URLSearchParams(document.location.search);
@@ -51,19 +37,38 @@ function onLoad(){
         success: function (data) {
             console.log(data)
             if (data["Status"] == "Success") {
-                articles = JSON.parse(data["Data"])
+                let articleData = data["Data"]
 
                 //---------------------------------------------------------------------------------------------------Add Articles
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                // const oneWeekAgo = new Date();
+                // oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+                categories = JSON.parse(articleData["Categories"]);
+                articles = JSON.parse(articleData["Articles"]);
+
+                console.log(categories);
+                console.log(articles);
+
+                for (let i = 0; i < categories.length; i++) {
+                    let category = categories[i]["Category"];
+                    document.getElementById("content").innerHTML += `
+                    <div class="row m-5 mb-4">
+                        <div class="col">
+                            <h2>${category}</h2>
+                            <div id="${strToID(category)}" class="row">
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }
+
 
                 for (let i = 0; i < articles.length; i++) {
                     let articleDate = new Date(articles[i]["Published_Date"]);
                     let formattedDate = articleDate.toLocaleDateString();
-                    if (articleDate >= oneWeekAgo) {
-                        addArticle("recentlyUpdatedArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
-                    } else {
-                        addArticle("olderNewsArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+
+                    if (articles[i]["Category"] != null) {
+                        addArticle(strToID(articles[i]["Category"]), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
                     }
                 }
             } else {
@@ -401,16 +406,13 @@ let articles = [];
 function addArticle (location, title, description, date, id, photo = 'default_news_photo.png') {
     document.getElementById(location).innerHTML +=
         `<div class="col-md-2 mb-3">\n` +
-        `  <a href="../article?articleID=${id}&userID=${userID}" class="card-link" style="text-decoration: none; color: inherit;" target="_blank">\n` +
-        `    <div class="card h-100" style="transition: transform 0.2s, background-color 0.2s; cursor: pointer; background-color: #f8f9fa; border: none;">\n` +
-        `      <div class="card-img-top" style="background-image: url('${photo}'); background-size: cover; background-position: center; aspect-ratio: 4 / 2;"></div>\n` +
-        `      <div class="card-body p-3" style="font-family: 'Times New Roman', Times, serif;">\n` +
-        `        <h5 class="card-title fs-4 font-weight-bold">${title}</h5>\n` +
-        `        <p class="card-date">${date}</p>\n` +
-        `        <p class="card-text">${description}</p>\n` +
-        `      </div>\n` +
+        `  <div class="card h-100" style="transition: transform 0.2s, background-color 0.2s; cursor: pointer; background-color: #f8f9fa; border: none;" onclick="window.open('../article?articleID=${id}&userID=${userID}', '_blank')">\n` +
+        `    <div class="card-body p-3" style="font-family: 'Times New Roman', Times, serif;">\n` +
+        `      <h5 class="card-title fs-4 font-weight-bold">${title}</h5>\n` +
+        `      <p class="card-date">${date}</p>\n` +
+        `      <p class="card-text">${description}</p>\n` +
         `    </div>\n` +
-        `  </a>\n` +
+        `  </div>\n` +
         `</div>\n`;
 
     // Add hover effect
@@ -426,3 +428,17 @@ function addArticle (location, title, description, date, id, photo = 'default_ne
         });
     });
 }
+
+function strToID(str){
+    return str.charAt(0).toLowerCase() + str.slice(1).replace(/\s+/g, '');
+}
+
+
+// Listen For Arctile Page Redirect Home
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.action === 'focusHome') {
+      // Optionally ensure the URL is set correctly
+      window.location.href = event.data.url;
+      window.focus();
+    }
+  });
