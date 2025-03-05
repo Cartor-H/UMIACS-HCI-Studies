@@ -129,10 +129,10 @@ Your response should be conversational and encouraging further engagement with t
 User's statement: "{user_message}"
 
 Determine which type of statement this is and respond accordingly:
-- If about the user themselves (interests, background): 1) Thank them for sharing and 2) ask if there's anything they'd like to discuss with two example questions. Put these two things in two separate paragraphs.
-- If a comment or personal opinion about the article: 1) Acknowledge their opinion and 2) ask what makes them think this way. Put these two things in two separate paragraphs.
+- If about the user themselves (interests, background): Thank them for sharing and ask if there's anything they'd like to discuss with two example questions.
+- If a comment or personal opinion about the article: Acknowledge their opinion and ask what makes them think this way.
 - If referring to specific content without personal opinion: Ask if they'd like to know anything about this text.
-- If not relevant to the person or article: 1) Politely explain you don't understand and 2) ask them to rephrase. Put these two things in two separate paragraphs.
+- If not relevant to the person or article: Politely explain you don't understand and ask them to rephrase.
 """
 
     elif state == "User_Literal_Question":
@@ -148,8 +148,6 @@ Category: {category} (1=word explanation, 2=summary)
 
 1. Provide a clear, informative answer to the user's question.
 2. Then, ask if they are interested in discussing the news content further, suggesting possible topics from the article they might want to explore.
-
-In your response, use "######" to separate the two parts. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
 """
 
     elif state == "User_Factual_Question":
@@ -160,10 +158,9 @@ In your response, use "######" to separate the two parts. Your response should w
 
 User's question: "{user_message}"
 
-1. Provide an answer and specify whether the information you provide is from the news article itself or from the other sources. 
-2. Ask the user what prompted them to be interested in this factual information, e.g., if they wanted to know how this factual information may be [explanation, implication, interpetation] of [topic, social issue, or concepts] of the news article, or if there's anything relevant to their life they would like to know about?
-
-In your response, use "######" to separate the two parts. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+1. Provide an accurate answer based on the article's content. If the information isn't in the article, acknowledge this limitation.
+2. Specify whether your information comes from the article itself or general knowledge.
+3. Ask what prompted their interest in this information - how it relates to broader topics in the article or to their personal interests.
 """
 
     elif state == "User_Interpretive_Question":
@@ -187,7 +184,8 @@ Please follow these steps in your response:
    - Ask if this thought makes sense to them
    - Offer to explore additional information or alternative perspectives
 
-In your response, use "######" to separate the three parts. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+Your response should be thoughtful but conversational, inviting further discussion rather than presenting a definitive answer.
+Put your response into natural language paragraphs without displaying the words "Thought" and "Information" to the user.
 """
 
     elif state == "Waiting_User_Response_to_Thought":
@@ -214,7 +212,8 @@ Based on this classification, respond accordingly:
 - If alternative perspectives: Explain assumptions underlying the current thought and how changing them affects the conclusion.
 - If new point-of-view: Consider what information would be relevant from this new perspective and share an updated thought.
 
-In your response, use "######" to separate the different parts in your response. Put your response into natural language pragraphs without displaying the words "Updated Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+Your response should maintain the conversational flow while deepening the analysis.
+Put your response into natural language paragraphs without displaying the words "Thought", "Information", or "Updated Thought", "New Thought" to the user.
 """
 
     else:
@@ -300,7 +299,7 @@ def classify_user_message(user_message, article, state):
         Classify this user message about a news article into one of these categories:
         - "question_or_interest": a question or expression of interest to discuss content
         - "statement": a statement without a clear question or request
-        - "coordination": instructions, greetings, acknowledgements to coordinate the conversation with you, such as "thank you", "can you clarify?", "can you answer in shorter texts?", "please use simpler words"
+        - "coordination": coordination messages like greetings or acknowledgments
         - "conversation_end": indication that the user has finished the discussion
 
         NEWS ARTICLE TITLE: {article["Title"]}
@@ -562,16 +561,14 @@ def outputSQLQuery(form):
         cleaned_response = clean_response(assistant_message)
 
         # Step 5: Update conversation history
-
-        if assistant_message != "I'm sorry, I'm having trouble processing your request right now. Please try again later.":
-            stored_messages.append({"role": "assistant", "content": cleaned_response})
+        stored_messages.append({"role": "assistant", "content": cleaned_response})
 
         # Get category from classification or previous state
         category = None
         if isinstance(classification_result, dict):
             category = classification_result.get("category")
-        # elif "category" in prev_chain_of_thought:
-        #     category = prev_chain_of_thought["category"]
+        elif "category" in prev_chain_of_thought:
+            category = prev_chain_of_thought["category"]
 
         # Step 7: Update chain of thought with NEXT state
         chain_of_thought = {
@@ -590,16 +587,10 @@ def outputSQLQuery(form):
         # Format category for frontend
         category_value = str(category) if category is not None else ""
 
-        if "######" in cleaned_response:
-            cleaned_response = cleaned_response.split("######")
-            cleaned_response = [i.replace('\n', '') for i in cleaned_response]
-        else:
-            cleaned_response = [cleaned_response]
-
         # Step 9: Return response
         data = json.dumps({
-            "response": cleaned_response + ["current state: " + current_state + ' \nnext state: ' + next_state + \
-                                            " \ncategory: " + category_value],
+            "response": [cleaned_response + "\n current state: " + current_state + ' next state: ' + next_state + \
+                        " category: " + category_value],
             "chainOfThought": chain_of_thought,
             "classification": category_value
         })
