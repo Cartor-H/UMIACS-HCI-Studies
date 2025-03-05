@@ -113,7 +113,7 @@ To ensure a structured and maintainable web application, organize your files as 
 ```SQL
 USE News_Interface;
 
--- make table `UserReadArticleHistory`
+-- Table `UserReadArticleHistory`
 -- ID prim key, identity
 -- UserID foreign key
 -- ArticleID foreign key
@@ -128,7 +128,7 @@ CREATE TABLE UserReadArticleHistory (
     FOREIGN KEY (ArticleID) REFERENCES Articles(ID)
 );
 
--- make table `ArticleOpenHistory`
+-- Table `ArticleOpenHistory`
 -- ID - prim key , identity
 -- Action nvarchar(50)
 -- ActionDate datetime2(7)
@@ -143,7 +143,7 @@ CREATE TABLE [dbo].[ArticleOpenHistory](
     [UserID] [int] NULL,
 )
 
--- make table `Users`
+-- Table `Users`
 -- UserID prim key , identity
 -- DisplayName nvarchar(50)
 -- TestUser boolean
@@ -153,6 +153,52 @@ CREATE TABLE Users (
     DisplayName NVARCHAR(50),
     TestUser BIT
 );
+
+-- Table `MessageClassifications`
+-- articleID, int - foreign key (Articles.ID)
+-- userID, int
+-- messgaeID, int - foreign key (Messages.MessageID)
+-- message, nvarchar(MAX)
+-- classification, nvarchar(50)
+
+CREATE TABLE MessageClassifications (
+    articleID int,
+    userID int,
+    messageID int,
+    message nvarchar(MAX),
+    classification nvarchar(50),
+    FOREIGN KEY (articleID) REFERENCES Articles(ID),
+    FOREIGN KEY (messageID) REFERENCES Messages(MessageID)
+);
+
+-- Table `ChainOfThought`
+-- UserID, nvarchar(50)
+-- ArticleID, int
+-- LastChanged, datetime2(7)
+-- Content, nvarchar(max)
+
+CREATE TABLE ChainOfThought (
+    UserID int,
+    ArticleID int,
+    LastChanged datetime2(7),
+    Content nvarchar(max)
+);
+
+-- Table `Articles`
+-- ID	int
+-- Title	nvarchar
+-- Published_Date	datetime2
+-- Description	nvarchar
+-- Image_ID	nvarchar
+-- Content	nvarchar
+-- Author	nvarchar
+-- Added_Date	datetime2
+-- Category	nvarchar
+
+
+-- Table `ArticleCategories`
+-- Category, nvachar(255)
+-- Order, int
 ```
 
 # SSL / https

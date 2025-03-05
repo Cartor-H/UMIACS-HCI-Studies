@@ -2,11 +2,6 @@
 # dos2unix /var/www/html/1/getMessages.py
 # nano /var/log/httpd/error_log
 
-# IMPORTANT!!
-# When installing packages, use `sudo python3.11 -m pip install <package>` otherwise server errors (code 500) will occur
-# Ideally a virtual environment should be used, but this started as a simple script and doing so now would cause too much downtime
-# and take time away from making new features
-
 import json
 import sys
 import os
@@ -31,24 +26,28 @@ def outputSQLQuery(form):
     con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
     cursor=con.cursor()
 
-    cursor.execute("SELECT * FROM Articles ORDER BY Published_Date DESC FOR JSON AUTO")
-    articles_data = cursor.fetchall()
+    chainOfThought = json.loads(form.get('chainOfThought', []))
+    articleID = form.get("articleID", -1)
+    userID = form.get("userID", -1)
 
-    cursor.execute("SELECT Category FROM ArticleCategories ORDER BY [Order] ASC FOR JSON AUTO")
-    categories_data = cursor.fetchall()
+    cursor.execute("SELECT Content FROM ChainOfThought WHERE ArticleID=%s AND UserID=%s", (articleID, userID))
+    data = cursor.fetchall()
 
-    if articles_data and categories_data:
-        articles_json = ''.join([row[0] for row in articles_data])  # Concatenate the values from each row
-        categories_json = ''.join([row[0] for row in categories_data])  # Concatenate the values from each row
-        print(json.dumps({
-            "Status": "Success",
-            "Data": {
-                "Articles": articles_json,
-                "Categories": categories_json
-            }
-        }))
+    if data:
+        cursor.execute("UPDATE ChainOfThought SET Content=%s, LastChanged=GETDATE() WHERE ArticleID=%s AND UserID=%s", 
+                       (json.dumps(chainOfThought), articleID, userID))
     else:
-        print(json.dumps({"Status": "No Data"}))
+        cursor.execute("INSERT INTO ChainOfThought (ArticleID, UserID, Content, LastChanged) VALUES (%s, %s, %s, GETDATE())", 
+                       (articleID, userID, json.dumps(chainOfThought)))
+    con.commit()
+
+    if data:
+        json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
+        print(json.dumps({
+            "Status" : "Success",
+            "Data" : json_data}))
+    else:
+        print(json.dumps({"Status" : "No Data"}))
 
     cursor.close()
     con.close()
@@ -84,10 +83,11 @@ try:
 
     outputSQLQuery(form)
 except Exception as e:
+    print("{error:")
+    print(f"An error occurred: {str(e)}")
     print(json.dumps({
-        "Status": "Error",
-        "Message": str(e),
-        "Traceback": traceback.format_exc()
+        "error": str(e),
+        "trace": traceback.format_exc()
     }))
 
 # try:
@@ -100,15 +100,4 @@ except Exception as e:
 #     # import cgi
 #     # cgitb.handler()
 #     # cgi.print_exception()                 # catch and print errors
-"""
-Traceback (most recent call last):
-    File "/var/www/html/home/functions/getArticles.py", line 78, in <module>
-        outputSQLQuery(form)
-    File "/var/www/html/home/functions/getArticles.py", line 31, in outputSQLQuery
-        con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    File "src/pymssql/_pymssql.pyx", line 647, in pymssql._pymssql.connect
-    File "src/pymssql/_mssql.pyx", line 2109, in pymssql._mssql.connect
-    File "src/pymssql/_mssql.pyx", line 609, in pymssql._mssql.MSSQLConnection.__init__
-TypeError: argument of type 'NoneType' is not iterable
-"""
+

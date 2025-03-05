@@ -143,6 +143,28 @@ function onLoad(){
         });
     }
 
+    // Retreive Previous Chain Of Thought
+    if(articleID && userID && articleID!="" && userID!="") {
+        $.ajax({
+            url: 'functions/get_chain_of_thought.py',
+            type: 'POST',
+            loading: false,
+            dataType: 'json',
+            data: {articleID: articleID, userID: userID},
+            success: function (data) {
+                if (data["Status"] == "Success") {
+                    chainOfThought = JSON.parse(data["Data"])[0]
+                } else {
+                    console.log("No Data, Starting New Chain Of Thought");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus);
+                alert("Error: " + errorThrown);
+            }
+        });
+    }
+
     // Focus on text input area
     document.getElementById("message").focus();
 }
@@ -500,6 +522,9 @@ function gptRespondMessage(message) {
                 saveMessage(responses[i], "ChatBot")
             }
             
+            //Save Chain Of Thought
+            saveChainOfThought();
+
             // saveClassification(message, classification)
             scrollBottom();
         },
@@ -510,3 +535,48 @@ function gptRespondMessage(message) {
     });
     
 }
+
+function saveChainOfThought() {
+    $.ajax({
+        url: 'functions/save_chain_of_thought.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {
+            chainOfThought: JSON.stringify(chainOfThought),
+            articleID: articleID,
+            userID: userID
+        },
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
+}
+
+
+//---------------------------------------------------Close Page-----------------------------------------------------//
+
+function closeTab() {
+    if (window.opener && !window.opener.closed) {
+
+        window.opener.location.href = '/home';
+        
+        window.opener.focus();
+
+        
+        window.opener.postMessage({ action: 'focusHome', url: '/home' }, '*');
+    }
+    window.close();
+    
+    saveChainOfThought();
+
+    return false;
+}
+
+window.addEventListener('beforeunload', function (e) {
+    closeTab();
+});
