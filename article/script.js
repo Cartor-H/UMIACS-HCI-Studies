@@ -165,6 +165,9 @@ function onLoad(){
         });
     }
 
+    // Call GPT
+    sendMessageToChatBot("")
+
     // Focus on text input area
     document.getElementById("message").focus();
 }
@@ -477,6 +480,7 @@ function sendMessageToChatBot(message) {
     // Commented Out For Now - Bc Not Implemented Yet //
 
     gptRespondMessage(message);
+    document.getElementById("typingAlert").hidden = false
 
     // let context, classification = classifyMessage(message);
     
@@ -511,6 +515,8 @@ function gptRespondMessage(message) {
             chainOfThought: JSON.stringify(chainOfThought)
         },
         success: function (data) {
+            document.getElementById("typingAlert").hidden = true
+
             data = JSON.parse(data["Data"])
 
             chainOfThought = data["chainOfThought"]
