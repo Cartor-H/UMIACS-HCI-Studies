@@ -465,7 +465,12 @@ def outputSQLQuery(form):
     """
     try:
         # Parse input data
-        user_message = form["message"]
+
+        if 'message' in form:
+            user_message = form["message"]
+        else:
+            user_message = 'hello'
+
         article = json.loads(form["article"])
 
         # Handle potential empty chainOfThought
@@ -582,7 +587,7 @@ def outputSQLQuery(form):
             "chainOfThought": chain_of_thought,
             "classification": category_value
         })
-
+        
         print(json.dumps({
             "Status": "Success",
             "Data": data
