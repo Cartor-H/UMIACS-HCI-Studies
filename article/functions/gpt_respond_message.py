@@ -33,27 +33,6 @@ def is_classification_only_state(state):
     return state in classification_only_states
 
 
-def extract_thought_analysis(response_text):
-    """
-    Extracts thought analysis JSON from the response if present.
-    """
-    try:
-        # Look for JSON in the response
-        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(0)
-            thought_analysis = json.loads(json_str)
-
-            # Check if it has the expected keys for a thought analysis
-            expected_keys = ["thought", "information", "assumptions", "pov"]
-            if any(key in thought_analysis for key in expected_keys):
-                return thought_analysis
-    except:
-        pass
-
-    return None
-
-
 def clean_response(response_text):
     """
     Cleans the response to remove JSON and other technical content.
@@ -167,6 +146,7 @@ In your response, use "######" to separate the two parts. Your response should w
 """
 
     elif state == "User_Interpretive_Question":
+        category = classification_result.get('category', 6)
         return f"""The user has asked a question that requires interpretation of the news content.
 
 {article_context}
@@ -174,49 +154,110 @@ In your response, use "######" to separate the two parts. Your response should w
 
 User's question: "{user_message}"
 
-Please follow these steps in your response:
+Category: {category}
 
-1. First, develop your thought in these areas (for your own thinking):
-   - Thought: Form an opinion, analysis, or interpretation responding to the user's question
-   - Information: Identify factual information from the article that supports your thought
-   - Assumptions: Recognize assumptions underlying your thought
-   - PoV: Consider the perspective you're taking
+The user has shared a Category 3, 5, or 6 message with you for interpreting the news content. You should follow the following steps to generate your response:
 
-2. In your response to the user:
-   - Share only your thought and the supporting information
-   - Ask if this thought makes sense to them
-   - Offer to explore additional information or alternative perspectives
+Step 1: Generate your answer to the question following this structure.
+- Thought: one opinion, analysis, or interpretation from you in response to the user question based on the information from this news article only.
+- Information: the factual information and relevant concept from the article that your Thought is based upon.
+- Assumptions: potential assumptions that are made within your Thought.
+- PoV: the perspective or point-of-view from which you generated with your thought.
 
-In your response, use "######" to separate the three parts. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+Step 2: Generate a follow-up to the user based on the Category of the user message:
+- For Category 3 message: Ask the user whether your thought makes sense to them or not.
+- For Category 5 message: Explain to the user that their original [question, request, or interest] probably goes beyond the scope of the article. You have presented them with an answer based on the article itself, and you can continue exploring the interpretation by considering information and perspectives beyond the news article. But before you proceed, you would like to see if your current thought makes sense to them.
+- For Category 6 message: Explain to the user that their original [question, request, or interset] is persoanlly relevant so the answer may differ for different people. You have presented them with a generic answer based on what you know from the article. You would like to see if the user wants to share some of their background information to get a more personalized answer.
+
+Step 3: Respond to the user with two things: 1) your [Thought] and [Information] only from Step 1, and 2) your follow-up to the user from step 2.
+
+In your response, use "######" to separate the different parts. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
 """
 
-    elif state == "Waiting_User_Response_to_Thought":
-        thought_analysis = prev_chain_of_thought.get('thought_analysis', {})
-        thought_json = json.dumps(thought_analysis) if thought_analysis else "No previous thought analysis available"
+    elif state == "Waiting_User_First_Response_to_Thought":
+        category = prev_chain_of_thought["category"]
 
         return f"""You've shared a thought with the user about the news article, and they've responded.
 
 {article_context}
-{conversation_context}
 
-Your previous thought analysis: {thought_json}
+Previous conversation: "{conversation_context}"
+User's current response: "{user_message}"
 
-User's response: "{user_message}"
+I've classified their response as Category: {category}
 
-I've classified their response as: {classification_result}
+- If the user responded by saying that your thought makes sense to them or that they agree with your thought, respond based on the condition below:
+	- If the user's initial question/request/interest was Category 3 or Category 6, you will ask them whether they would like to explore an alternative perspective with you with one to two examples perspectives.
+	- If the user's initial question/request/interest was a Category 5, you will 1) generate an updated [Thought] by considering factual information or perspectives beyond the scope of the article and explain the new information or perspectives you have considered in this thought, and 2) ask whether the thought makes sense to the user.
 
-Based on this classification, respond accordingly:
-- If agreement: Either conclude if you've covered both additional info and alternative thoughts, or offer to explore uncovered aspects.
-- If disagreement: Ask what makes them disagree and offer to explore alternative perspectives.
-- If request for information: Provide relevant information, update your thought, and check if it makes sense.
-- If new facts: Acknowledge their input, update your thought incorporating their information, and check if it makes sense.
-- If personal thought: Compare your thought with theirs, highlighting differences in information, assumptions, and perspective.
-- If alternative perspectives: Explain assumptions underlying the current thought and how changing them affects the conclusion.
-- If new point-of-view: Consider what information would be relevant from this new perspective and share an updated thought.
+- If the user responded by saying that your thought does not make sense to them or they disagree with you: respond by telling them that you are curious to what part of your thought they find confusing or they do not agree with you and invite them to share their thought, opinion, or interpretations.
 
-In your response, use "######" to separate the different parts in your response. Put your response into natural language pragraphs without displaying the words "Updated Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+- If the user's response indicated an ambiguous attitude, e.g., "I'm not sure", "I don't know": respond by telling them that you are curious to learn what made them feel so, e.g., what part of your answer they are unclear about, and invite them to share their thought, opinion, or interpretations.
+
+- If the user responded by asking you questions about your answer or asking you to clarify your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) if this explanation makes sense to them or not. 
+
+- If the user's response do not belong to any of these categories, proceed to the <End_state> without providing a response here. 
+
+In your response, use "######" to separate each numbered part. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
 """
+    elif state == "Waiting_User_Second_Response_to_Thought":
+        return f"""You've shared a thought with the user about the news article, and they've responded.
 
+        {article_context}
+
+        Previous conversation: "{conversation_context}"
+        User's current response: "{user_message}"
+
+        - If the user said that your response makes sense to them, respond by asking if they would like to explore an alternative perspecitve to interpret their original question and provide example new perspectives.
+
+        - If the user responded by saying that your thought does not make sense to them or they disagree with you: respond by telling them that you are curious to what part of your thought they find confusing or they do not agree with you and invite them to share their thought, opinion, or interpretations.
+        
+        - If the user's response indicated an ambiguous attitude, e.g., "I'm not sure", "I don't know": respond by telling them that you are curious to learn what made them feel so, e.g., what part of your answer they are unclear about, and invite them to share their thought, opinion, or interpretations.
+        
+        - If the user responded by asking you questions about your answer or asking you to clarify your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) if this explanation makes sense to them or not. 
+        
+        - If the user provided additional factual information relevant to themselves or from other sources: respond by 1) acknolwedging the user's input and sharing an updated [Thought] that incorporates the information or perspectives conveyed in the user message, and 2) asking whether the new thought makes sense to the user. 
+        
+        - If the user responded by sharing their personal thought, follow these steps:
+            - Step 1: compare your thought with the user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
+            - Step 2: respond to the user with three things: 1) acknolwedge their thought, 2) share your comparision of your thought and the user's thought, 3) ask whether the user has additional thoughts or questions given the differences or similarities in your thoughts. 
+        
+        - If the user responded by asking to explore alternative perspective: respond with two things: 1) explain the assumptions that are underlying the current thought and how the thought would change if the assumptions do not hold true, and 2) explain the point-of-view from which the current thought seems to be from, and 3) ask if the user would like to explore an alternative perspective with two examples that explore different assumptions or point-of-views.
+        
+        If the user responded by sharing a specific point-of-view they would like to explore, follow these steps:
+            - Step 1: consider alternative factual information relevant to this new point-of-view.
+            - Step 2: respond to the user with three things: 1) explain to them that shifting a point-of-view require them to re-examine the information context and provide an updated [Information] to user from the article or external sources, 2) share an updated [Thought] based on the new point-of-view and information context, and 3) ask the user if the thought makes sense to the user and invite them to ask follow-up questions.
+        
+        - If the user's response do not belong to any of these categories, proceed to the next state without providing a response here. 
+        
+        In your response, use "######" to separate each numbered part. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+"""
+    elif state == "Waiting_User_Third_Response_to_Thought":
+        return f"""You've shared a thought with the user about the news article, and they've responded.
+
+    {article_context}
+
+    Previous conversation: "{conversation_context}"
+    User's current response: "{user_message}"
+
+    - If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
+        - Step 1: consider alternative factual information relevant to this new point-of-view or perspective.
+        - Step 2: respond to the user with three things: 1) explain to them that shifting a point-of-view or prespective require them to re-examine the information context and provide an updated [Information] to user from the article or external sources, 2) share an updated [Thought] based on the new point-of-view and information context, and 3) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
+    
+    - If the user responded by sharing their personal thought, follow these steps:
+        - Step 1: compare your thought with the user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
+        - Step 2: respond to the user with three things: 1) acknolwedge their thought, 2) share your comparision of your thought and the user's thought, 3) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
+    
+    - If the user responded by saying that your thought doesn't make sense to them, respond with two things: 1) acknowledge their response, 2) explain to them they you seem to have been discussing this quesiton for a while and it may be helpful for you and the user to explore some alternative questions together and get a better sense of the issue; with example alternative questions that are relevant to the core concepts you are discussing for the user to consider.
+    
+    - If the user responded by saying that they are good with this question or not wanting to discuss any further, ask the user if there's any other questions they would like to discuss. 
+    
+    - If the user responded by saying that they agree with what you have shared or your thought makes sense to them, ask the user if there's any other questions they would like to discuss.
+    
+    - If the user's response do not belong to the above conditions, proceed to the <End_state> without providing a response here.
+    
+    In your response, use "######" to separate each numbered part, if any. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+"""
     else:
         # Default prompt for any unhandled state
         return f"""You are a news reading assistant helping a user engage with a news article.
@@ -267,15 +308,16 @@ def determine_next_state(current_state, classification_result):
         return "Waiting_User_Input"
 
     elif current_state == "User_Interpretive_Question":
-        return "Waiting_User_Response_to_Thought"
+        return "Waiting_User_First_Response_to_Thought"
 
-    elif current_state == "Waiting_User_Response_to_Thought":
-        if classification_result == "subject_change":
-            return "Waiting_User_Input"
-        elif classification_result == "done":
-            return "Waiting_User_Input"
-        else:
-            return "Waiting_User_Response_to_Thought"
+    elif current_state == "Waiting_User_First_Response_to_Thought":
+        return "Waiting_User_Second_Response_to_Thought"
+
+    elif current_state == "Waiting_User_Second_Response_to_Thought":
+        return "Waiting_User_Third_Response_to_Thought"
+
+    elif current_state == "Waiting_User_Third_Response_to_Thought":
+        return "Waiting_User_Input"
 
     elif current_state == "Chatbot_Follow-up":
         return "Waiting_User_Input"
@@ -373,26 +415,6 @@ Message:
 
 Response:
 """
-    elif state == "Waiting_User_Response_to_Thought":
-        # Classify response to a thought
-        classification_prompt = f"""
-        Classify this user response to a previously shared thought:
-
-        Determine which type:
-        - "agreement": User agrees with the thought
-        - "disagreement": User disagrees or is uncertain
-        - "request_info": User asked for more information
-        - "new_facts": User pointed to different factual information
-        - "personal_thought": User shared their own thought
-        - "alt_perspectives": User asked to explore alternative perspectives
-        - "new_pov": User shared a new point-of-view to explore
-        - "subject_change": User changed the subject
-        - "done": User is done with this question
-
-        USER RESPONSE: "{user_message}"
-
-        RESPOND WITH ONLY ONE WORD from the options above.
-        """
 
     if classification_prompt:
         try:
@@ -420,8 +442,6 @@ Response:
                 return "question_or_interest"
             elif state == "User_Question_Processing":
                 return {"category": 4}
-            elif state == "Waiting_User_Response_to_Thought":
-                return "agreement"
 
     return None
 
@@ -466,42 +486,7 @@ def outputSQLQuery(form):
         # Step 1: Process current state
         classification_result = None
 
-        # if is_classification_only_state(current_state):
-        #     # For classification-only states, just classify and move to next state
-        #     if current_state == "User_Question_Processing":
-        #         classification_result = classify_user_message(user_message, article, current_state)
-        #
-        #     # Determine next state based on classification
-        #     next_state = determine_next_state(current_state, classification_result)
-        #
-        #     # For classification-only states, we'll generate a response based on the next state
-        #     prompt = generate_prompt_for_state(
-        #         next_state,
-        #         user_message,
-        #         article,
-        #         prev_chain_of_thought,
-        #         stored_messages,
-        #         classification_result
-        #     )
-        #     next_state = determine_next_state(next_state, classification_result)
-        # else:
-        #     # For response states, classify if needed
-        #     if current_state in ["Waiting_User_Input", "Waiting_User_Response_to_Thought"]:
-        #         classification_result = classify_user_message(user_message, article, current_state)
-        #
-        #     next_state = determine_next_state(current_state, classification_result)
-        #
-        #     # Generate prompt based on CURRENT state for response states
-        #     prompt = generate_prompt_for_state(
-        #         current_state,
-        #         user_message,
-        #         article,
-        #         prev_chain_of_thought,
-        #         stored_messages,
-        #         classification_result
-        #     )
-
-        if current_state in ["Waiting_User_Input", "Waiting_User_Response_to_Thought"]:
+        if current_state in ["Waiting_User_Input"]:
             classification_result = classify_user_message(user_message, article, current_state)
             next_state = determine_next_state(current_state, classification_result)
 
@@ -552,12 +537,6 @@ def outputSQLQuery(form):
             assistant_message = "I'm sorry, I'm having trouble processing your request right now. Please try again later."
             next_state = current_state  # Maintain current state on error
 
-        # Step 3: Extract thought analysis if applicable
-        if current_state == "User_Interpretive_Question" or next_state == "User_Interpretive_Question":
-            thought_analysis = extract_thought_analysis(assistant_message)
-            if thought_analysis:
-                prev_chain_of_thought["thought_analysis"] = thought_analysis
-
         # Step 4: Clean response for user display
         cleaned_response = clean_response(assistant_message)
 
@@ -570,8 +549,12 @@ def outputSQLQuery(form):
         category = None
         if isinstance(classification_result, dict):
             category = classification_result.get("category")
-        # elif "category" in prev_chain_of_thought:
-        #     category = prev_chain_of_thought["category"]
+        elif "category" in prev_chain_of_thought:
+            category = prev_chain_of_thought["category"]
+
+        classification = None
+        if isinstance(classification_result, dict):
+            classification = classification_result.get("category")
 
         # Step 7: Update chain of thought with NEXT state
         chain_of_thought = {
@@ -583,12 +566,8 @@ def outputSQLQuery(form):
         if category is not None:
             chain_of_thought["category"] = category
 
-        # Preserve thought analysis if present
-        if "thought_analysis" in prev_chain_of_thought:
-            chain_of_thought["thought_analysis"] = prev_chain_of_thought["thought_analysis"]
-
         # Format category for frontend
-        category_value = str(category) if category is not None else ""
+        category_value = str(classification) if classification is not None else ""
 
         if "######" in cleaned_response:
             cleaned_response = cleaned_response.split("######")
@@ -634,4 +613,3 @@ except Exception as e:
         "error": str(e),
         "trace": traceback.format_exc().splitlines()
     }, indent=4))
-
