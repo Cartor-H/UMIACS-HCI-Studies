@@ -279,6 +279,20 @@ function addMessageLeft (message) {
         '</div>';
 }
 
+function addTypingAlertLeft() {
+    document.getElementById("chatWindow").innerHTML += `
+        <div class="card left-color mb-3" id="typingAlertLeft" style="display: inline-block; animation: pulse 1.5s infinite; transform-origin: left;">
+            <div class="card-body pt-2 pb-2">
+                <strong>. . .</strong>
+            </div>
+        </div>
+        `
+    }
+
+function removeTypingAlertLeft() {
+    document.getElementById("typingAlertLeft").remove();
+}
+
 // function addMessagesLeft (messages) {
 //     for (let i = 0; i < messages.length; i++) {
 
@@ -480,7 +494,8 @@ function sendMessageToChatBot(message) {
     // Commented Out For Now - Bc Not Implemented Yet //
 
     gptRespondMessage(message);
-    document.getElementById("typingAlert").hidden = false
+    // document.getElementById("typingAlert").hidden = false
+    addTypingAlertLeft();
 
     // let context, classification = classifyMessage(message);
     
@@ -515,7 +530,8 @@ function gptRespondMessage(message) {
             chainOfThought: JSON.stringify(chainOfThought)
         },
         success: function (data) {
-            document.getElementById("typingAlert").hidden = true
+            // document.getElementById("typingAlert").hidden = true
+            removeTypingAlertLeft();
 
             data = JSON.parse(data["Data"])
 
@@ -524,8 +540,11 @@ function gptRespondMessage(message) {
             let responses = data["response"]
 
             for (let i = 0; i < responses.length; i++) {
-                addMessageLeft(responses[i]);
-                saveMessage(responses[i], "ChatBot")
+                setTimeout(function() {
+                    addMessageLeft(responses[i]);
+                    saveMessage(responses[i], "ChatBot");
+                    scrollBottom();
+                }, i * 500);
             }
             
             //Save Chain Of Thought
