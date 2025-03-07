@@ -175,7 +175,7 @@ In your response, use "######" to separate the different parts. Put your respons
 """
 
     elif state == "Waiting_User_First_Response_to_Thought":
-        category = prev_chain_of_thought.get('category', classification_result.get('category', 6))
+        # category = prev_chain_of_thought.get['category']
 
         return f"""You've shared a thought with the user about the news article, and they've responded.
 
@@ -184,7 +184,7 @@ In your response, use "######" to separate the different parts. Put your respons
 Previous conversation: "{conversation_context}"
 User's current response: "{user_message}"
 
-I've classified their response as Category: {category}
+I've classified their response as Category: {6}
 
 - If the user responded by saying that your thought makes sense to them or that they agree with your thought, respond based on the condition below:
 	- If the user's initial question/request/interest was Category 3 or Category 6, you will ask them whether they would like to explore an alternative perspective with you with one to two examples perspectives.
