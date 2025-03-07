@@ -165,8 +165,14 @@ function onLoad(){
         });
     }
 
-    // Call GPT
-    sendMessageToChatBot("")
+    // Wait until chainOfThought and article are not null
+    let checkDataInterval = setInterval(function() {
+        if (chainOfThought && Object.keys(chainOfThought).length !== 0 && article && Object.keys(article).length !== 0) {
+            clearInterval(checkDataInterval);
+            // Call GPT
+            sendMessageToChatBot("");
+        }
+    }, 100);
 
     // Focus on text input area
     document.getElementById("message").focus();
