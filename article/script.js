@@ -153,7 +153,8 @@ function onLoad(){
             data: {articleID: articleID, userID: userID},
             success: function (data) {
                 if (data["Status"] == "Success") {
-                    chainOfThought = JSON.parse(data["Data"])[0]
+                    chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
+                    console.log(chainOfThought)
                 } else {
                     console.log("No Data, Starting New Chain Of Thought");
                 }
@@ -167,7 +168,7 @@ function onLoad(){
 
     // Wait until chainOfThought and article are not null
     let checkDataInterval = setInterval(function() {
-        if (chainOfThought && Object.keys(chainOfThought).length !== 0 && article && Object.keys(article).length !== 0) {
+        if (chainOfThought && Object.keys(chainOfThought).length == 0 && article && Object.keys(article).length !== 0) {
             clearInterval(checkDataInterval);
             // Call GPT
             sendMessageToChatBot("");
@@ -539,25 +540,28 @@ function gptRespondMessage(message) {
             // document.getElementById("typingAlert").hidden = true
             removeTypingAlertLeft();
 
-            data = JSON.parse(data["Data"])
+            if (data["Status"] == "Success") {
 
-            chainOfThought = data["chainOfThought"]
-            let classification = data["classification"]
-            let responses = data["response"]
+                data = JSON.parse(data["Data"])
 
-            for (let i = 0; i < responses.length; i++) {
-                setTimeout(function() {
-                    addMessageLeft(responses[i]);
-                    saveMessage(responses[i], "ChatBot");
-                    scrollBottom();
-                }, i * 500);
+                chainOfThought = data["chainOfThought"]
+                let classification = data["classification"]
+                let responses = data["response"]
+
+                for (let i = 0; i < responses.length; i++) {
+                    setTimeout(function() {
+                        addMessageLeft(responses[i]);
+                        saveMessage(responses[i], "ChatBot");
+                        scrollBottom();
+                    }, i * 500);
+                }
+                
+                //Save Chain Of Thought
+                saveChainOfThought();
+
+                // saveClassification(message, classification)
+                scrollBottom();
             }
-            
-            //Save Chain Of Thought
-            saveChainOfThought();
-
-            // saveClassification(message, classification)
-            scrollBottom();
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             alert("Status: " + textStatus);
