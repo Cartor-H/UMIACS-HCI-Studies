@@ -127,6 +127,14 @@ Determine which type of statement this is and respond accordingly:
 - If a comment or personal opinion about the article: 1) Acknowledge their opinion and 2) ask what makes them think this way. Put these two things in two separate paragraphs.
 - If referring to specific content without personal opinion: Ask if they'd like to know anything about this text.
 - If not relevant to the person or article: 1) Politely explain you don't understand and 2) ask them to rephrase. Put these two things in two separate paragraphs.
+
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
 
     elif state == "User_Literal_Question":
@@ -143,7 +151,13 @@ Category: {category} (1=word explanation, 2=summary)
 1. Provide a clear, informative answer to the user's question.
 2. Then, ask if they are interested in discussing the news content further, suggesting possible topics from the article they might want to explore.
 
-In your response, use "######" to separate the two parts. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
 
     elif state == "User_Factual_Question":
@@ -157,7 +171,13 @@ User's question: "{user_message}"
 1. Provide an answer and specify whether the information you provide is from the news article itself or from the other sources. 
 2. Ask the user what prompted them to be interested in this factual information, e.g., if they wanted to know how this factual information may be [explanation, implication, interpetation] of [topic, social issue, or concepts] of the news article, or if there's anything relevant to their life they would like to know about?
 
-In your response, use "######" to separate the two parts. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
 
     elif state == "User_Interpretive_Question":
@@ -184,9 +204,15 @@ Step 2: Generate a follow-up to the user based on the Category of the user messa
 - For Category 5 message: Explain to the user that their original [question, request, or interest] probably goes beyond the scope of the article. You have presented them with an answer based on the article itself, and you can continue exploring the interpretation by considering information and perspectives beyond the news article. But before you proceed, you would like to see if your current thought makes sense to them.
 - For Category 6 message: Explain to the user that their original [question, request, or interset] is persoanlly relevant so the answer may differ for different people. You have presented them with a generic answer based on what you know from the article. You would like to see if the user wants to share some of their background information to get a more personalized answer.
 
-Step 3: Respond to the user with two things: 1) your [Thought] and [Information] only from Step 1, and 2) your follow-up to the user from step 2.
+Step 3: Respond to the user with three parts: 1) your [Thought] from step 1, 2) your [Information] from Step 1, and 3) your follow-up to the user from step 2.
 
-In your response, use "######" to separate the different parts. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
 
     elif state == "Waiting_User_First_Response_to_Thought":
@@ -198,22 +224,33 @@ In your response, use "######" to separate the different parts. Put your respons
 
 Previous conversation: "{conversation_context}"
 User's current response: "{user_message}"
+I've already classified user current response as a {classification_result} type message.
 
-I've classified their response as Category: {category}
+User initial question/request/interest Category: {category}
 
-- If the user responded by saying that your thought makes sense to them or that they agree with your thought, respond based on the condition below:
-	- If the user's initial question/request/interest was Category 3 or Category 6, you will ask them whether they would like to explore an alternative perspective with you with one to two examples perspectives.
-	- If the user's initial question/request/interest was a Category 5, you will 1) generate an updated [Thought] by considering factual information or perspectives beyond the scope of the article and explain the new information or perspectives you have considered in this thought, and 2) ask whether the thought makes sense to the user.
+- If the user asks the meaning of one or more word, respond with two parts: 1) an explanation of the word(s), and 2) ask the user if your idea makes sense to them or not. 
+- If the user signals non-understanding (e.g., "I don't understand", "Could you explain again"), respond with two parts: 1) acknowledge the user request and explain your previous message if necessary, and 2) ask the user if your idea makes sense to them or not.
+- If the user gives you an instruction (e.g., "Please use simpler language", "make your answer shorter"), respond with two parts: 1) acknowledge the user request and rephrase your last message to the user, and 2) ask the user if your idea makes sense to them or not.
+
+- If the user responded by acknowledging your message (e.g., "Oh, okay", "thank you for the information") or indicating their acceptance of your thought (e.g., "yes it makes sense to me", "I agree with you"), respond based on the condition below:
+   - If the user's initial question/request/interest was Category 3 or Category 6, you will ask them whether they would like to explore an alternative perspective with you with one to two examples perspectives.
+   - If the user's initial question/request/interest was a Category 5, you will respond with two parts: 1) generate an updated [Thought] by considering factual information or perspectives beyond the scope of the article and explain the new information or perspectives you have considered in this thought, and 2) ask whether this idea makes sense to the user.
 
 - If the user responded by saying that your thought does not make sense to them or they disagree with you: respond by telling them that you are curious to what part of your thought they find confusing or they do not agree with you and invite them to share their thought, opinion, or interpretations.
 
 - If the user's response indicated an ambiguous attitude, e.g., "I'm not sure", "I don't know": respond by telling them that you are curious to learn what made them feel so, e.g., what part of your answer they are unclear about, and invite them to share their thought, opinion, or interpretations.
 
-- If the user responded by asking you questions about your answer or asking you to clarify your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) if this explanation makes sense to them or not. 
+- If the user responded by asking you questions about your answer or asking you to elaborate on your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) ask if this explanation makes sense to them or not.
 
-- If the user's response do not belong to any of these categories, proceed to the <End_state> without providing a response here. 
+- If the user's response does not belong to any of these categories, proceed to the next state without providing a response here.
 
-In your response, use "######" to separate each numbered part. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
     elif state == "Waiting_User_Second_Response_to_Thought":
         return f"""You've shared a thought with the user about the news article, and they've responded.
@@ -222,30 +259,43 @@ In your response, use "######" to separate each numbered part. Put your response
 
         Previous conversation: "{conversation_context}"
         User's current response: "{user_message}"
+        I've already classified user current response as a {classification_result} type message.
 
-        - If the user said that your response makes sense to them, respond by asking if they would like to explore an alternative perspecitve to interpret their original question and provide example new perspectives.
+        - If the user asks the meaning of one or more word, respond with two parts: 1) an explanation of the word(s), and 2) ask the user if your idea makes sense to them or not.
 
-        - If the user responded by saying that your thought does not make sense to them or they disagree with you: respond by telling them that you are curious to what part of your thought they find confusing or they do not agree with you and invite them to share their thought, opinion, or interpretations.
-        
-        - If the user's response indicated an ambiguous attitude, e.g., "I'm not sure", "I don't know": respond by telling them that you are curious to learn what made them feel so, e.g., what part of your answer they are unclear about, and invite them to share their thought, opinion, or interpretations.
-        
-        - If the user responded by asking you questions about your answer or asking you to clarify your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) if this explanation makes sense to them or not. 
-        
-        - If the user provided additional factual information relevant to themselves or from other sources: respond by 1) acknolwedging the user's input and sharing an updated [Thought] that incorporates the information or perspectives conveyed in the user message, and 2) asking whether the new thought makes sense to the user. 
-        
-        - If the user responded by sharing their personal thought, follow these steps:
-            - Step 1: compare your thought with the user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
-            - Step 2: respond to the user with three things: 1) acknolwedge their thought, 2) share your comparision of your thought and the user's thought, 3) ask whether the user has additional thoughts or questions given the differences or similarities in your thoughts. 
-        
-        - If the user responded by asking to explore alternative perspective: respond with two things: 1) explain the assumptions that are underlying the current thought and how the thought would change if the assumptions do not hold true, and 2) explain the point-of-view from which the current thought seems to be from, and 3) ask if the user would like to explore an alternative perspective with two examples that explore different assumptions or point-of-views.
-        
-        If the user responded by sharing a specific point-of-view they would like to explore, follow these steps:
-            - Step 1: consider alternative factual information relevant to this new point-of-view.
-            - Step 2: respond to the user with three things: 1) explain to them that shifting a point-of-view require them to re-examine the information context and provide an updated [Information] to user from the article or external sources, 2) share an updated [Thought] based on the new point-of-view and information context, and 3) ask the user if the thought makes sense to the user and invite them to ask follow-up questions.
-        
-        - If the user's response do not belong to any of these categories, proceed to the next state without providing a response here. 
-        
-        In your response, use "######" to separate each numbered part. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
+- If the user signals non-understanding (e.g., "I don't understand", "Could you explain again"), respond with two parts: 1) acknowledge the user request and explain your previous message if necessary, and 2) ask the user if your idea makes sense to them or not.
+
+- If the user gives you an instruction (e.g., "Please use simpler language", "make your answer shorter"), respond with two parts: 1) acknowledge the user request and rephrase your last message to the user, and 2) ask the user if your idea makes sense to them or not.
+
+- If the user responded by acknowledging your message (e.g., "Oh, okay", "thank you for the information") or indicating their acceptance of your thought (e.g., "yes it makes sense to me", "I agree with you"), respond by asking if they would like to explore an alternative perspective to interpret their original question and provide example new perspectives.
+
+- If the user responded by saying that your thought does not make sense to them or they disagree with you: respond by telling them that you are curious to what part of your thought they find confusing or they do not agree with you and invite them to share their thought, opinion, or interpretations.
+
+- If the user's response indicated an ambiguous attitude, e.g., "I'm not sure", "I don't know": respond by telling them that you are curious to learn what made them feel so, e.g., what part of your answer they are unclear about, and invite them to share their thought, opinion, or interpretations.
+
+- If the user responded by asking you questions about your answer or asking you to elaborate on your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond with two parts: 1) provide an answer to the user, and 2) ask if this explanation makes sense to them or not.
+
+- If the user provided additional factual information relevant to themselves or from other sources: respond with two parts: 1) acknowledging the user's input and sharing an updated [Thought] that incorporates the information or perspectives conveyed in the user message, and 2) asking whether the new thought makes sense to the user.
+
+- If the user responded by sharing their personal thought, follow these steps:
+	- Step 1: compare your thought with the user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
+	- Step 2: respond to the user with two parts: 1) acknowledge their thought and share your comparison of your thought and the user's thought, 2) ask whether the user has additional thoughts or questions given the differences or similarities in your thoughts.
+
+- If the user responded by asking to explore alternative perspective: respond with two parts: 1) explain the point-of-view from which the current thought is based upon and any potential assumptions, and 2) ask if the user would like to explore an alternative perspective that's from a different point-of-view or have different assumptions with two examples.
+
+If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
+	- Step 1: update your thought accordingly and incorporating different factual information if necessary.
+	- Step 2: respond to the user with three parts: 1) share your updated [Thought] based on the new point-of-view, 2) provide an updated [Information] to user from the article or external sources and explain to them that shifting perspectives require examining a different information context, 3) ask the user if the thought makes sense to the user.
+
+- If the user's response do not belong to any of these categories, proceed to the next state without providing a response here.
+
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
     elif state == "Waiting_User_Third_Response_to_Thought":
         return f"""You've shared a thought with the user about the news article, and they've responded.
@@ -254,25 +304,39 @@ In your response, use "######" to separate each numbered part. Put your response
 
     Previous conversation: "{conversation_context}"
     User's current response: "{user_message}"
+    I've already classified user current response as a {classification_result} type message.
 
-    - If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
-        - Step 1: consider alternative factual information relevant to this new point-of-view or perspective.
-        - Step 2: respond to the user with three things: 1) explain to them that shifting a point-of-view or prespective require them to re-examine the information context and provide an updated [Information] to user from the article or external sources, 2) share an updated [Thought] based on the new point-of-view and information context, and 3) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
-    
-    - If the user responded by sharing their personal thought, follow these steps:
-        - Step 1: compare your thought with the user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
-        - Step 2: respond to the user with three things: 1) acknolwedge their thought, 2) share your comparision of your thought and the user's thought, 3) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
-    
-    - If the user responded by saying that your thought doesn't make sense to them, respond with two things: 1) acknowledge their response, 2) explain to them they you seem to have been discussing this quesiton for a while and it may be helpful for you and the user to explore some alternative questions together and get a better sense of the issue; with example alternative questions that are relevant to the core concepts you are discussing for the user to consider.
-    
-    - If the user responded by saying that they are good with this question or not wanting to discuss any further, ask the user if there's any other questions they would like to discuss. 
-    
-    - If the user responded by saying that they agree with what you have shared or your thought makes sense to them, ask the user if there's any other questions they would like to discuss.
-    
-    - If the user's response do not belong to the above conditions, proceed to the <End_state> without providing a response here.
-    
-    In your response, use "######" to separate each numbered part, if any. Put your response into natural language pragraphs without displaying the words "Thought" and "Information" to the user. Your response should written as if you are text messaging with friends but AVOID using slangs. Your language should be understandable to a high-school graduate in the U.S.
-"""
+- If the user asks the meaning of one or more word, respond with two parts: 1) an explanation of the word(s), and 2) ask the user if your idea makes sense to them or not.
+
+- If the user signals non-understanding (e.g., "I don't understand", "Could you explain again"), respond with two parts: 1) acknowledge the user request and explain your previous message if necessary, and 2) ask the user if your idea makes sense to them or not.
+
+- If the user gives you an instruction (e.g., "Please use simpler language", "make your answer shorter"), respond with two parts: 1) acknowledge the user request and rephrase your last message to the user, and 2) ask the user if your idea makes sense to them or not.
+
+If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
+	- Step 1: update your thought accordingly and incorporating different factual information if necessary.
+	- Step 2: respond to the user with three parts: 1) share your updated [Thought] based on the new point-of-view, 2) provide an updated [Information] to user from the article or external sources and explain to them that shifting perspectives require examining a different information context, 3) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
+
+- If the user responded by sharing their personal thought, follow these steps:
+	- Step 1: summarize your thought and user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
+	- Step 2: respond to the user with two parts: 1) acknowledge their thought and summarize the thoughts shared by both of you, 2) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
+
+- If the user responded by saying that your thought doesn't make sense to them, respond with two parts: 1) acknowledge their response, 2) explain to them they you seem to have been discussing this question for a while and it may be helpful for you and the user to explore some alternative questions together and get a better sense of the issue; with example alternative questions that are relevant to the core concepts you are discussing for the user to consider.
+
+- If the user responded by saying that they are good with this question or not wanting to discuss any further, ask the user if there's any other questions they would like to discuss.
+
+- If the user responded by acknowledging your message (e.g., "Oh, okay", "thank you for the information") or indicating their acceptance of your thought (e.g., "yes it makes sense to me", "I agree with you"), ask the user if there's any other questions they would like to discuss.
+
+- If the user responded by asking you questions about your answer or asking you to elaborate on your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond with two parts: 1) provide an answer to the user, and 2) suggest to the user to discuss another perspective or question given that the two of you have discussed this question for a while.
+
+- If the user's response do not belong to the above conditions, proceed to the next state without providing a response here.
+
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response"""
     else:
         # Default prompt for any unhandled state
         return f"""You are a news reading assistant helping a user engage with a news article.
@@ -327,13 +391,35 @@ def determine_next_state(current_state, classification_result):
         return "Waiting_User_First_Response_to_Thought"
 
     elif current_state == "Waiting_User_First_Response_to_Thought":
-        return "Waiting_User_Second_Response_to_Thought"
+        if classification_result in ["word_meaning", "non_understanding", "instruction"]:
+            return "Waiting_User_First_Response_to_Thought"
+
+        elif classification_result in ["positive_acknowledgement", "disagreement", "ambiguous", "question"]:
+            return "Waiting_User_Second_Response_to_Thought"
+
+        elif classification_result in ['other']:  # "other" or any unhandled type
+            return "Waiting_User_Input"
+
+        else:
+            return "Waiting_User_First_Response_to_Thought"
 
     elif current_state == "Waiting_User_Second_Response_to_Thought":
-        return "Waiting_User_Third_Response_to_Thought"
+        if classification_result in ["word_meaning", "non_understanding", "instruction"]:
+            return "Waiting_User_Second_Response_to_Thought"
+        elif classification_result in ["positive_acknowledgement", "disagreement", "ambiguous",
+                                       "question", "additional_info", "personal_thought",
+                                       "request_alternative", "specific_perspective"]:
+            return "Waiting_User_Third_Response_to_Thought"
+        elif classification_result in ['other']:
+            return "Waiting_User_Input"
+        else:
+            return "Waiting_User_Second_Response_to_Thought"
 
     elif current_state == "Waiting_User_Third_Response_to_Thought":
-        return "Waiting_User_Input"
+        if classification_result in ["word_meaning", "non_understanding", "instruction"]:
+            return "Waiting_User_Third_Response_to_Thought"
+        else:
+            return "Waiting_User_Input"
 
     elif current_state == "Chatbot_Follow-up":
         return "Waiting_User_Input"
@@ -374,6 +460,70 @@ def classify_user_message(user_message, article, state):
         "acknowledgement", "non_understanding", "instruction", "conversation_end", \
         "question_or_interest" or "statement"
         """
+    elif state == "Waiting_User_First_Response_to_Thought":
+        # New classification prompt for Waiting_User_First_Response_to_Thought state
+        classification_prompt = f"""
+            Classify this user response about a thought shared with them into exactly one of these categories:
+            - "word_meaning": the user asks about the meaning of one or more words
+            - "non_understanding": the user signals they don't understand or need clarification
+            - "instruction": the user gives a specific instruction about how you should respond
+            - "positive_acknowledgement": the user acknowledges your message positively or agrees with your thought
+            - "disagreement": the user says your thought doesn't make sense or they disagree with you
+            - "ambiguous": the user expresses uncertainty or ambivalence about your thought
+            - "question": the user asks you a question about your answer or asks for elaboration
+            - "other": the user's response doesn't fit into any of the above categories
+
+            NEWS ARTICLE TITLE: {article["Title"]}
+            USER MESSAGE: "{user_message}"
+
+            RESPOND WITH ONLY ONE WORD: "word_meaning", "non_understanding", "instruction", "positive_acknowledgement", \
+            "disagreement", "ambiguous", "question" or "other".
+            """
+    elif state == "Waiting_User_Second_Response_to_Thought":
+        # New classification prompt for second response
+        classification_prompt = f"""
+            Classify this user response into exactly one of these categories:
+            - "word_meaning": the user asks about the meaning of one or more words
+            - "non_understanding": the user signals they don't understand or need clarification
+            - "instruction": the user gives a specific instruction about how you should respond
+            - "positive_acknowledgement": the user acknowledges your message positively or agrees with your thought
+            - "disagreement": the user says your thought doesn't make sense or they disagree with you
+            - "ambiguous": the user expresses uncertainty or ambivalence about your thought
+            - "question": the user asks you a question about your answer or asks for elaboration
+            - "additional_info": the user provides additional factual information relevant to themselves or from other sources
+            - "personal_thought": the user shares their own personal thought or opinion
+            - "request_alternative": the user asks to explore alternative perspectives
+            - "specific_perspective": the user shares a specific point-of-view or perspective they want to explore
+            - "other": the user's response doesn't fit into any of the above categories
+
+            NEWS ARTICLE TITLE: {article["Title"]}
+            USER MESSAGE: "{user_message}"
+
+            RESPOND WITH ONLY ONE WORD: "word_meaning", "non_understanding", "instruction", "positive_acknowledgement", \
+            "disagreement", "ambiguous", "question", "additional_info", "personal_thought", "request_alternative", \
+            "specific_perspective", or "other".
+            """
+    elif state == "Waiting_User_Third_Response_to_Thought":
+        # New classification prompt for third response
+        classification_prompt = f"""
+            Classify this user response into exactly one of these categories:
+            - "word_meaning": the user asks about the meaning of one or more words
+            - "non_understanding": the user signals they don't understand or need clarification
+            - "instruction": the user gives a specific instruction about how you should respond
+            - "specific_perspective": the user shares a specific point-of-view or perspective they want to explore
+            - "personal_thought": the user shares their own personal thought or opinion
+            - "disagreement": the user says your thought doesn't make sense or they disagree with you
+            - "satisfaction": the user says they are good with this question or don't want to discuss further
+            - "positive_acknowledgement": the user acknowledges your message positively or agrees with your thought
+            - "question": the user asks you a question about your answer or asks for elaboration
+            - "other": the user's response doesn't fit into any of the above categories
+
+            NEWS ARTICLE TITLE: {article["Title"]}
+            USER MESSAGE: "{user_message}"
+
+            RESPOND WITH ONLY ONE WORD: "word_meaning", "non_understanding", "instruction", "specific_perspective", \
+            "personal_thought", "disagreement", "satisfaction", "positive_acknowledgement", "question", or "other".
+            """
     elif state == "User_Question_Processing":
         # Classify question type into categories 1-6
         classification_prompt = f"""You are a classifier. You will be given a news article and a message discussing that article. Your task is to classify the message into one of seven possible categories by following a two-step process.
@@ -466,6 +616,10 @@ Response:
                 return "question_or_interest"
             elif state == "User_Question_Processing":
                 return {"category": 4}
+            elif state in ["Waiting_User_First_Response_to_Thought",
+                           "Waiting_User_Second_Response_to_Thought",
+                           "Waiting_User_Third_Response_to_Thought"]:
+                return "word_meaning"
 
     return None
 
@@ -514,6 +668,14 @@ def outputSQLQuery(form):
 
         # Step 1: Process current state
         classification_result = None
+
+        # Check the next state of thought states
+        for current_state in ['Waiting_User_First_Response_to_Thought', 'Waiting_User_Second_Response_to_Thought',
+                              'Waiting_User_Third_Response_to_Thought']:
+            classification_result = classify_user_message(user_message, article, current_state)
+            next_state = determine_next_state(current_state, classification_result)
+            if next_state == "Waiting_User_Input":
+                current_state = "Waiting_User_Input"
 
         if current_state in ["Waiting_User_Input"]:
             classification_result = classify_user_message(user_message, article, current_state)
