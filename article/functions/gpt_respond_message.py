@@ -92,11 +92,26 @@ The user has just said: "{user_message}"
 
 I've already classified this as a {classification_result} type message.
 
-Provide a helpful response based on this message type:
-- If coordination: Acknowledge and ask what they'd like to discuss about the article.
-- If conversation end: Thank them and let them know they can return to resume the discussion.
+- If the user sends "1" or a statement asking for word explanation without mentioning a specific word, ask them what words they would like to know.
+- If the user sends "2" or a similar statement asking for text summary, respond with two parts: 1) provide your summary of the article, and 2) ask them if they are interested in discussing the news content with you, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about.
+- If the user sends "3" or a statement saying that they are interested in discussing the news content with you, ask if they have any questions in mind about this article, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about.
 
-Your response should be conversational and encouraging further engagement with the article.
+- If the user sends a specific word, respond with two parts: \
+1) provide explanation, 2) ask them if they are interested in discussing the news content with you, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about.
+
+- If the user sends an acknowledgement or thanks to you (e.g., "Oh, okay", "thank you for the information"), acknowledge the user and ask them if there is anything about the article they would like to discuss.
+- If the user signals non-understanding (e.g., "I don't understand", "Could you explain again"), respond with two parts: 1) acknowledge the user request and explain your previous message if necessary, and 2) ask the user if there is anything about the article they would like to discuss.
+- If the user gives you an instruction (e.g., "Please use simpler language", "make your answer shorter"), respond with two parts: 1) acknowledge the user request and rephrase your last message to the user, and 2) ask the user if there is anything about the article they would like to discuss.
+
+- If the user sends a message that indicates they are done with the discussion, e.g., "it's been nice talking to you", "I'm done with my questions", end the conversation by 1) thanking them for discussion with you, and 2) letting them know they can return to resume discussion if wanted.
+
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+2. Limit each part of your response to 150 words. 
+3. Write the response following the rules but in your own words
+4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
+5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+6. Do NOT add more follow-ups in your response
 """
 
     elif state == "Chatbot_Follow-up":
