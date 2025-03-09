@@ -279,14 +279,15 @@ def determine_next_state(current_state, classification_result):
         return "Waiting_User_Input"
 
     elif current_state == "Waiting_User_Input":
-        if classification_result == "question_or_interest":
-            return "User_Question_Processing"
-        elif classification_result == "statement":
-            return "Chatbot_Follow-up"
-        elif classification_result == "coordination":
+        if classification_result in ["option_1", "option_2", "option_3", "specific_word", "acknowledgement",
+                                     "non_understanding", "instruction"]:
             return "Waiting_User_Input"
         elif classification_result == "conversation_end":
             return "Conversation_End"
+        elif classification_result == "question_or_interest":
+            return "User_Question_Processing"
+        elif classification_result == "statement":
+            return "Chatbot_Follow-up"
         else:
             return "Waiting_User_Input"
 
@@ -340,15 +341,23 @@ def classify_user_message(user_message, article, state):
         # Classify message type: question, statement, coordination, or conversation end
         classification_prompt = f"""
         Classify this user message about a news article into one of these categories:
-        - "question_or_interest": a question or expression of interest to discuss content
-        - "statement": a statement without a clear question or request
-        - "coordination": instructions, greetings, acknowledgements to coordinate the conversation with you, such as "thank you", "can you clarify?", "can you answer in shorter texts?", "please use simpler words"
-        - "conversation_end": indication that the user has finished the discussion
+        - "option_1": the user sends "1" or asks for word explanation without specifying a word
+        - "option_2": the user sends "2" or asks for a summary of the article
+        - "option_3": the user sends "3" or expresses interest in discussing the article
+        - "specific_word": the user asks about a specific word from the article
+        - "acknowledgement": the user sends a thank you or acknowledgement
+        - "non_understanding": the user indicates they don't understand or asks for clarification
+        - "instruction": the user gives a specific instruction about how to respond
+        - "conversation_end": the user indicates they're done with the discussion
+        - "question_or_interest": the user asks a substantive question about the article or expresses interest in discussing a specific topic
+        - "statement": the user makes a statement that doesn't fit any of the above categories
 
         NEWS ARTICLE TITLE: {article["Title"]}
         USER MESSAGE: "{user_message}"
 
-        RESPOND WITH ONLY ONE WORD: "question_or_interest", "statement", "coordination", or "conversation_end"
+        RESPOND WITH ONLY ONE WORD: "option_1", "option_2", "option_3", "specific_word", \
+        "acknowledgement", "non_understanding", "instruction", "conversation_end", \
+        "question_or_interest" or "statement"
         """
     elif state == "User_Question_Processing":
         # Classify question type into categories 1-6
@@ -587,7 +596,7 @@ def outputSQLQuery(form):
             "chainOfThought": chain_of_thought,
             "classification": category_value
         })
-        
+
         print(json.dumps({
             "Status": "Success",
             "Data": data
