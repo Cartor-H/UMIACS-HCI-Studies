@@ -647,7 +647,7 @@ def outputSQLQuery(form):
         if 'message' in form:
             user_message = form["message"]
         else:
-            user_message = 'hello'
+            user_message = ""
 
         article = json.loads(form["article"])
 
@@ -658,6 +658,11 @@ def outputSQLQuery(form):
                 prev_chain_of_thought = {"state": "beginning", "messages": []}
         except:
             prev_chain_of_thought = {"state": "beginning", "messages": []}
+
+        # if not user_message:
+        #     prev_chain_of_thought = {"state": "beginning", "messages": []}
+        # else:
+        #     prev_chain_of_thought = json.loads(form["chainOfThought"])
 
         # Get current state and conversation history
         current_state = prev_chain_of_thought.get("state", "beginning")
