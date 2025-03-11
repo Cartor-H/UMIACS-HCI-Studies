@@ -2,7 +2,7 @@
 let articleID = "-1";
 let userID = "-1";
 
-let chainOfThought = {};
+let chainOfThought = null;
 let article = {};
 
 
@@ -168,7 +168,7 @@ function onLoad(){
 
     // Wait until chainOfThought and article are not null
     let checkDataInterval = setInterval(function() {
-        if (chainOfThought && Object.keys(chainOfThought).length == 0 && article && Object.keys(article).length !== 0) {
+        if (chainOfThought && article && Object.keys(article).length !== 0) {
             clearInterval(checkDataInterval);
             // Call GPT
             sendMessageToChatBot("");
