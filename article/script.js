@@ -149,12 +149,12 @@ function onLoad(){
             clearInterval(checkDataInterval);
             
             // Ensure Chain Of Thought is null for first message.
-            let tempCOT = chainOfThought
+            // let tempCOT = chainOfThought
             chainOfThought = null;
             // Call GPT
             sendMessageToChatBot("");
 
-            chainOfThought = tempCOT;
+            // chainOfThought = tempCOT;
         }
     }, 100);
 
