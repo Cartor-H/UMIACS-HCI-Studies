@@ -143,6 +143,21 @@ function onLoad(){
         });
     }
 
+    // Wait until chainOfThought and article are not null
+    let checkDataInterval = setInterval(function() {
+        if (article && Object.keys(article).length !== 0) {
+            clearInterval(checkDataInterval);
+            
+            // Ensure Chain Of Thought is null for first message.
+            let tempCOT = chainOfThought
+            chainOfThought = null;
+            // Call GPT
+            sendMessageToChatBot("");
+
+            chainOfThought = tempCOT;
+        }
+    }, 100);
+
     // Retreive Previous Chain Of Thought
     if(articleID && userID && articleID!="" && userID!="") {
         $.ajax({
@@ -165,15 +180,6 @@ function onLoad(){
             }
         });
     }
-
-    // Wait until chainOfThought and article are not null
-    let checkDataInterval = setInterval(function() {
-        if (chainOfThought && article && Object.keys(article).length !== 0) {
-            clearInterval(checkDataInterval);
-            // Call GPT
-            sendMessageToChatBot("");
-        }
-    }, 100);
 
     // Focus on text input area
     document.getElementById("message").focus();
