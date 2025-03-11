@@ -670,8 +670,8 @@ def outputSQLQuery(form):
         classification_result = None
 
         # Check the next state of thought states
-        for current_state in ['Waiting_User_First_Response_to_Thought', 'Waiting_User_Second_Response_to_Thought',
-                              'Waiting_User_Third_Response_to_Thought']:
+        if current_state in ['Waiting_User_First_Response_to_Thought', 'Waiting_User_Second_Response_to_Thought',
+                             'Waiting_User_Third_Response_to_Thought']:
             classification_result = classify_user_message(user_message, article, current_state)
             next_state = determine_next_state(current_state, classification_result)
             if next_state == "Waiting_User_Input":
