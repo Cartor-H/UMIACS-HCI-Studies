@@ -774,6 +774,12 @@ def outputSQLQuery(form):
             "classification": category_value
         })
 
+        # data = json.dumps({
+        #     "response": ['hello', current_state],
+        #     "chainOfThought": chain_of_thought,
+        #     "classification": category_value
+        # })
+
         print(json.dumps({
             "Status": "Success",
             "Data": data
