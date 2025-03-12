@@ -187,12 +187,12 @@ CREATE TABLE ChainOfThought (
 -- Table `Articles`
 -- ID	int
 -- Title	nvarchar
--- Published_Date	datetime2
+-- Published_Date	datetime2 -- When the article was initially published
 -- Description	nvarchar
 -- Image_ID	nvarchar
 -- Content	nvarchar
 -- Author	nvarchar
--- Added_Date	datetime2
+-- Added_Date	datetime2 -- When Yimin added the article
 -- Category	nvarchar
 
 
