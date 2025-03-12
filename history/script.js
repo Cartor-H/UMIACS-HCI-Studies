@@ -5,9 +5,6 @@ let userID = "-1";
 let chainOfThought = null;
 let article = {};
 
-messageCount = 0;
-messageIDs = {};
-
 
 //---------------------------------------------------Send Message-----------------------------------------------------//
 
@@ -25,13 +22,11 @@ function clientSendMsg() {
         //Show Message Locally
         addMessageRight(message);
 
-        //Add Message To SQL Server
-        saveMessage(message, "Client", messageCount);
-
         //Send Message to ChatBot
-        sendMessageToChatBot(message, messageCount);
+        sendMessageToChatBot(message);
 
-        messageCount = messageCount + 1;
+        //Add Message To SQL Server
+        saveMessage(message, "Client");
 
         //Clear Message and Scroll to Bottom
         document.getElementById("message").innerText = ""
@@ -40,9 +35,8 @@ function clientSendMsg() {
 }
 
 //---------------------------------------------------Save Message-----------------------------------------------------//
-function saveMessage(message, sender, localMessageIDTracker) {
+function saveMessage(message, sender) {
     //Ajax Call To Serverside Python
-
     $.ajax({
         url: 'functions/save_message.py',
         type: 'POST',
@@ -57,14 +51,6 @@ function saveMessage(message, sender, localMessageIDTracker) {
         },
         success: function (data) {
             console.log(data)
-            if (data["Status"] == "Success") {
-                messageID = data["Data"]["MessageID"]
-                messageIDs[localMessageIDTracker] = messageID
-                console.log("Message ID: " + messageID + " Local Message ID: " + localMessageIDTracker)
-            } else {
-                console.log("Something Went Wrong On Data Retrieval");
-                console.log(data);
-            }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             alert("Status: " + textStatus);
@@ -72,6 +58,45 @@ function saveMessage(message, sender, localMessageIDTracker) {
         }
     });
 }
+
+{/* <div class="accordion" id="questionsAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            Question 1
+        </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#questionsAccordion">
+        <div class="accordion-body">
+            Answer to question 1.
+        </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingTwo">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            Question 2
+        </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#questionsAccordion">
+        <div class="accordion-body">
+            Answer to question 2.
+        </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingThree">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            Question 3
+        </button>
+        </h2>
+        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#questionsAccordion">
+        <div class="accordion-body">
+            Answer to question 3.
+        </div>
+        </div>
+    </div>
+</div> */}
 
 
 //------------------------------------------------------On Load-------------------------------------------------------//
@@ -98,21 +123,52 @@ function onLoad(){
         articleID = params.get('articleID');
     }
 
-    // Get Article Content From SQL Server
+//---------------------------------------------------------------------------------------------------Get Articles
+    //Ajax Python Call To Get Messages From SQL Server
     $.ajax({
-        url: 'functions/get_article.py',
+        url: 'functions/get_user_read_articles.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
-        data: {articleID: articleID},
         success: function (data) {
             console.log(data)
             if (data["Status"] == "Success") {
-                article = JSON.parse(data["Data"])[0]
+                let articleData = data["Data"]
 
-                // Add Article Content To Page
-                addArticleTittle(mdToHtml(article["Title"]));
-                addArticleLine(mdToHtml(article["Content"]));
+                //---------------------------------------------------------------------------------------------------Add Articles
+
+                categories = JSON.parse(articleData["Categories"]);
+                articles = JSON.parse(articleData["Articles"]);
+
+                console.log(categories);
+                console.log(articles);
+
+                for (let i = 0; i < categories.length; i++) {
+                    let category = categories[i]["Category"];
+                    let title = articles[i]["Title"];
+                    document.getElementById("questionWindow").innerHTML += `
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading${strToID(title)}">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${strToID(title)}" aria-expanded="true" aria-controls="collapse${strToID(title)}">
+                                ${title}
+                            </button>
+                            </h2>
+                        </div>
+                    `;
+                }
+
+
+                for (let i = 0; i < articles.length; i++) {
+                    let articleDate = new Date(articles[i]["Published_Date"]);
+                    let formattedDate = articleDate.toLocaleDateString();
+                    let category = articles[i]["Category"]
+
+                    console.log(category)
+
+                    if (category != null && document.getElementById(strToID(category)) != null) {
+                        addArticle(strToID(category), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                    }
+                }
             } else {
                 console.log("Something Went Wrong On Data Retrieval");
                 console.log(data);
@@ -195,9 +251,6 @@ function onLoad(){
             }
         });
     }
-
-    // Add open action to ArticleOpenHistory
-    saveArticleAction("open");
 
     // Focus on text input area
     document.getElementById("message").focus();
@@ -362,128 +415,6 @@ function keyUp(e) {
 //------------------------------------------------- Artilce Control -------------------------------------------------//
 
 let articles = [];
-// let articles = [
-//     {
-//       "id": 1,
-//       "title": "City Council Approves New Park Renovation",
-//       "description": "The city council approved a renovation plan for the historic park, promising new facilities and community spaces.",
-//       "date": "2023-10-10"
-//     },
-//     {
-//       "id": 2,
-//       "title": "Local Library Hosts Summer Reading Program",
-//       "description": "The downtown library is launching its annual summer reading event, encouraging residents of all ages to explore new books.",
-//       "date": "2023-06-15"
-//     },
-//     {
-//       "id": 3,
-//       "title": "Community Garden Initiative Blossoms in Westside Neighborhood",
-//       "description": "Local residents have come together to transform a vacant lot into a vibrant community garden, promoting sustainability and neighborhood bonding.",
-//       "date": "2023-05-20"
-//     },
-//     {
-//       "id": 4,
-//       "title": "Downtown Business Week Attracts Entrepreneurs",
-//       "description": "A week-long event in the heart of downtown has drawn local and regional entrepreneurs, showcasing innovative business ideas and networking opportunities.",
-//       "date": "2023-09-25"
-//     },
-//     {
-//       "id": 5,
-//       "title": "Local High School Wins State Championship",
-//       "description": "In a thrilling finale, the local high school soccer team clinched the state title, sparking celebrations across the community.",
-//       "date": "2023-11-05"
-//     },
-//     {
-//       "id": 6,
-//       "title": "Neighborhood Cleanup Day Scheduled for Saturday",
-//       "description": "Residents are encouraged to participate in a community cleanup event aimed at revitalizing local parks and streets.",
-//       "date": "2023-04-08"
-//     },
-//     {
-//       "id": 7,
-//       "title": "New Art Exhibit Showcases Local Talent",
-//       "description": "The city museum has unveiled a new exhibit that highlights the work of emerging local artists, drawing art enthusiasts from across the region.",
-//       "date": "2023-07-12"
-//     },
-//     {
-//       "id": 8,
-//       "title": "City Police Increase Patrols to Combat Rising Vandalism",
-//       "description": "Authorities are stepping up patrols in several neighborhoods in response to a recent spike in vandalism incidents.",
-//       "date": "2023-08-18"
-//     },
-//     {
-//       "id": 9,
-//       "title": "Local Restaurant Earns Michelin Star",
-//       "description": "A recently opened restaurant downtown has received a Michelin star, marking a milestone for the local culinary scene.",
-//       "date": "2023-10-01"
-//     },
-//     {
-//       "id": 10,
-//       "title": "City Announces Free Health Clinics for Residents",
-//       "description": "In a bid to improve community health, the city is offering free health clinics at various locations over the next month.",
-//       "date": "2023-03-15"
-//     },
-//     {
-//       "id": 11,
-//       "title": "Historic Building Gets Renovated for Community Use",
-//       "description": "A beloved historic building is being repurposed into a community center, complete with meeting rooms and cultural spaces.",
-//       "date": "2023-09-10"
-//     },
-//     {
-//       "id": 12,
-//       "title": "Local Sports Club Launches Youth Training Program",
-//       "description": "The sports club has introduced a new training initiative aimed at nurturing local talent and promoting physical fitness among youths.",
-//       "date": "2023-06-05"
-//     },
-//     {
-//       "id": 13,
-//       "title": "City Council Debates New Zoning Laws",
-//       "description": "Council members are currently deliberating proposed zoning changes that could impact local businesses and residential areas.",
-//       "date": "2023-08-22"
-//     },
-//     {
-//       "id": 14,
-//       "title": "New Public Transit Route to Improve Connectivity",
-//       "description": "A new bus route has been announced, promising to enhance transportation options for residents in suburban areas.",
-//       "date": "2023-07-30"
-//     },
-//     {
-//       "id": 15,
-//       "title": "Local Theater Group Stages a Classic Play",
-//       "description": "The community theater is set to perform a beloved classic, inviting locals to enjoy an evening of culture and drama.",
-//       "date": "2023-05-25"
-//     },
-//     {
-//       "id": 16,
-//       "title": "Fire Department Hosts Safety Awareness Workshop",
-//       "description": "Local firefighters are offering a series of workshops to educate residents on emergency preparedness and fire safety.",
-//       "date": "2023-04-20"
-//     },
-//     {
-//       "id": 17,
-//       "title": "New Recycling Program Launched in the City",
-//       "description": "City officials have rolled out an innovative recycling initiative designed to boost environmental sustainability and reduce waste.",
-//       "date": "2023-03-01"
-//     },
-//     {
-//       "id": 18,
-//       "title": "Local Farmer's Market Returns This Weekend",
-//       "description": "After a long hiatus, the popular farmer's market is back, featuring fresh produce, artisanal goods, and community fun.",
-//       "date": "2023-09-15"
-//     },
-//     {
-//       "id": 19,
-//       "title": "City Plans to Expand Bicycle Lanes",
-//       "description": "Local government announced plans to extend bike lanes throughout the city, promoting eco-friendly transportation and healthier lifestyles.",
-//       "date": "2023-10-20"
-//     },
-//     {
-//       "id": 20,
-//       "title": "Community Raises Funds for Local Shelter",
-//       "description": "A fundraising event held over the weekend successfully raised significant funds to support the local shelter and aid community members in need.",
-//       "date": "2023-11-12"
-//     }
-//   ]
 
 function addArticleLine (line) {
     document.getElementById("articleWindow").innerHTML +=
@@ -512,33 +443,8 @@ function mdToHtml(text) {
     return text;
 }
 
-
-//----------------------------------------- User Article History Control -------------------------------------//
-
-function saveArticleAction(action) {
-    $.ajax({
-        url: 'functions/save_article_action.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {
-            articleID: articleID,
-            userID: userID,
-            action: action,
-            time: new Date().toISOString()
-        },
-        success: function (data) {
-            if (data["Status"] == "Success") {
-                // console.log("Save Article Action: " + JSON.parse(data["Data"]))
-            } else {
-                console.log("Save Article Action Action Went Wrong");
-            }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
+function strToID(str){
+    return str.charAt(0).toLowerCase() + str.slice(1).replace(/\s+/g, '');
 }
 
 //------------------------------------------------- Chat Bot -------------------------------------------------//
@@ -551,11 +457,23 @@ the prompt type as a parameter.
 Just MAKE SURE that the python script never takes a prompt as a parameter. Otherwise people can use our api key
 without having to know it.
 */
-function sendMessageToChatBot(message, localMessageIDTracker) {
+function sendMessageToChatBot(message) {
+    // Commented Out For Now - Bc Not Implemented Yet //
 
-    gptRespondMessage(message, localMessageIDTracker);
+    gptRespondMessage(message);
+    // document.getElementById("typingAlert").hidden = false
     addTypingAlertLeft();
 
+    // let context, classification = classifyMessage(message);
+    
+    // if (classification == "PRACTICAL_GUIDANCE") {
+
+    // } else if (classification == "BROADER IMPACT") {
+    // } else if (classification == "REFERENTIAL_FACT") {
+    // } else if (classification == "VIEWPOINT_SYNTHESIS") {
+    // } else if (classification == "LITERARY_COMPREHENSION") {
+    // }
+    
 }
 
 /*
@@ -567,7 +485,7 @@ Demo of how to run a prompt on the gpt api.
                           | This is to prevent people from using our website
                           | as a free chat gpt api.
 */
-function gptRespondMessage(message, localMessageIDTracker) {
+function gptRespondMessage(message) {
     $.ajax({
         url: 'functions/gpt_respond_message.py',
         type: 'POST',
@@ -593,19 +511,13 @@ function gptRespondMessage(message, localMessageIDTracker) {
                 for (let i = 0; i < responses.length; i++) {
                     setTimeout(function() {
                         addMessageLeft(mdToHtml(responses[i]));
-                        saveMessage(responses[i], "ChatBot", -1);
+                        saveMessage(responses[i], "ChatBot");
                         scrollBottom();
                     }, i * 500);
                 }
                 
-                // Save Chain Of Thought
+                //Save Chain Of Thought
                 saveChainOfThought();
-
-                // Save Classification
-                console.log("Classification: " + classification)
-                if (classification != "") {
-                    saveClassification(localMessageIDTracker, message, classification)
-                }
 
                 // saveClassification(message, classification)
                 scrollBottom();
@@ -617,39 +529,6 @@ function gptRespondMessage(message, localMessageIDTracker) {
         }
     });
     
-}
-
-function saveClassification(localMessageIDTracker, message, classification) {
-
-    let waitForMessageID = setInterval(function() {
-        if (messageIDs[localMessageIDTracker] !== undefined) {
-            
-            clearInterval(waitForMessageID);
-            let messageID = messageIDs[localMessageIDTracker];
-            delete messageIDs[localMessageIDTracker];
-
-            $.ajax({
-                url: 'functions/save_classification.py',
-                type: 'POST',
-                loading: false,
-                dataType: 'json',
-                data: {
-                    message: message,
-                    classification: classification,
-                    articleID: articleID,
-                    userID: userID,
-                    messageID: messageID
-                },
-                success: function (data) {
-                    console.log(data)
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert("Status: " + textStatus);
-                    alert("Error: " + errorThrown);
-                }
-            });
-        }
-    }, 100);
 }
 
 function saveChainOfThought() {
@@ -695,5 +574,4 @@ function closeTab() {
 
 window.addEventListener('beforeunload', function (e) {
     closeTab();
-    saveArticleAction("close");
 });

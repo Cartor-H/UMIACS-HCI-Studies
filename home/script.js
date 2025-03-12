@@ -1,6 +1,7 @@
 //---------------------------------------------------Global Variables-----------------------------------------------------//
 let articleID = "-1";
 let userID = "-1";
+let historyCategory = "";
 
 
 //------------------------------------------------------On Load-------------------------------------------------------//
@@ -34,6 +35,7 @@ function onLoad(){
         type: 'POST',
         loading: false,
         dataType: 'json',
+        data: {userID: userID},
         success: function (data) {
             console.log(data)
             if (data["Status"] == "Success") {
@@ -51,6 +53,9 @@ function onLoad(){
 
                 for (let i = 0; i < categories.length; i++) {
                     let category = categories[i]["Category"];
+                    // if (i == 1) {
+                    //     historyCategory = category;
+                    // }
                     document.getElementById("content").innerHTML += `
                     <div class="row m-5 mb-4">
                         <div class="col">
@@ -66,9 +71,12 @@ function onLoad(){
                 for (let i = 0; i < articles.length; i++) {
                     let articleDate = new Date(articles[i]["Published_Date"]);
                     let formattedDate = articleDate.toLocaleDateString();
+                    let category = articles[i]["Category"]
 
-                    if (articles[i]["Category"] != null) {
-                        addArticle(strToID(articles[i]["Category"]), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                    console.log(category)
+
+                    if (category != null && document.getElementById(strToID(category)) != null) {
+                        addArticle(strToID(category), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
                     }
                 }
             } else {

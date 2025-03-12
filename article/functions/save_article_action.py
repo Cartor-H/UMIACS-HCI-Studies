@@ -29,28 +29,20 @@ def outputSQLQuery(form):
 
     cursor=con.cursor()
 
-    message = form['message']
+    action = form['action']
     userID = form["userID"]
     articleID = form['articleID']
-    sender = form['sender']
-    timeSent = form['timeSent']
+    time = form['time']
 
-    cursor.execute("INSERT INTO Messages (UserID, ArticleID, TimeSent, Sender, Message) VALUES (%s, %s, %s, %s, %s)",
-                   (userID, articleID, timeSent, sender, message))
+    cursor.execute("INSERT INTO ArticleOpenHistory (UserID, ArticleID, ActionDate, Action) VALUES (%s, %s, %s, %s)",
+                   (userID, articleID, time, action))
     con.commit()
-
-
-    messageID = str(cursor.lastrowid)
-    print(json.dumps({"Status": "Success", "Data": {
-                            "MessageID": messageID
-                            }
-                      }))
 
 
     cursor.close()
     con.close()
 
-    # print(json.dumps({"Status" : "Success"}))
+    print(json.dumps({"Status" : "Success"}))
 
 try:
     print("Content-type: text/html\n\n")   # say generating html

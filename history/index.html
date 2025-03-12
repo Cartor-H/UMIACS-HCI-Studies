@@ -11,35 +11,6 @@
   <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
   <script src="../js/bootstrap.js"></script>
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-
-    .card {
-      border-radius: 15px;
-    }
-
-    .input-group .form-control {
-      border-top-left-radius: 15px;
-      border-bottom-left-radius: 15px;
-    }
-
-    .input-group .btn {
-      border-top-right-radius: 15px;
-      border-bottom-right-radius: 15px;
-    }
-
-    .textarea {
-      min-height: 50px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    ::selection {
-      background-color: rgb(154, 204, 154);
-      color: rgb(0, 0, 0);
-    }
-  </style>
 </head>
 
 <body onload="onLoad()">
@@ -53,10 +24,10 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav w-100 d-flex justify-content-between">
           <li class="nav-item flex-fill text-center">
-            <a class="nav-link" href="#" onclick="closeTab()">Home</a>
+            <a class="nav-link" href="../home">Home</a>
           </li>
           <li class="nav-item flex-fill text-center">
-            <a class="nav-link" href="../history">History</a>
+            <a class="nav-link" href="">History</a>
           </li>
           <li class="nav-item flex-fill text-center">
             <span class="navbar-text">
@@ -69,44 +40,39 @@
   </nav>
 
   <div class="row m-5 mt-1 mb-5" style="height:90vh">
-    <div class="col-lg-6 mb-4 h-100">
+    <div class="col-lg-4 mb-4 h-100">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">Article</h5>
+          <h5 class="mb-0">User Question Pool</h5>
         </div>
-        <div class="card-body overflow-auto" id="articleWindow">
-          <!-- Article content goes here -->
+        <div class="card-body overflow-auto" id="questionsWindow">
+          
         </div>
       </div>
     </div>
 
-    <div class="col-lg-6 mb-4 h-100">
+    <div class="col-lg-4 mb-4 h-100">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">Chat</h5>
+          <h5 class="mb-0">Synthesize Thoughts</h5>
         </div>
-        <div class="card-body overflow-auto" id="chatWindow">
-          <!-- Chat content goes here -->
-        </div>
-        
-        <div class="card-footer">
-            <!-- <div class="alert alert-primary p-1 ps-2" role="alert" id="typingAlert" hidden style="animation: pulse 1.5s infinite;">
-            Bot is typing...
-            </div>
-            <style>
+        <div class="card-body overflow-auto" id="thoughtWindow">
 
-            </style> -->
-          <div class="input-group">
-            <div class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
-              onkeydown="keyDown(event,clientSendMsg,this)" onkeyup="keyUp(event)" tabindex="1"
-              onmouseup="checkCursor()" contenteditable></div>
-            <button class="btn btn-primary" type="button" onclick="clientSendMsg()" tabindex="2">
-              <i class="fa-solid fa-paper-plane"></i>
-            </button>
-          </div>
         </div>
       </div>
     </div>
+
+    <div class="col-lg-4 mb-4 h-100">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Question Insights and Recomendations</h5>
+        </div>
+        <div class="card-body overflow-auto" id="insightsWindow">
+
+        </div>
+      </div>
+    </div>
+  
   </div>
 </body>
 

@@ -31,43 +31,15 @@ def outputSQLQuery(form):
     con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
     cursor=con.cursor()
 
+    cursor.execute("SELECT * FROM Articles ORDER BY Published_Date DESC FOR JSON AUTO")
+    articles_data = cursor.fetchall()
+
     cursor.execute("SELECT Category FROM ArticleCategories ORDER BY [Order] ASC FOR JSON AUTO")
     categories_data = cursor.fetchall()
 
-    articles_data = ""
-
-    # if 'userID' in form:
-    userID = form['userID']
-
-    # Select all articles, but if they're read by the user, then put them in the 2nd category from categories_data
-    # But if they're labeled as the second category and they haven't been read by the user, then don't send them.
-
-    # cursor.execute("SELECT ArticleID FROM ArticleOpenHistory WHERE UserID=%s", (userID))
-    # read_articles = cursor.fetchall()
-    # read_articles = [row[0] for row in read_articles]
-
-    # Make sure we don't select any pre-asined category 2 articles
-    cursor.execute("""
-        SELECT *, 
-            CASE 
-                WHEN ID IN (SELECT ArticleID FROM ArticleOpenHistory WHERE UserID=%s) 
-                THEN (SELECT Category FROM ArticleCategories WHERE [Order]=2) 
-                ELSE Category 
-            END as Category
-        FROM Articles
-        WHERE Category != (SELECT Category FROM ArticleCategories WHERE [Order]=2)
-        FOR JSON AUTO
-    """, (userID))
-    articles_data = cursor.fetchall()
-    # print(articles_data)
-
-    # else:
-    #     cursor.execute("SELECT * FROM Articles ORDER BY Published_Date DESC FOR JSON AUTO")
-    #     articles_data = cursor.fetchall()
-
     if articles_data and categories_data:
         articles_json = ''.join([row[0] for row in articles_data])  # Concatenate the values from each row
-        categories_json = ''.join([str(row[0]) for row in categories_data])  # Concatenate the values from each row
+        categories_json = ''.join([row[0] for row in categories_data])  # Concatenate the values from each row
         print(json.dumps({
             "Status": "Success",
             "Data": {

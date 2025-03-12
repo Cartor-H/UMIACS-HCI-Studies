@@ -40,17 +40,10 @@ def outputSQLQuery(form):
     con.commit()
 
 
-    messageID = str(cursor.lastrowid)
-    print(json.dumps({"Status": "Success", "Data": {
-                            "MessageID": messageID
-                            }
-                      }))
-
-
     cursor.close()
     con.close()
 
-    # print(json.dumps({"Status" : "Success"}))
+    print(json.dumps({"Status" : "Success"}))
 
 try:
     print("Content-type: text/html\n\n")   # say generating html
