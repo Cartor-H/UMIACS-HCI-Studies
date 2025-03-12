@@ -242,8 +242,6 @@ User initial question/request/interest Category: {category}
 
 - If the user responded by asking you questions about your answer or asking you to elaborate on your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) ask if this explanation makes sense to them or not.
 
-- If the user's response does not belong to any of these categories, proceed to the next state without providing a response here.
-
 When responding to user, you MUST follow these requirements: 
 1. Use "######" to separate different parts listed in the instruction, do NOT number each part
 2. Limit each part of your response to 150 words. 
@@ -686,7 +684,18 @@ def outputSQLQuery(form):
             classification_result = classify_user_message(user_message, article, current_state)
             next_state = determine_next_state(current_state, classification_result)
 
-            if next_state == "User_Question_Processing":
+            if next_state == "Chatbot_Follow-up":
+                prompt = generate_prompt_for_state(
+                    next_state,
+                    user_message,
+                    article,
+                    prev_chain_of_thought,
+                    stored_messages,
+                    classification_result
+                )
+                next_state = determine_next_state(next_state, classification_result)
+
+            elif next_state == "User_Question_Processing":
                 classification_result = classify_user_message(user_message, article, next_state)
                 next_state = determine_next_state(next_state, classification_result)
                 prompt = generate_prompt_for_state(
