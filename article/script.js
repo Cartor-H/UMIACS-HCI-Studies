@@ -595,7 +595,7 @@ function gptRespondMessage(message, localMessageIDTracker) {
                         addMessageLeft(mdToHtml(responses[i]));
                         saveMessage(responses[i], "ChatBot", -1);
                         scrollBottom();
-                    }, i * 500);
+                    }, i * 2000);
                 }
                 
                 // Save Chain Of Thought

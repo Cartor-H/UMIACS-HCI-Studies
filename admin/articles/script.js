@@ -326,6 +326,31 @@ function uploadArticles() {
 
                 // Convert the sheet to JSON
                 const articles = XLSX.utils.sheet_to_json(worksheet);
+                // Count and print the number of \r and \n in the Content column before and after processing
+                let beforeCountR = 0;
+                let beforeCountN = 0;
+                articles.forEach(article => {
+                    if (article.Content) {
+                        beforeCountR += (article.Content.match(/\r/g) || []).length;
+                        beforeCountN += (article.Content.match(/\n/g) || []).length;
+                    }
+                });
+                console.log(`Before processing: \\r count = ${beforeCountR}, \\n count = ${beforeCountN}`);
+
+                // Process the articles' Content column
+                articles.forEach(article => {
+                    if (article.Content) {
+                        const content = article.Content;
+                        const contentCountR = (content.match(/\r/g) || []).length;
+                        const contentCountN = (content.match(/\n/g) || []).length;
+                        // console.log(`Article ID: ${article.ID}, Content \\r count = ${contentCountR}, \\n count = ${contentCountN}`);
+                    }
+                });
+
+                const processedData = JSON.stringify(articles);
+                const afterCountR = (processedData.match(/\r/g) || []).length;
+                const afterCountN = (processedData.match(/\n/g) || []).length;
+                console.log(`After processing: \\r count = ${afterCountR}, \\n count = ${afterCountN}`);
 
                 // Process the articles as needed
                 console.log(articles);

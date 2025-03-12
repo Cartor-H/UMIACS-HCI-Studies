@@ -126,10 +126,11 @@ function onLoad(){
 //---------------------------------------------------------------------------------------------------Get Articles
     //Ajax Python Call To Get Messages From SQL Server
     $.ajax({
-        url: 'functions/get_user_read_articles.py',
+        url: 'functions/get_questions.py',
         type: 'POST',
         loading: false,
         dataType: 'json',
+        data: {userID: userID},
         success: function (data) {
             console.log(data)
             if (data["Status"] == "Success") {
@@ -137,36 +138,55 @@ function onLoad(){
 
                 //---------------------------------------------------------------------------------------------------Add Articles
 
-                categories = JSON.parse(articleData["Categories"]);
+                questions = JSON.parse(articleData["Questions"]);
                 articles = JSON.parse(articleData["Articles"]);
 
-                console.log(categories);
-                console.log(articles);
+                console.log("Questions" + questions);
+                console.log("Questions" + articles);
 
-                for (let i = 0; i < categories.length; i++) {
-                    let category = categories[i]["Category"];
+                for (let i = 0; i < articles.length; i++) {
                     let title = articles[i]["Title"];
-                    document.getElementById("questionWindow").innerHTML += `
+                    let articleID = articles[i]["ID"];
+
+                    console.log(title)
+                    console.log(articleID)
+
+                    document.getElementById("questionsAccordion").innerHTML += `
                         <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading${strToID(title)}">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${strToID(title)}" aria-expanded="true" aria-controls="collapse${strToID(title)}">
+                            <h2 class="accordion-header" id="heading${articleID}">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${articleID}" aria-expanded="false" aria-controls="collapse${articleID}">
                                 ${title}
                             </button>
                             </h2>
+                            <div id="collapse${articleID}" class="accordion-collapse collapse" aria-labelledby="heading${articleID}">
+                                <div class="accordion-body" id="accordionBody${articleID}">
+
+                                </div>
+                            </div>
                         </div>
                     `;
                 }
 
 
-                for (let i = 0; i < articles.length; i++) {
-                    let articleDate = new Date(articles[i]["Published_Date"]);
-                    let formattedDate = articleDate.toLocaleDateString();
-                    let category = articles[i]["Category"]
+                for (let i = 0; i < questions.length; i++) {
+                    // let articleDate = new Date(articles[i]["Published_Date"]);
+                    // let formattedDate = articleDate.toLocaleDateString();
+                    // let category = articles[i]["Category"]
+                    let articleID = questions[i]["articleID"];
+                    let message = questions[i]["message"];
 
-                    console.log(category)
+                    console.log(articleID)
+                    console.log(message)
 
-                    if (category != null && document.getElementById(strToID(category)) != null) {
-                        addArticle(strToID(category), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                    if (article != null && document.getElementById(`accordionBody${articleID}`) != null) {
+                        // addArticle(strToID(category), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+                        document.getElementById(`accordionBody${articleID}`).innerHTML += `
+                            <div class="card left-color mb-3">
+                                <div class="card-body pt-2 pb-2">
+                                    ${message}
+                                </div>
+                            </div>
+                        `;
                     }
                 }
             } else {
@@ -180,113 +200,81 @@ function onLoad(){
         }
     });
 
-    // Retrieve Previously Sent Messages From SQL Server
-    if(articleID && userID && articleID!="" && userID!="") {
-        $.ajax({
-            url: 'functions/get_messages.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {articleID: articleID, userID: userID},
-            success: function (data) {
-                if (data["Status"] == "Success") {
+    // // Retrieve Previously Sent Messages From SQL Server
+    // if(articleID && userID && articleID!="" && userID!="") {
+    //     $.ajax({
+    //         url: 'functions/get_messages.py',
+    //         type: 'POST',
+    //         loading: false,
+    //         dataType: 'json',
+    //         data: {articleID: articleID, userID: userID},
+    //         success: function (data) {
+    //             if (data["Status"] == "Success") {
 
-                    // Add Messages To Page
-                    let messages = JSON.parse(data["Data"])
-                    for (let i = 0; i < messages.length; i++) {
-                        if (messages[i]["Sender"] == "Client") {
-                            addMessageRight(messages[i]["Message"]);
-                        } else {
-                            addMessageLeft(mdToHtml(messages[i]["Message"]));
-                        }
-                    }
-                } else {
-                    console.log("Something Went Wrong On Data Retrieval");
-                    console.log(data);
-                }
+    //                 // Add Messages To Page
+    //                 let messages = JSON.parse(data["Data"])
+    //                 for (let i = 0; i < messages.length; i++) {
+    //                     if (messages[i]["Sender"] == "Client") {
+    //                         addMessageRight(messages[i]["Message"]);
+    //                     } else {
+    //                         addMessageLeft(mdToHtml(messages[i]["Message"]));
+    //                     }
+    //                 }
+    //             } else {
+    //                 console.log("Something Went Wrong On Data Retrieval");
+    //                 console.log(data);
+    //             }
 
-                scrollBottom();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-    }
+    //             scrollBottom();
+    //         },
+    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //             alert("Status: " + textStatus);
+    //             alert("Error: " + errorThrown);
+    //         }
+    //     });
+    // }
 
-    // Wait until chainOfThought and article are not null
-    let checkDataInterval = setInterval(function() {
-        if (article && Object.keys(article).length !== 0) {
-            clearInterval(checkDataInterval);
+    // // Wait until chainOfThought and article are not null
+    // let checkDataInterval = setInterval(function() {
+    //     if (article && Object.keys(article).length !== 0) {
+    //         clearInterval(checkDataInterval);
             
-            // Ensure Chain Of Thought is null for first message.
-            // let tempCOT = chainOfThought
-            chainOfThought = null;
-            // Call GPT
-            sendMessageToChatBot("");
+    //         // Ensure Chain Of Thought is null for first message.
+    //         // let tempCOT = chainOfThought
+    //         chainOfThought = null;
+    //         // Call GPT
+    //         sendMessageToChatBot("");
 
-            // chainOfThought = tempCOT;
-        }
-    }, 100);
+    //         // chainOfThought = tempCOT;
+    //     }
+    // }, 100);
 
-    // Retreive Previous Chain Of Thought
-    if(articleID && userID && articleID!="" && userID!="") {
-        $.ajax({
-            url: 'functions/get_chain_of_thought.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {articleID: articleID, userID: userID},
-            success: function (data) {
-                if (data["Status"] == "Success") {
-                    chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
-                    console.log(chainOfThought)
-                } else {
-                    console.log("No Data, Starting New Chain Of Thought");
-                }
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-    }
+    // // Retreive Previous Chain Of Thought
+    // if(articleID && userID && articleID!="" && userID!="") {
+    //     $.ajax({
+    //         url: 'functions/get_chain_of_thought.py',
+    //         type: 'POST',
+    //         loading: false,
+    //         dataType: 'json',
+    //         data: {articleID: articleID, userID: userID},
+    //         success: function (data) {
+    //             if (data["Status"] == "Success") {
+    //                 chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
+    //                 console.log(chainOfThought)
+    //             } else {
+    //                 console.log("No Data, Starting New Chain Of Thought");
+    //             }
+    //         },
+    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //             alert("Status: " + textStatus);
+    //             alert("Error: " + errorThrown);
+    //         }
+    //     });
+    // }
 
-    // Focus on text input area
-    document.getElementById("message").focus();
+    // // Focus on text input area
+    // document.getElementById("message").focus();
 }
-
-//----------------------------------------------------Clock Update----------------------------------------------------//
-
-// // MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
-
-// let startTime = null;
-
-// /*
-// A function primarily used to inform the user of how much time they're taking, and how much time they have left in the
-// istant messagin session.
-// */
-// function updateClock() {
-//     const clockElement = document.getElementById("clock");
-//     if (clockElement) {
-//         const currentTime = Date.now();
-//         const elapsedTime = currentTime - startTime;
-
-//         // Calculate minutes and seconds
-//         const minutes = Math.floor(elapsedTime / 60000);
-//         const seconds = Math.floor((elapsedTime % 60000) / 1000);
-
-//         // Format minutes and seconds with leading zeros
-//         const formattedMinutes = String(minutes).padStart(2, "0");
-//         const formattedSeconds = String(seconds).padStart(2, "0");
-
-//         // Update the clock display
-//         clockElement.value = `${formattedMinutes}:${formattedSeconds}`;
-
-//         // Schedule the next update in 1 second
-//         setTimeout(updateClock, 1000);
-//     }
-// }
 
 //--------------------------------------------------Typing Detection--------------------------------------------------//
 
