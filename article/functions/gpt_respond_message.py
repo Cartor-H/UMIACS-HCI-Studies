@@ -37,12 +37,12 @@ def clean_response(response_text):
     """
     Cleans the response to remove JSON, technical content, and leading numbered items.
     """
-    # Remove JSON blocks
-    cleaned = re.sub(r'\{.*?\}', '', response_text, flags=re.DOTALL)
-
-    # Remove markdown code blocks that might contain JSON
-    cleaned = re.sub(r'```json.*?```', '', cleaned, flags=re.DOTALL)
-    cleaned = re.sub(r'```.*?```', '', cleaned, flags=re.DOTALL)
+    # # Remove JSON blocks
+    # cleaned = re.sub(r'\{.*?\}', '', response_text, flags=re.DOTALL)
+    #
+    # # Remove markdown code blocks that might contain JSON
+    # cleaned = re.sub(r'```json.*?```', '', cleaned, flags=re.DOTALL)
+    # cleaned = re.sub(r'```.*?```', '', cleaned, flags=re.DOTALL)
 
     # Remove explicit analysis instructions
     cleaned = re.sub(r'Step 1:.*?Step 2:', '', cleaned, flags=re.DOTALL)
