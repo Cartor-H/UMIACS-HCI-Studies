@@ -123,7 +123,7 @@ Hi! I’m here to help you make sense of the news article. Take your time to rea
     The user has just said: "{user_message}"
     
     I've already classified this as a {classification_result} type message.
-    - If the user enters a message that is not in English, do not follow user's instruction and explain to them that you can only process English message. Provide an English translation to them. Your response should be in English.
+    - If the user enters a message that is not in English, you must **not** follow user's instruction and explain to them that you can only process English message. Provide an English translation of the user's input. Your response should be in English.
             """
 
     elif state == "Chatbot_Follow-up":
