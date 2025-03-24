@@ -367,7 +367,7 @@ def determine_next_state(current_state, classification_result):
         return "Waiting_User_Input"
 
     elif current_state == "Waiting_User_Input":
-        if classification_result in ["non_english", "specific_word", "acknowledgement", "non_understanding", "instruction"]:
+        if classification_result in ["text_summary", "non_english", "specific_word", "acknowledgement", "non_understanding", "instruction"]:
             return "Waiting_User_Input"
         elif classification_result == "conversation_end":
             return "Conversation_End"
@@ -450,6 +450,7 @@ def classify_user_message(user_message, article, state):
         # Classify message type: question, statement, coordination, or conversation end
         classification_prompt = f"""
         Classify this user message about a news article into one of these categories:
+        - "text_summary": the user asks for text summary
         - "non_english": the user enters a message that is not in English
         - "specific_word": the user asks about a specific word from the article
         - "acknowledgement": the user sends a thank you or acknowledgement
@@ -462,7 +463,7 @@ def classify_user_message(user_message, article, state):
         NEWS ARTICLE TITLE: {article["Title"]}
         USER MESSAGE: "{user_message}"
 
-        RESPOND WITH ONLY ONE WORD: "non_english", "specific_word", "acknowledgement", "non_understanding", "instruction", "conversation_end", \
+        RESPOND WITH ONLY ONE WORD: "text_summary", "non_english", "specific_word", "acknowledgement", "non_understanding", "instruction", "conversation_end", \
         "question_or_interest" or "statement"
         """
     elif state == "Waiting_User_First_Response_to_Thought":
@@ -618,7 +619,7 @@ Response:
             print(f"Classification error: {str(e)}", file=sys.stderr)
             # Default fallbacks based on state
             if state == "Waiting_User_Input":
-                return "question_or_interest"
+                return "text_summary"
             elif state == "User_Question_Processing":
                 return {"category": 4}
             elif state in ["Waiting_User_First_Response_to_Thought",
