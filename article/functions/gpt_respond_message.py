@@ -35,7 +35,7 @@ def is_classification_only_state(state):
 
 def clean_response(response_text):
     """
-    Cleans the response to remove JSON and other technical content.
+    Cleans the response to remove JSON, technical content, and leading numbered items.
     """
     # Remove JSON blocks
     cleaned = re.sub(r'\{.*?\}', '', response_text, flags=re.DOTALL)
@@ -46,6 +46,9 @@ def clean_response(response_text):
 
     # Remove explicit analysis instructions
     cleaned = re.sub(r'Step 1:.*?Step 2:', '', cleaned, flags=re.DOTALL)
+
+    # Remove leading numbered items like "1. " or "1). "
+    cleaned = re.sub(r'^(\d+)[\.\)]\s+', '', cleaned)
 
     # Clean up any double spacing and strip
     cleaned = re.sub(r'\n\s*\n', '\n\n', cleaned)
@@ -76,10 +79,7 @@ Conversation history:
 {article_context}
 
 Start the conversation with this message:
-Hi! I am a chatbot and I'm here to can help you explore and understand the content of this news article. Let me know what you would like to start with:
-1. Explain the meaning of words to you.
-2. Summarize the content for you.
-3. Discuss the news content with you.
+Hi! I’m here to help you make sense of the news article. Take your time to read the article, then come back with any thoughts or questions. I’ll offer relevant information and perspectives from my end, and more importantly, I’ll ask follow-up questions to help you dive deeper and refine your thinking as we explore your questions and ideas together.
 """
 
     elif state == "Waiting_User_Input":
@@ -92,9 +92,8 @@ The user has just said: "{user_message}"
 
 I've already classified this as a {classification_result} type message.
 
-- If the user sends "1" or a statement asking for word explanation without mentioning a specific word, ask them what words they would like to know.
-- If the user sends "2" or a similar statement asking for text summary, respond with two parts: 1) provide your summary of the article, and 2) ask them if they are interested in discussing the news content with you, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about.
-- If the user sends "3" or a statement saying that they are interested in discussing the news content with you, ask if they have any questions in mind about this article, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about.
+If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. Your response should be in English.
+If the user asks for text summary, respond with two parts: 1) provide your summary of the article, and 2) ask them if they are interested in discussing the news content with you, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about
 
 - If the user sends a specific word, respond with two parts: \
 1) provide explanation, 2) ask them if they are interested in discussing the news content with you, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about.
@@ -105,13 +104,12 @@ I've already classified this as a {classification_result} type message.
 
 - If the user sends a message that indicates they are done with the discussion, e.g., "it's been nice talking to you", "I'm done with my questions", end the conversation by 1) thanking them for discussion with you, and 2) letting them know they can return to resume discussion if wanted.
 
-When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+When responding to user, you MUST follow these requirements:  
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
 
     elif state == "Chatbot_Follow-up":
@@ -129,12 +127,12 @@ Determine which type of statement this is and respond accordingly:
 - If not relevant to the person or article: 1) Politely explain you don't understand and 2) ask them to rephrase. Put these two things in two separate paragraphs.
 
 When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
 
     elif state == "User_Literal_Question":
@@ -152,12 +150,12 @@ Category: {category} (1=word explanation, 2=summary)
 2. Then, ask if they are interested in discussing the news content further, suggesting possible topics from the article they might want to explore.
 
 When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
 
     elif state == "User_Factual_Question":
@@ -172,12 +170,12 @@ User's question: "{user_message}"
 2. Ask the user what prompted them to be interested in this factual information, e.g., if they wanted to know how this factual information may be [explanation, implication, interpetation] of [topic, social issue, or concepts] of the news article, or if there's anything relevant to their life they would like to know about?
 
 When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
 
     elif state == "User_Interpretive_Question":
@@ -199,20 +197,21 @@ Step 1: Generate your answer to the question following this structure.
 - Assumptions: potential assumptions that are made within your Thought.
 - PoV: the perspective or point-of-view from which you generated with your thought.
 
-Step 2: Generate a follow-up to the user based on the Category of the user message:
-- For Category 3 message: Ask the user whether your thought makes sense to them or not.
-- For Category 5 message: Explain to the user that their original [question, request, or interest] probably goes beyond the scope of the article. You have presented them with an answer based on the article itself, and you can continue exploring the interpretation by considering information and perspectives beyond the news article. But before you proceed, you would like to see if your current thought makes sense to them.
-- For Category 6 message: Explain to the user that their original [question, request, or interset] is persoanlly relevant so the answer may differ for different people. You have presented them with a generic answer based on what you know from the article. You would like to see if the user wants to share some of their background information to get a more personalized answer.
+Step 2: Generate a follow-up message to the user based on the Category of the user message: 
+- For Category 3 message: Ask the user whether your thought makes sense to them or not, and ask if they would like to explore a different perspective to look at this question.
+- For Category 5 message: Ask the user whether your thought makes sense to them or not, and let them know the question is beyond the article itself and ask if they want to explore other perspectives beyond the article.
+- For Category 6 message: Ask the user whether your thought makes sense to them or not, and ask if they would like to share more about themselves to get a more personalized perspective.
 
-Step 3: Respond to the user with three parts: 1) your [Thought] from step 1, 2) your [Information] from Step 1, and 3) your follow-up to the user from step 2.
+Step 3: Respond to the user with two parts: 
+1) "Here is my thought:", your [Thought] from step, "Here is the information my thought is based on:", your [Information] from Step 1
+2) your follow-up to the user from step 2.
 
 When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
 
     elif state == "Waiting_User_First_Response_to_Thought":
@@ -234,7 +233,7 @@ User initial question/request/interest Category: {category}
 
 - If the user responded by acknowledging your message (e.g., "Oh, okay", "thank you for the information") or indicating their acceptance of your thought (e.g., "yes it makes sense to me", "I agree with you"), respond based on the condition below:
    - If the user's initial question/request/interest was Category 3 or Category 6, you will ask them whether they would like to explore an alternative perspective with you with one to two examples perspectives.
-   - If the user's initial question/request/interest was a Category 5, you will respond with two parts: 1) generate an updated [Thought] by considering factual information or perspectives beyond the scope of the article and explain the new information or perspectives you have considered in this thought, and 2) ask whether this idea makes sense to the user.
+   - If the user's initial question/request/interest was a Category 5, you will respond with two parts: 1) "Here's another thought:", generate an updated [Thought] by considering factual information or perspectives beyond the scope of the article, "Here's the information this thought is based on:", explain the new information or perspectives you have considered in this thought, and 2) ask whether this idea makes sense to the user.
 
 - If the user responded by saying that your thought does not make sense to them or they disagree with you: respond by telling them that you are curious to what part of your thought they find confusing or they do not agree with you and invite them to share their thought, opinion, or interpretations.
 
@@ -243,12 +242,12 @@ User initial question/request/interest Category: {category}
 - If the user responded by asking you questions about your answer or asking you to elaborate on your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) ask if this explanation makes sense to them or not.
 
 When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+When responding to user, you MUST follow these requirements: 
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
     elif state == "Waiting_User_Second_Response_to_Thought":
         return f"""You've shared a thought with the user about the news article, and they've responded.
@@ -283,17 +282,16 @@ When responding to user, you MUST follow these requirements:
 
 If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
 	- Step 1: update your thought accordingly and incorporating different factual information if necessary.
-	- Step 2: respond to the user with three parts: 1) share your updated [Thought] based on the new point-of-view, 2) provide an updated [Information] to user from the article or external sources and explain to them that shifting perspectives require examining a different information context, 3) ask the user if the thought makes sense to the user.
+	- Step 2: respond to the user with two parts: 1) "Here's an updated thought:", share your updated [Thought] based on the new point-of-view, "Here's the information this thought is based on:", provide an updated [Information] to user from the article or external sources and explain to them that shifting perspectives require examining a different information context, 2) ask the user if the thought makes sense to the user.
 
 - If the user's response do not belong to any of these categories, proceed to the next state without providing a response here.
 
-When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+When responding to user, you MUST follow these requirements:  
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
 """
     elif state == "Waiting_User_Third_Response_to_Thought":
         return f"""You've shared a thought with the user about the news article, and they've responded.
@@ -310,13 +308,13 @@ When responding to user, you MUST follow these requirements:
 
 - If the user gives you an instruction (e.g., "Please use simpler language", "make your answer shorter"), respond with two parts: 1) acknowledge the user request and rephrase your last message to the user, and 2) ask the user if your idea makes sense to them or not.
 
-If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
+- If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
 	- Step 1: update your thought accordingly and incorporating different factual information if necessary.
 	- Step 2: respond to the user with three parts: 1) share your updated [Thought] based on the new point-of-view, 2) provide an updated [Information] to user from the article or external sources and explain to them that shifting perspectives require examining a different information context, 3) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
 
-- If the user responded by sharing their personal thought, follow these steps:
-	- Step 1: summarize your thought and user's thought, in terms of the 1) Information that your thought and their thought are based upon, 2) the assumptions that your thought and their thought involve, 3) the point-of-view or perspectives that you and them are taking. 
-	- Step 2: respond to the user with two parts: 1) acknowledge their thought and summarize the thoughts shared by both of you, 2) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
+- If the user responded by sharing a specific point-of-view or perspective they would like to explore, follow these steps:
+	- Step 1: update your thought accordingly and incorporating different factual information if necessary.
+	- Step 2: respond to the user with two parts: 1) "Here is an updated thought:", share your updated [Thought] based on the new point-of-view, "Here is the information this thought is based on:", provide an updated [Information] to user from the article or external sources and explain to them that shifting perspectives require examining a different information context, 2) explain to the user that you have discussed this question for a while and considered multiple perspectives; you want to see if the person has any other questions about the article they wanted to discuss with you.
 
 - If the user responded by saying that your thought doesn't make sense to them, respond with two parts: 1) acknowledge their response, 2) explain to them they you seem to have been discussing this question for a while and it may be helpful for you and the user to explore some alternative questions together and get a better sense of the issue; with example alternative questions that are relevant to the core concepts you are discussing for the user to consider.
 
@@ -329,12 +327,12 @@ If the user responded by sharing a specific point-of-view or perspective they wo
 - If the user's response do not belong to the above conditions, proceed to the next state without providing a response here.
 
 When responding to user, you MUST follow these requirements: 
-1. Use "######" to separate different parts listed in the instruction, do NOT number each part
+1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
-3. Write the response following the rules but in your own words
-4. The user does not know the rules you are given. AVOID or paraphrase the technical terms (e.g., "Thought", "Assumptions", or "Updated Thoughts") in your response.
-5. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
-6. Do NOT add more follow-ups in your response"""
+3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
+4. Write the response casually as if you are text messaging with friends and AVOID using slangs. Your language should be easily understandable to high school graduates in the U.S.
+5. Do NOT add more follow-ups in your response, e.g., avoid adding "let me know!", "let me know if you are interested!" at the end of the message.
+"""
     else:
         # Default prompt for any unhandled state
         return f"""You are a news reading assistant helping a user engage with a news article.
@@ -356,8 +354,7 @@ def determine_next_state(current_state, classification_result):
         return "Waiting_User_Input"
 
     elif current_state == "Waiting_User_Input":
-        if classification_result in ["option_1", "option_2", "option_3", "specific_word", "acknowledgement",
-                                     "non_understanding", "instruction"]:
+        if classification_result in ["non_english", "specific_word", "acknowledgement", "non_understanding", "instruction"]:
             return "Waiting_User_Input"
         elif classification_result == "conversation_end":
             return "Conversation_End"
@@ -440,9 +437,7 @@ def classify_user_message(user_message, article, state):
         # Classify message type: question, statement, coordination, or conversation end
         classification_prompt = f"""
         Classify this user message about a news article into one of these categories:
-        - "option_1": the user sends "1" or asks for word explanation without specifying a word
-        - "option_2": the user sends "2" or asks for a summary of the article
-        - "option_3": the user sends "3" or expresses interest in discussing the article
+        - "non_english": the user enters a message that is not in English
         - "specific_word": the user asks about a specific word from the article
         - "acknowledgement": the user sends a thank you or acknowledgement
         - "non_understanding": the user indicates they don't understand or asks for clarification
@@ -454,8 +449,7 @@ def classify_user_message(user_message, article, state):
         NEWS ARTICLE TITLE: {article["Title"]}
         USER MESSAGE: "{user_message}"
 
-        RESPOND WITH ONLY ONE WORD: "option_1", "option_2", "option_3", "specific_word", \
-        "acknowledgement", "non_understanding", "instruction", "conversation_end", \
+        RESPOND WITH ONLY ONE WORD: "non_english", "specific_word", "acknowledgement", "non_understanding", "instruction", "conversation_end", \
         "question_or_interest" or "statement"
         """
     elif state == "Waiting_User_First_Response_to_Thought":
