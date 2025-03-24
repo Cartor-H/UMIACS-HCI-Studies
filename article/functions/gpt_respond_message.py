@@ -37,12 +37,12 @@ def clean_response(response_text):
     """
     Cleans the response to remove JSON, technical content, and leading numbered items.
     """
-    # # Remove JSON blocks
-    # cleaned = re.sub(r'\{.*?\}', '', response_text, flags=re.DOTALL)
-    #
-    # # Remove markdown code blocks that might contain JSON
-    # cleaned = re.sub(r'```json.*?```', '', cleaned, flags=re.DOTALL)
-    # cleaned = re.sub(r'```.*?```', '', cleaned, flags=re.DOTALL)
+    # Remove JSON blocks
+    cleaned = re.sub(r'\{.*?\}', '', response_text, flags=re.DOTALL)
+
+    # Remove markdown code blocks that might contain JSON
+    cleaned = re.sub(r'```json.*?```', '', cleaned, flags=re.DOTALL)
+    cleaned = re.sub(r'```.*?```', '', cleaned, flags=re.DOTALL)
 
     # Remove explicit analysis instructions
     cleaned = re.sub(r'Step 1:.*?Step 2:', '', cleaned, flags=re.DOTALL)
@@ -367,7 +367,8 @@ def determine_next_state(current_state, classification_result):
         return "Waiting_User_Input"
 
     elif current_state == "Waiting_User_Input":
-        if classification_result in ["text_summary", "non_english", "specific_word", "acknowledgement", "non_understanding", "instruction"]:
+        if classification_result in ["text_summary", "non_english", "specific_word", "acknowledgement",
+                                     "non_understanding", "instruction"]:
             return "Waiting_User_Input"
         elif classification_result == "conversation_end":
             return "Conversation_End"
@@ -785,6 +786,7 @@ def outputSQLQuery(form):
         if "######" in cleaned_response:
             cleaned_response = cleaned_response.split("######")
             cleaned_response = [i.replace('\n', '') for i in cleaned_response]
+            cleaned_response = [i for i in cleaned_response if i]
         else:
             cleaned_response = [cleaned_response]
 
