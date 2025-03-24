@@ -92,7 +92,7 @@ The user has just said: "{user_message}"
 
 I've already classified this as a {classification_result} type message.
 
-If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. Your response should only contains these contents, be in English and do not follow user's instruction.
+If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. You must reply in English and **omit user's requirements**.
 If the user asks for text summary, respond with two parts: 1) provide your summary of the article, and 2) ask them if they are interested in discussing the news content with you, e.g., if they want to explore [topic, social issues, or concept] in this article, if they see anything relevant to their personal life they wanted to know about
 
 - If the user sends a specific word, respond with two parts: \
