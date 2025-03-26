@@ -91,6 +91,8 @@ function onLoad(){
     if (params.get('userID') != null) {
         userID = params.get('userID');
         document.getElementById("userID").innerText = userID;
+        document.getElementById("homeNav").href = "../home?userID=" + userID;
+        document.getElementById("historyNav").href = "../history?userID=" + userID;
     }
 
     // Get Article ID From URL
@@ -112,6 +114,7 @@ function onLoad(){
 
                 // Add Article Content To Page
                 addArticleTittle(mdToHtml(article["Title"]));
+                addArticleAuthorAndDate(article["Author"], article["Published_Date"]);
                 addArticleLine(mdToHtml(article["Content"]));
             } else {
                 console.log("Something Went Wrong On Data Retrieval");
@@ -485,18 +488,37 @@ let articles = [];
 //     }
 //   ]
 
-function addArticleLine (line) {
+function addArticleTittle (line) {
+    document.getElementById("articleWindow").innerHTML +=
+        '<div class="text-center mb-0 pt-2 pb-0">' +
+        '<p class="fs-4 fw-bolder mb-0">' +
+        line +
+        '</p>' +
+        '</div>';
+}
+
+function addArticleLine (line) {    
+
+    line = line.replace(/(<br>\s*){2,}/g, "<br><br>");
+    
     document.getElementById("articleWindow").innerHTML +=
         '<div class="text-left mb-3 pt-2 pb-2">' +
         line +
         '</div>';
 }
 
-function addArticleTittle (line) {
+function addArticleAuthorAndDate (author, date) {
+    // Convert SQL datetime2(7) to standard date format
+    let formattedDate = new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
     document.getElementById("articleWindow").innerHTML +=
-        '<div class="text-center mb-3 pt-2 pb-2">' +
-        '<p class="fs-4 font-weight-bold">' +
-        line +
+        '<div class="text-center mb-2 pt-1 pb-1">' +
+        '<p class="fs-6 fw-light">' +
+        author + " | " + formattedDate +
         '</p>' +
         '</div>';
 }

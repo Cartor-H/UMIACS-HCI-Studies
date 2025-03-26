@@ -116,6 +116,8 @@ function onLoad(){
     if (params.get('userID') != null) {
         userID = params.get('userID');
         document.getElementById("userID").innerText = userID;
+        document.getElementById("homeNav").href = "../home?userID=" + userID;
+        document.getElementById("historyNav").href = "../history?userID=" + userID;
     }
 
     // Get Article ID From URL

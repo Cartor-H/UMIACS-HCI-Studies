@@ -2,6 +2,17 @@
 let articleID = "-1";
 let userID = "-1";
 
+let tables = [
+    { name: "Articles"               , upload: true , download: true  },
+    { name: "Messages"               , upload: false, download: true  },
+    { name: "ArticleOpenHistory"     , upload: false, download: true  },
+    { name: "UserReadArticleHistory" , upload: false, download: true  },
+    { name: "MessageClassifications" , upload: false, download: true  },
+    { name: "ChainOfThought"         , upload: false, download: true  },
+    { name: "ArticleCategories"      , upload: true , download: true  },
+    // { name: "Users"                  , upload: false, download: false },
+];
+
 
 //------------------------------------------------------On Load-------------------------------------------------------//
 
@@ -39,42 +50,46 @@ function onLoad(){
         articleID = params.get('articleID');
     }
 
+    for (let i = 0; i < tables.length; i++) {
+        addTableRow(tables[i]);
+    }
 
-    //---------------------------------------------------------------------------------------------------Get Articles
-    //Ajax Python Call To Get Messages From SQL Server
-    $.ajax({
-        url: 'functions/get_articles.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        success: function (data) {
-            console.log(data)
-            if (data["Status"] == "Success") {
-                articles = JSON.parse(data["Data"])
 
-                //---------------------------------------------------------------------------------------------------Add Articles
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // //---------------------------------------------------------------------------------------------------Get Articles
+    // //Ajax Python Call To Get Messages From SQL Server
+    // $.ajax({
+    //     url: 'functions/get_articles.py',
+    //     type: 'POST',
+    //     loading: false,
+    //     dataType: 'json',
+    //     success: function (data) {
+    //         console.log(data)
+    //         if (data["Status"] == "Success") {
+    //             articles = JSON.parse(data["Data"])
 
-                for (let i = 0; i < articles.length; i++) {
-                    let articleDate = new Date(articles[i]["Published_Date"]);
-                    let formattedDate = articleDate.toLocaleDateString();
-                    if (articleDate >= oneWeekAgo) {
-                        addArticle("recentlyUpdatedArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
-                    } else {
-                        addArticle("olderNewsArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
-                    }
-                }
-            } else {
-                console.log("Something Went Wrong On Data Retrieval");
-                console.log(data);
-            }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
+    //             //---------------------------------------------------------------------------------------------------Add Articles
+    //             const oneWeekAgo = new Date();
+    //             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    //             for (let i = 0; i < articles.length; i++) {
+    //                 let articleDate = new Date(articles[i]["Published_Date"]);
+    //                 let formattedDate = articleDate.toLocaleDateString();
+    //                 if (articleDate >= oneWeekAgo) {
+    //                     addArticle("recentlyUpdatedArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+    //                 } else {
+    //                     addArticle("olderNewsArticles", articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
+    //                 }
+    //             }
+    //         } else {
+    //             console.log("Something Went Wrong On Data Retrieval");
+    //             console.log(data);
+    //         }
+    //     },
+    //     error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //         alert("Status: " + textStatus);
+    //         alert("Error: " + errorThrown);
+    //     }
+    // });
 
 
     //---------------------------------------------------------------------Connect to Server and Listen For New Messages
@@ -274,128 +289,6 @@ function keyUp(e) {
 //------------------------------------------------- Artilce Control -------------------------------------------------//
 
 let articles = [];
-// let articles = [
-//     {
-//       "id": 1,
-//       "title": "City Council Approves New Park Renovation",
-//       "description": "The city council approved a renovation plan for the historic park, promising new facilities and community spaces.",
-//       "date": "2023-10-10"
-//     },
-//     {
-//       "id": 2,
-//       "title": "Local Library Hosts Summer Reading Program",
-//       "description": "The downtown library is launching its annual summer reading event, encouraging residents of all ages to explore new books.",
-//       "date": "2023-06-15"
-//     },
-//     {
-//       "id": 3,
-//       "title": "Community Garden Initiative Blossoms in Westside Neighborhood",
-//       "description": "Local residents have come together to transform a vacant lot into a vibrant community garden, promoting sustainability and neighborhood bonding.",
-//       "date": "2023-05-20"
-//     },
-//     {
-//       "id": 4,
-//       "title": "Downtown Business Week Attracts Entrepreneurs",
-//       "description": "A week-long event in the heart of downtown has drawn local and regional entrepreneurs, showcasing innovative business ideas and networking opportunities.",
-//       "date": "2023-09-25"
-//     },
-//     {
-//       "id": 5,
-//       "title": "Local High School Wins State Championship",
-//       "description": "In a thrilling finale, the local high school soccer team clinched the state title, sparking celebrations across the community.",
-//       "date": "2023-11-05"
-//     },
-//     {
-//       "id": 6,
-//       "title": "Neighborhood Cleanup Day Scheduled for Saturday",
-//       "description": "Residents are encouraged to participate in a community cleanup event aimed at revitalizing local parks and streets.",
-//       "date": "2023-04-08"
-//     },
-//     {
-//       "id": 7,
-//       "title": "New Art Exhibit Showcases Local Talent",
-//       "description": "The city museum has unveiled a new exhibit that highlights the work of emerging local artists, drawing art enthusiasts from across the region.",
-//       "date": "2023-07-12"
-//     },
-//     {
-//       "id": 8,
-//       "title": "City Police Increase Patrols to Combat Rising Vandalism",
-//       "description": "Authorities are stepping up patrols in several neighborhoods in response to a recent spike in vandalism incidents.",
-//       "date": "2023-08-18"
-//     },
-//     {
-//       "id": 9,
-//       "title": "Local Restaurant Earns Michelin Star",
-//       "description": "A recently opened restaurant downtown has received a Michelin star, marking a milestone for the local culinary scene.",
-//       "date": "2023-10-01"
-//     },
-//     {
-//       "id": 10,
-//       "title": "City Announces Free Health Clinics for Residents",
-//       "description": "In a bid to improve community health, the city is offering free health clinics at various locations over the next month.",
-//       "date": "2023-03-15"
-//     },
-//     {
-//       "id": 11,
-//       "title": "Historic Building Gets Renovated for Community Use",
-//       "description": "A beloved historic building is being repurposed into a community center, complete with meeting rooms and cultural spaces.",
-//       "date": "2023-09-10"
-//     },
-//     {
-//       "id": 12,
-//       "title": "Local Sports Club Launches Youth Training Program",
-//       "description": "The sports club has introduced a new training initiative aimed at nurturing local talent and promoting physical fitness among youths.",
-//       "date": "2023-06-05"
-//     },
-//     {
-//       "id": 13,
-//       "title": "City Council Debates New Zoning Laws",
-//       "description": "Council members are currently deliberating proposed zoning changes that could impact local businesses and residential areas.",
-//       "date": "2023-08-22"
-//     },
-//     {
-//       "id": 14,
-//       "title": "New Public Transit Route to Improve Connectivity",
-//       "description": "A new bus route has been announced, promising to enhance transportation options for residents in suburban areas.",
-//       "date": "2023-07-30"
-//     },
-//     {
-//       "id": 15,
-//       "title": "Local Theater Group Stages a Classic Play",
-//       "description": "The community theater is set to perform a beloved classic, inviting locals to enjoy an evening of culture and drama.",
-//       "date": "2023-05-25"
-//     },
-//     {
-//       "id": 16,
-//       "title": "Fire Department Hosts Safety Awareness Workshop",
-//       "description": "Local firefighters are offering a series of workshops to educate residents on emergency preparedness and fire safety.",
-//       "date": "2023-04-20"
-//     },
-//     {
-//       "id": 17,
-//       "title": "New Recycling Program Launched in the City",
-//       "description": "City officials have rolled out an innovative recycling initiative designed to boost environmental sustainability and reduce waste.",
-//       "date": "2023-03-01"
-//     },
-//     {
-//       "id": 18,
-//       "title": "Local Farmer's Market Returns This Weekend",
-//       "description": "After a long hiatus, the popular farmer's market is back, featuring fresh produce, artisanal goods, and community fun.",
-//       "date": "2023-09-15"
-//     },
-//     {
-//       "id": 19,
-//       "title": "City Plans to Expand Bicycle Lanes",
-//       "description": "Local government announced plans to extend bike lanes throughout the city, promoting eco-friendly transportation and healthier lifestyles.",
-//       "date": "2023-10-20"
-//     },
-//     {
-//       "id": 20,
-//       "title": "Community Raises Funds for Local Shelter",
-//       "description": "A fundraising event held over the weekend successfully raised significant funds to support the local shelter and aid community members in need.",
-//       "date": "2023-11-12"
-//     }
-//   ]
 
 function addArticle (location, title, description, date, id, photo = 'default_news_photo.png') {
     document.getElementById(location).innerHTML +=
@@ -423,5 +316,280 @@ function addArticle (location, title, description, date, id, photo = 'default_ne
             card.style.transform = 'scale(1)';
             card.style.backgroundColor = '#f8f9fa';
         });
+    });
+}
+
+//------------------------------------------------- Article Upload -------------------------------------------------//
+
+// Upload Excel File & Parse it into JSON of Articles
+function uploadArticles() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.xlsx';
+    fileInput.onchange = () => {
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Assuming the first sheet contains the articles
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert the sheet to JSON
+                const articles = XLSX.utils.sheet_to_json(worksheet);
+
+                // Process the articles as needed
+                console.log(articles);
+
+                // Add articles to the database
+                addJSONArticlesToDB(articles);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    }
+    fileInput.click();
+}
+
+function addJSONArticlesToDB(articles) {
+    $.ajax({
+        url: 'functions/save_articles.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: { articles: JSON.stringify(articles) },
+        success: function (data) {
+            console.log(data);
+            if (data["Status"] == "Success") {
+                console.log(JSON.parse(data["Data"]));
+                // location.reload();
+            } else {
+                console.log(data);
+                console.log(data["Traceback"]);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
+}
+
+function downloadArticles() {
+
+    $.ajax({
+        url: 'functions/get_articles.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {},
+        success: function (data) {
+            console.log(data)
+            const jsonData = JSON.parse(data.Data);
+            // Create a worksheet
+            const ws = XLSX.utils.json_to_sheet(jsonData);
+
+            // Create a workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ChatLogs");
+
+            // Generate the Excel file
+            XLSX.writeFile(wb, "chat_logs.xlsx");
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
+}
+
+// ------------------------------------------------- Data Control ------------------------------------------------- //
+
+function addTableRow(table) {
+    let html = `
+      <div class="card d-flex align-items-center mb-2 w-100 flex-shrink-1">
+        <div class="card-body d-flex justify-content-between align-items-center w-100">
+          <div class="d-flex align-items-center">
+            <input type="checkbox" class="form-check-input table-name-check me-3 mt-0">
+            <h5 class="mb-0 text-start d-md-none" style="font-size: 0.8rem;">${table.name}</h5>
+            <h5 class="mb-0 text-start d-none d-md-block">${table.name}</h5>
+          </div>
+          <div class="ms-auto">
+    `
+
+    if (table.upload) {
+        html += `
+            <button type="button" class="btn btn-primary btn-sm ms-3" onclick="uploadData('${table.name}')">
+                <i class="fas fa-upload"></i> Upload
+            </button>
+        `
+    }
+
+    if (table.download) {
+        html += `
+            <button type="button" class="btn btn-primary btn-sm ms-3" onclick="downloadData('${table.name}')">
+                <i class="fas fa-download"></i> Download
+            </button>
+        `
+    }
+
+    console.log(table.name + " Added");
+    html += `
+          </div>
+        </div>
+      </div>
+    `  
+
+    document.getElementById("tableList").innerHTML += html;
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.table-name-check');
+    if (document.getElementById('selectAll').checked) {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    } else {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+}
+
+function uploadData(tableName) {
+
+    let localTables = [tableName,];
+
+    if (tableName === "all") {
+        localTables = tables.map(table => table.name);
+    }
+
+    if (tableName === "selected") {
+        localTables = [];
+        const checkboxes = document.querySelectorAll('.table-name-check');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                localTables.push(checkbox.parentElement.querySelector('h5').innerText);
+            }
+        });
+    }
+
+    // For the selected tables, get the data and upload it from
+    let tableData = {};
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.xlsx';
+    fileInput.onchange = () => {
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                localTables.forEach((tableName) => {
+                    if (workbook.SheetNames.includes(tableName)) {
+                        const worksheet = workbook.Sheets[tableName];
+                        const tableContent = XLSX.utils.sheet_to_json(worksheet);
+
+                        // Insert table data into tableData for each table name
+                        tableData[tableName] = tableContent;
+
+                        console.log(`Data for table ${tableName}:`, tableContent);
+                    } else {
+                        console.warn(`Sheet for table ${tableName} not found in the workbook.`);
+                    }
+                });
+
+
+                $.ajax({
+                    url: 'functions/save_all_tables.py',
+                    type: 'POST',
+                    loading: false,
+                    dataType: 'json',
+                    data: { tables: JSON.stringify(localTables), data: JSON.stringify(tableData) },
+                    success: function (data) {
+                        console.log(data);
+
+                        if (data.Status === "Success") {
+                            const jsonData = JSON.parse(data.Data);
+                            console.log(jsonData);
+
+                            if (jsonData["Articles"] != "") {
+                                articles = JSON.parse(jsonData["Articles"]);
+                                console.log(articles);
+                            }
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("Status: " + textStatus);
+                        alert("Error: " + errorThrown);
+                    }
+                });
+
+
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    };
+    fileInput.click();
+
+    // Data format: { table1: [data1], table2: [data2], ... }
+    
+}
+
+
+function downloadData(tableName) {
+
+    let localTables = [tableName,];
+
+    if (tableName === "all") {
+        localTables = tables.map(table => table.name);
+    }
+
+    if (tableName === "selected") {
+        localTables = [];
+        const checkboxes = document.querySelectorAll('.table-name-check');
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                localTables.push(checkbox.parentElement.querySelector('h5').innerText);
+            }
+        });
+    }
+
+    $.ajax({
+        url: 'functions/get_all_tables.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: { tables: JSON.stringify(localTables) },
+        success: function (data) {
+            console.log(data);
+            const jsonData = JSON.parse(data.Data);
+            console.log(jsonData);
+            const wb = XLSX.utils.book_new();
+
+            for (const table of Object.keys(jsonData)) {
+                console.log(table);
+                if (jsonData[table] == "") {
+                    console.log("Empty Table");
+                    continue;
+                }
+                console.log(JSON.parse(jsonData[table]));
+                const ws = XLSX.utils.json_to_sheet(JSON.parse(jsonData[table]));
+                XLSX.utils.book_append_sheet(wb, ws, table);
+            }
+
+            // Generate the Excel file
+            XLSX.writeFile(wb, `${tableName}.xlsx`);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
     });
 }

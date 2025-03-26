@@ -11,3 +11,13 @@
 .nav-link:hover {
     background-color: #e2e6ef;
   }
+
+.btn-primary {
+  background-color: #4992FD !important;
+  border-color: #4992FD !important;
+}
+
+.btn-primary:hover {
+  background-color: #76ADFD !important;
+  border-color: #76ADFD !important;
+}

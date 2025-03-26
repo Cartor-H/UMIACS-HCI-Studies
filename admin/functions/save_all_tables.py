@@ -31,40 +31,96 @@ def outputSQLQuery(form):
     con=pymssql.connect(connection['host'],connection['username'],connection['password'],connection['db'])
     cursor=con.cursor()
 
+    ALLOWED_TABLES = [
+        "Articles",
+        "ArticleCategories",
+    ]
 
-    cursor.execute("SELECT ID, Title, Published_Date, Description, Image_ID, Content, Author FROM articles ORDER BY Published_Date DESC FOR JSON AUTO")
-    data = cursor.fetchall()
+
+    tables = json.loads(form.get('tables', []))
+    data   = json.loads(form.get('data'  , []))
+
+    articles = data.get('Articles', [])
+    categories = data.get('ArticleCategories', [])
+
+    if not tables:
+        print(json.dumps({"Status": "No Data"}))
+        return
+
+    for table in tables:
+        if table not in ALLOWED_TABLES:
+            print(json.dumps({
+                "Status": "Error",
+                "Message": "Table not allowed",
+                "Table": table
+            }))
+            return
+
+
+    # Update or insert articles
+    for article in articles:
+        article_id = article.get('ID')
+
+
+        # Check if the article already exists
+        cursor.execute("SELECT COUNT(*) FROM articles WHERE ID = %s", (article_id,))
+        exists = cursor.fetchone()[0]
+        if exists:
+            # Update existing article
+            update_fields = []
+            update_values = []
+            for key, value in article.items():
+                if key != 'ID' and key != 'Added_Date':
+                    update_fields.append(f"{key} = %s")
+                    update_values.append(value if value is not None else 'NULL')
+            update_values.append(article_id)
+            cursor.execute(f"""
+            UPDATE articles
+            SET {', '.join(update_fields)}
+            WHERE id = %s
+            """, tuple(update_values))
+        else:
+            # Insert new article
+            columns = ', '.join([key for key in article.keys() if key != 'ID'])
+            placeholders = ', '.join(['%s' if value is not None else 'NULL' for key, value in article.items() if key != 'ID'])
+            values = [value for key, value in article.items() if key != 'ID' and value is not None]
+            columns += ', Added_Date'
+            placeholders += ', GETDATE()'
+            cursor.execute(f"""
+            INSERT INTO articles ({columns})
+            VALUES ({placeholders})
+            """, tuple(values))
+
+    con.commit()
+
+    # Update or insert article categories
+    cursor.execute("DELETE FROM ArticleCategories")
+    con.commit()
+
+    for category in categories:
+        # Categories are [Category, Order]
+        # Just replace the existing categories with the new ones
+        cursor.execute("INSERT INTO ArticleCategories (Category, [Order]) VALUES (%s, %s)", (category["Category"], category["Order"]))
+        con.commit()
+
+    data = {}
+    for table in tables:
+        query = "SELECT * FROM {} FOR JSON AUTO".format(table)
+        cursor.execute(query)
+        tableData = cursor.fetchall()
+        json_data = ''.join([row[0] for row in tableData])  # Concatenate the values from each row
+        data[table] = json_data
 
     if data:
-        json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
+        # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
         print(json.dumps({
             "Status" : "Success",
-            "Data" : json_data}))
+            "Data" : json.dumps(data)}))
     else:
         print(json.dumps({"Status" : "No Data"}))
 
     cursor.close()
     con.close()
-
-    # cursor = cnxn.cursor()
-    # query = u"SELECT default_password FROM student2022 where Student_ID like ? and password like ? FOR JSON AUTO"
-    # cursor.execute(query,[sID, userPassword])
-    # data = cursor.fetchall()
-    # if data:
-    #     print('[]')
-    #     return
-    #
-    # cursor = cnxn.cursor()
-    # cursor.execute("INSERT INTO student2022 (Student_ID, First_Name, Last_Name, password, default_password)"
-    #                "VALUES (?,?,?,?,?)", [sID, fName, lName, userPassword, 0])
-    # cursor.commit()
-    #
-    # cursor.execute("SELECT CAST((SELECT * FROM student2022 FOR JSON AUTO) AS VARCHAR(MAX))", [])
-    # data = cursor.fetchall()
-    # if data:
-    #     print(data[0][0])
-    # else:
-    #     print('[]')
 
 try:
     print("Content-type: text/html\n\n")   # say generating html

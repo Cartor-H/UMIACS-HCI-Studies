@@ -32,14 +32,44 @@ def outputSQLQuery(form):
     cursor=con.cursor()
 
 
-    cursor.execute("SELECT ID, Title, Published_Date, Description, Image_ID, Content, Author FROM articles ORDER BY Published_Date DESC FOR JSON AUTO")
-    data = cursor.fetchall()
+    ALLOWED_TABLES = [
+        "Articles",
+        "Messages",
+        #"Users",
+        "ArticleOpenHistory",
+        "UserReadArticleHistory",
+        "MessageClassifications",
+        "ChainOfThought",
+        "ArticleCategories",
+    ]
+
+
+    tables = json.loads(form.get('tables', []))
+    if not tables:
+        print(json.dumps({"Status": "No Data"}))
+        return
+
+    data = {}
+    for table in tables:
+        if table not in ALLOWED_TABLES:
+            print(json.dumps({
+                "Status": "Error",
+                "Message": "Table not allowed",
+                "Table": table
+            }))
+            return
+        # print(table,"\n")
+        query = "SELECT * FROM {} FOR JSON AUTO".format(table)
+        cursor.execute(query)
+        tableData = cursor.fetchall()
+        json_data = ''.join([row[0] for row in tableData])  # Concatenate the values from each row
+        data[table] = json_data
 
     if data:
-        json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
+        # json_data = ''.join([row[0] for row in data])  # Concatenate the values from each row
         print(json.dumps({
             "Status" : "Success",
-            "Data" : json_data}))
+            "Data" : json.dumps(data)}))
     else:
         print(json.dumps({"Status" : "No Data"}))
 
