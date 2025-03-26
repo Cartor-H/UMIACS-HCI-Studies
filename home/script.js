@@ -61,7 +61,7 @@ function onLoad(){
                     document.getElementById("content").innerHTML += `
                     <div class="row m-5 mb-4">
                         <div class="col">
-                            <h2>${category}</h2>
+                            <h2><strong>${category}</strong></h2>
                             <div id="${strToID(category)}" class="row">
                             </div>
                         </div>
@@ -418,8 +418,8 @@ function addArticle (location, title, description, date, id, photo = 'default_ne
         `<div class="col-md-2 mb-3">\n` +
         `  <div class="card h-100" style="transition: transform 0.2s, background-color 0.2s; cursor: pointer; background-color: #f8f9fa; border: none;" onclick="window.open('../article?articleID=${id}&userID=${userID}', '_blank')">\n` +
         `    <div class="card-body p-3" style="font-family: 'Times New Roman', Times, serif;">\n` +
-        `      <h5 class="card-title fs-4 font-weight-bold">${title}</h5>\n` +
-        `      <p class="card-date">${date}</p>\n` +
+        `      <h5 class="card-title fs-4 fw-bold">${title}</h5>\n` +
+        `      <p class="card-date fw-bold" style="color: #6c757d;">${date}</p>\n` +
         `      <p class="card-text">${description}</p>\n` +
         `    </div>\n` +
         `  </div>\n` +
