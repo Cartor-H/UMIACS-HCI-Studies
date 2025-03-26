@@ -56,6 +56,7 @@ def outputSQLQuery(form):
             END as Category
         FROM Articles
         WHERE Category != (SELECT Category FROM ArticleCategories WHERE [Order]=2)
+        ORDER BY Published_Date DESC
         FOR JSON AUTO
     """, (userID))
     articles_data = cursor.fetchall()
