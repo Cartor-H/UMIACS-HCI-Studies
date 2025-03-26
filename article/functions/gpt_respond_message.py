@@ -795,7 +795,8 @@ def outputSQLQuery(form):
             "response": cleaned_response + ["current state: " + current_state + ' \nnext state: ' + next_state + \
                                             " \ncategory: " + category_value],
             "chainOfThought": chain_of_thought,
-            "classification": category_value
+            "classification": category_value,
+            "intention": "dummy_intention"
         })
 
         # data = json.dumps({

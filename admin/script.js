@@ -6,10 +6,10 @@ let tables = [
     { name: "Articles"               , upload: true , download: true  },
     { name: "Messages"               , upload: false, download: true  },
     { name: "ArticleOpenHistory"     , upload: false, download: true  },
-    { name: "UserReadArticleHistory" , upload: false, download: true  },
     { name: "MessageClassifications" , upload: false, download: true  },
     { name: "ChainOfThought"         , upload: false, download: true  },
     { name: "ArticleCategories"      , upload: true , download: true  },
+    // { name: "UserReadArticleHistory" , upload: false, download: true  },
     // { name: "Users"                  , upload: false, download: false },
 ];
 
