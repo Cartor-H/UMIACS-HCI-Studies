@@ -519,9 +519,14 @@ function uploadData(tableName) {
                             const jsonData = JSON.parse(data.Data);
                             console.log(jsonData);
 
-                            if (jsonData["Articles"] != "") {
+                            if (jsonData["Articles"] !== undefined) {
                                 articles = JSON.parse(jsonData["Articles"]);
                                 console.log(articles);
+                            }
+
+                            if (jsonData["ArticleCategories"] !== undefined) {
+                                const categories = JSON.parse(jsonData["ArticleCategories"]);
+                                console.log(categories);
                             }
                         }
                     },

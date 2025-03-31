@@ -94,8 +94,9 @@ def outputSQLQuery(form):
     con.commit()
 
     # Update or insert article categories
-    cursor.execute("DELETE FROM ArticleCategories")
-    con.commit()
+    if categories:
+        cursor.execute("DELETE FROM ArticleCategories")
+        con.commit()
 
     for category in categories:
         # Categories are [Category, Order]
