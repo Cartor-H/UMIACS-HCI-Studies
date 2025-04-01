@@ -167,7 +167,6 @@ Category: {category} (1=word explanation, 2=summary)
 2. Then, ask if they are interested in discussing the news content further, suggesting possible topics from the article they might want to explore.
 
 When responding to user, you MUST follow these requirements: 
-When responding to user, you MUST follow these requirements: 
 1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
 3. Write the response following the rules but in your own words. If you have similar follow-ups as in your previous message, adjust your wording and avoid repeating yourself too much.
@@ -186,7 +185,6 @@ User's question: "{user_message}"
 1. Provide an answer and specify whether the information you provide is from the news article itself or from the other sources. 
 2. Ask the user what prompted them to be interested in this factual information, e.g., if they wanted to know how this factual information may be [explanation, implication, interpetation] of [topic, social issue, or concepts] of the news article, or if there's anything relevant to their life they would like to know about?
 
-When responding to user, you MUST follow these requirements: 
 When responding to user, you MUST follow these requirements: 
 1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
@@ -258,7 +256,6 @@ User initial question/request/interest Category: {category}
 
 - If the user responded by asking you questions about your answer or asking you to elaborate on your answer, e.g., where did you find the information, how did you come up with the answer, etc., respond by 1) provide an answer to the user, and 2) ask if this explanation makes sense to them or not.
 
-When responding to user, you MUST follow these requirements: 
 When responding to user, you MUST follow these requirements: 
 1. Use "######" to separate different parts listed in the instruction.
 2. Limit each part of your response to 150 words. 
@@ -767,9 +764,14 @@ def outputSQLQuery(form):
             category = classification_result.get("category")
         elif "category" in prev_chain_of_thought:
             category = prev_chain_of_thought["category"]
+        #     intention = classification_result
+        # else:
+        #     intention = classification_result
+
+        if isinstance(classification_result, str):
             intention = classification_result
-        else:
-            intention = classification_result
+        elif isinstance(classification_result, dict):
+            intention = "question_or_interest"
 
         classification = None
         if isinstance(classification_result, dict):
@@ -787,18 +789,20 @@ def outputSQLQuery(form):
 
         # Format category for frontend
         category_value = str(classification) if classification is not None else ""
+        intention_value = str(intention) if intention is not None else ""
 
         if "######" in cleaned_response:
+            cleaned_response = cleaned_response.strip()
+            # cleaned_response = cleaned_response.replace('\n', "######")
             cleaned_response = cleaned_response.split("######")
-            cleaned_response = [i.replace('\n', '') for i in cleaned_response]
-            cleaned_response = [i for i in cleaned_response if i]
+            cleaned_response = [i.strip() for i in cleaned_response if i.strip()]
         else:
             cleaned_response = [cleaned_response]
 
         # Step 9: Return response
         data = json.dumps({
             "response": cleaned_response + ["current state: " + current_state + ' \nnext state: ' + next_state + \
-                                            " \ncategory: " + category_value + " \nintention: " + intention],
+                                            " \ncategory: " + category_value + " \nintention: " + intention_value],
             "chainOfThought": chain_of_thought,
             "classification": category_value,
             "intention": intention
