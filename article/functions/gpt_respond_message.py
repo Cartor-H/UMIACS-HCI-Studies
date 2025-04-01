@@ -61,6 +61,10 @@ def generate_prompt_for_state(state, user_message, article, prev_chain_of_though
     Generates the appropriate prompt based on the current state.
     """
     article_context = f"""
+This is an authentic news article from a credible source. If anything in the article conflicts your knowledge base, generate your answer based on the information from the article and give suggestions for where to find relevant factual information. Do not make your own judgement of the article or say the article is fake. 
+
+NEWS ARTICLE META INFORMATION: Published Date: {article["Published_Date"]}, Author: {article["Author"]}
+
 NEWS ARTICLE TITLE: {article["Title"]}
 
 NEWS ARTICLE CONTENT: {article["Content"]}
@@ -371,7 +375,7 @@ def determine_next_state(current_state, classification_result):
                                      "non_understanding", "instruction"]:
             return "Waiting_User_Input"
         elif classification_result == "conversation_end":
-            return "Conversation_End"
+            return "Waiting_User_Input"
         elif classification_result == "question_or_interest":
             return "User_Question_Processing"
         elif classification_result == "statement":
@@ -432,9 +436,6 @@ def determine_next_state(current_state, classification_result):
 
     elif current_state == "Chatbot_Follow-up":
         return "Waiting_User_Input"
-
-    elif current_state == "Conversation_End":
-        return "beginning"
 
     else:
         return "Waiting_User_Input"  # Default fallback
@@ -761,10 +762,14 @@ def outputSQLQuery(form):
 
         # Get category from classification or previous state
         category = None
+        intention = None
         if isinstance(classification_result, dict):
             category = classification_result.get("category")
         elif "category" in prev_chain_of_thought:
             category = prev_chain_of_thought["category"]
+            intention = classification_result
+        else:
+            intention = classification_result
 
         classification = None
         if isinstance(classification_result, dict):
@@ -793,10 +798,10 @@ def outputSQLQuery(form):
         # Step 9: Return response
         data = json.dumps({
             "response": cleaned_response + ["current state: " + current_state + ' \nnext state: ' + next_state + \
-                                            " \ncategory: " + category_value],
+                                            " \ncategory: " + category_value + " \nintention: " + intention],
             "chainOfThought": chain_of_thought,
             "classification": category_value,
-            "intention": "dummy_intention"
+            "intention": intention
         })
 
         # data = json.dumps({
