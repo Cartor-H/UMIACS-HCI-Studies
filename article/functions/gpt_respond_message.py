@@ -805,7 +805,7 @@ def outputSQLQuery(form):
                                             " \ncategory: " + category_value + " \nintention: " + intention_value],
             "chainOfThought": chain_of_thought,
             "classification": category_value,
-            "intention": intention
+            "intention": intention_value
         })
 
         # data = json.dumps({
