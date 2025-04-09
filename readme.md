@@ -199,6 +199,24 @@ CREATE TABLE ChainOfThought (
 -- Table `ArticleCategories`
 -- Category, nvachar(255)
 -- Order, int
+
+-- Create table named MessageIntentions
+-- articleID int nullable foreign key
+-- userID nvarchar(50) nullable
+-- messageID foreign key int nullable
+-- message nvarchar(MAX) nullable
+-- intention nvarchar(50) nullable
+
+CREATE TABLE MessageIntentions
+(
+    articleID int NULL,
+    userID nvarchar(50) NULL,
+    messageID int NULL,
+    message nvarchar(MAX) NULL,
+    intention nvarchar(50) NULL,
+    FOREIGN KEY (articleID) REFERENCES Articles(ID),
+    FOREIGN KEY (messageID) REFERENCES Messages(messageID)
+);
 ```
 
 # SSL / https

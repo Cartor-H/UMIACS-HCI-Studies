@@ -35,10 +35,11 @@ def outputSQLQuery(form):
     ALLOWED_TABLES = [
         "Articles",
         "Messages",
-        #"Users",
         "ArticleOpenHistory",
         "UserReadArticleHistory",
         "MessageClassifications",
+        "MessageIntentions",
+        "UnifiedMessages",
         "ChainOfThought",
         "ArticleCategories",
     ]
@@ -59,7 +60,26 @@ def outputSQLQuery(form):
             }))
             return
         # print(table,"\n")
-        query = "SELECT * FROM {} FOR JSON AUTO".format(table)
+        if table == "UnifiedMessages":
+            query = """
+                SELECT
+                    m.*,
+                    ISNULL(c.classification, '') AS classification,
+                    ISNULL(i.intention, '') AS intention
+                FROM
+                    Messages m
+                LEFT JOIN
+                    MessageClassifications c ON m.MessageID = c.MessageID
+                LEFT JOIN
+                    MessageIntentions i ON m.MessageID = i.MessageID
+                WHERE
+                    m.MessageID IS NOT NULL
+                ORDER BY
+                    m.MessageID
+                FOR JSON AUTO
+            """
+        else:
+            query = "SELECT * FROM {} FOR JSON AUTO".format(table)
         cursor.execute(query)
         tableData = cursor.fetchall()
         json_data = ''.join([row[0] for row in tableData])  # Concatenate the values from each row
