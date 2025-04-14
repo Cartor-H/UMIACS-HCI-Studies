@@ -61,6 +61,8 @@ def generate_prompt_for_state(state, user_message, article, prev_chain_of_though
     Generates the appropriate prompt based on the current state.
     """
     article_context = f"""
+ARTICLE CONTEXT:
+
 This is an authentic news article from a credible source. If anything in the article conflicts your knowledge base, generate your answer based on the information from the article and give suggestions for where to find relevant factual information. Do not make your own judgement of the article or say the article is fake. 
 
 NEWS ARTICLE META INFORMATION: Published Date: {article["Published_Date"]}, Author: {article["Author"]}
@@ -73,7 +75,7 @@ NEWS ARTICLE CONTENT: {article["Content"]}
     conversation_context = ""
     if stored_messages:
         conversation_context = f"""
-Conversation history:
+CONVERSATION HISTORY:
 {format_conversation_history(stored_messages)}
         """
 
@@ -93,6 +95,7 @@ Hi! I’m here to help you make sense of the news article. Take your time to rea
             return f"""You are a news reading assistant helping a user engage with a news article.
     
     {article_context}
+    
     {conversation_context}
     
     The user has just said: "{user_message}"
