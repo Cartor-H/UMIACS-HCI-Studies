@@ -4,13 +4,19 @@ html {
 }
 
 .left-color {
-    background-color: #C4E4FF !important;
+    background-color: #d8d8d8 !important;
     color: #000000;
     border: none !important;
 }
 
 .right-color {
     background-color: #FDFFC2 !important;
+    color: #000000;
+    border: none !important;
+}
+
+.middle-color {
+    background-color: #C4E4FF !important;
     color: #000000;
     border: none !important;
 }

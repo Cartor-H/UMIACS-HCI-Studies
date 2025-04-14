@@ -9,6 +9,30 @@ messageCount = 0;
 messageIDs = {};
 
 
+//---------------------------------------------------Call Backend-----------------------------------------------------//
+
+function callFunction(functionName, data, successFunc) {
+    $.ajax({
+        url: `functions/${functionName}.py`,
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: data,
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log("JS Status: " + textStatus + "\n" +
+                        "JS Error: " + errorThrown);
+            if (data["Status"] == "Error") {
+                console.log("Py Status: " + data.Status + "\n" +
+                            "Py Error: " + data.Error + "\n" +
+                            "Py Traceback: " + data.Traceback);
+            }
+        }
+    });
+}
+
 //---------------------------------------------------Send Message-----------------------------------------------------//
 
 /*
@@ -23,7 +47,7 @@ function clientSendMsg() {
 
     if (message!="" && articleID!="-1" && userID!="-1"){
         //Show Message Locally
-        addMessageRight(message);
+        addMessageRight(message, new Date().toISOString());
 
         //Add Message To SQL Server
         saveMessage(message, "Client", messageCount);
@@ -127,6 +151,8 @@ function onLoad(){
         }
     });
 
+    addMessageMiddle("Loading...", new Date(), "Loading");
+
     // Retrieve Previously Sent Messages From SQL Server
     if(articleID && userID && articleID!="" && userID!="") {
         $.ajax({
@@ -140,11 +166,14 @@ function onLoad(){
 
                     // Add Messages To Page
                     let messages = JSON.parse(data["Data"])
+                    console.log(data["Data"])
                     for (let i = 0; i < messages.length; i++) {
+                        console.log(messages[i]["TimeSent"])
+                        console.log(new Date(messages[i]["TimeSent"]))
                         if (messages[i]["Sender"] == "Client") {
-                            addMessageRight(messages[i]["Message"]);
+                            addMessageRight(messages[i]["Message"], new Date(messages[i]["TimeSent"]));
                         } else {
-                            addMessageLeft(mdToHtml(messages[i]["Message"]));
+                            addMessageLeft(mdToHtml(messages[i]["Message"]), new Date(messages[i]["TimeSent"]));
                         }
                     }
                 } else {
@@ -206,100 +235,92 @@ function onLoad(){
     document.getElementById("message").focus();
 }
 
-//----------------------------------------------------Clock Update----------------------------------------------------//
-
-// // MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
-
-// let startTime = null;
-
-// /*
-// A function primarily used to inform the user of how much time they're taking, and how much time they have left in the
-// istant messagin session.
-// */
-// function updateClock() {
-//     const clockElement = document.getElementById("clock");
-//     if (clockElement) {
-//         const currentTime = Date.now();
-//         const elapsedTime = currentTime - startTime;
-
-//         // Calculate minutes and seconds
-//         const minutes = Math.floor(elapsedTime / 60000);
-//         const seconds = Math.floor((elapsedTime % 60000) / 1000);
-
-//         // Format minutes and seconds with leading zeros
-//         const formattedMinutes = String(minutes).padStart(2, "0");
-//         const formattedSeconds = String(seconds).padStart(2, "0");
-
-//         // Update the clock display
-//         clockElement.value = `${formattedMinutes}:${formattedSeconds}`;
-
-//         // Schedule the next update in 1 second
-//         setTimeout(updateClock, 1000);
-//     }
-// }
-
-//--------------------------------------------------Typing Detection--------------------------------------------------//
-
-// // MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
-// // Might be useful to display a notice of typing when chat gpt is thinking.
-
-function checkCursor() {
-
-}
-
-
-// var typingTimeout;
-
-// /*
-// A function that detects when the user is typing, and sends a notification to the server.
-// */
-// function notifyTyping () {
-//     if (typingTimeout != undefined) {
-//         clearTimeout(typingTimeout);
-//     } else {
-//         notifyTypingHelper(document.getElementById("receiverID").value,"Start")
-//     }
-//     typingTimeout = setTimeout(function() {
-//         notifyTypingHelper(document.getElementById("receiverID").value,"Stop");
-//         typingTimeout = undefined;
-//     }, 1000);
-// }
-
-// function notifyTypingHelper(to, status){
-//     fetch(`http://52.15.204.7:8080/notify-typing?to=${to}&status=${status}&section=${document.title}`)
-//         .then(response => response.text())
-//         .then(result => {
-//             console.log(result);
-//         })
-//         .catch(error => {
-//             console.error(error);
-//         });
-//     console.log(typingTimeout)
-//     console.log("Typing " + status + " to " + to)
-// }
-
 //----------------------------------------------Adding Messages To Screen---------------------------------------------//
 
-/*
-Add's a txt msg as if the client sent it.
-*/
-function addMessageRight (message) {
+/**
+ * 
+ * @param {Date} time The time to be converted.
+ * @returns {string} The time in the format h:m.
+ */
+function time2hm(time) {
+    const date = new Date(time);
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12 || 12; // Convert to 12-hour format and handle midnight (0)
+    return `${hours}:${minutes} ${ampm}`;
+}
+
+/**
+ * Returns Previous Message Element.
+ */
+function getLastMessageElement() {
+    return document.querySelector('#chatWindow .card:last-child');
+}
+
+/**
+ * Adds a txt msg as if the client sent it.
+ * 
+ * @param message The message to be sent.
+ * @param time The time the message was sent.
+ */
+function addMessageRight (message, time) {
+    let formattedDate = time2hm(time);
+
+    // // Get the last message element
+    // let lastMessage = document.querySelector('#chatWindow .card.right-color:last-child');
+    // // If the time in minutes is the same and the side is on the right then remove the time
+    // if (lastMessage && lastMessage.getAttribute('side') === 'right' && lastMessage.querySelector('.date')) {
+    //     // Delete <p> element
+    //     lastMessage.querySelector('.date').parentElement.remove();
+    // }
+
+
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card right-color offset-2 mb-3">' +
+        '<div class="card right-color offset-2 mb-3" side="right">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
+        '<p class="text-end mb-0">' +
+        '<small class="date">' + formattedDate + '</small>' +
+        '</p>' +
         '</div>' +
         '</div>';
 }
 
-/*
-Add's a txt msg as if the client was sent a msg by someone else.
-*/
-function addMessageLeft (message) {
+/**
+ * Adds a txt msg as if the client was sent a msg by someone else.
+ * 
+ * @param message The message to be sent.
+ * @param time The time the message was sent.
+ */
+function addMessageLeft (message, time) {
+    let formattedDate = time2hm(time);
+
+
     document.getElementById("chatWindow").innerHTML +=
         '<div class="card left-color col-10 mb-3">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
+        '<p class="text-start mb-0">' +
+        '<small>' + formattedDate + '</small>' +
+        '</p>' +
+        '</div>' +
+        '</div>';
+}
+
+/**
+ * Adds a text message to the middle of the chat window.
+ */
+function addMessageMiddle(message, time, id) {
+    let formattedDate = time2hm(time);
+
+    document.getElementById("chatWindow").innerHTML +=
+        '<div class="card middle-color text-center offset-1 col-10 mb-3">' +
+        '<div class="card-body pt-2 pb-2">' +
+        '<em>' + message + '</em>' +
+        '<p class="text-center mb-0">' +
+        '<small>' + formattedDate + '</small>' +
+        '</p>' +
         '</div>' +
         '</div>';
 }
@@ -365,128 +386,6 @@ function keyUp(e) {
 //------------------------------------------------- Artilce Control -------------------------------------------------//
 
 let articles = [];
-// let articles = [
-//     {
-//       "id": 1,
-//       "title": "City Council Approves New Park Renovation",
-//       "description": "The city council approved a renovation plan for the historic park, promising new facilities and community spaces.",
-//       "date": "2023-10-10"
-//     },
-//     {
-//       "id": 2,
-//       "title": "Local Library Hosts Summer Reading Program",
-//       "description": "The downtown library is launching its annual summer reading event, encouraging residents of all ages to explore new books.",
-//       "date": "2023-06-15"
-//     },
-//     {
-//       "id": 3,
-//       "title": "Community Garden Initiative Blossoms in Westside Neighborhood",
-//       "description": "Local residents have come together to transform a vacant lot into a vibrant community garden, promoting sustainability and neighborhood bonding.",
-//       "date": "2023-05-20"
-//     },
-//     {
-//       "id": 4,
-//       "title": "Downtown Business Week Attracts Entrepreneurs",
-//       "description": "A week-long event in the heart of downtown has drawn local and regional entrepreneurs, showcasing innovative business ideas and networking opportunities.",
-//       "date": "2023-09-25"
-//     },
-//     {
-//       "id": 5,
-//       "title": "Local High School Wins State Championship",
-//       "description": "In a thrilling finale, the local high school soccer team clinched the state title, sparking celebrations across the community.",
-//       "date": "2023-11-05"
-//     },
-//     {
-//       "id": 6,
-//       "title": "Neighborhood Cleanup Day Scheduled for Saturday",
-//       "description": "Residents are encouraged to participate in a community cleanup event aimed at revitalizing local parks and streets.",
-//       "date": "2023-04-08"
-//     },
-//     {
-//       "id": 7,
-//       "title": "New Art Exhibit Showcases Local Talent",
-//       "description": "The city museum has unveiled a new exhibit that highlights the work of emerging local artists, drawing art enthusiasts from across the region.",
-//       "date": "2023-07-12"
-//     },
-//     {
-//       "id": 8,
-//       "title": "City Police Increase Patrols to Combat Rising Vandalism",
-//       "description": "Authorities are stepping up patrols in several neighborhoods in response to a recent spike in vandalism incidents.",
-//       "date": "2023-08-18"
-//     },
-//     {
-//       "id": 9,
-//       "title": "Local Restaurant Earns Michelin Star",
-//       "description": "A recently opened restaurant downtown has received a Michelin star, marking a milestone for the local culinary scene.",
-//       "date": "2023-10-01"
-//     },
-//     {
-//       "id": 10,
-//       "title": "City Announces Free Health Clinics for Residents",
-//       "description": "In a bid to improve community health, the city is offering free health clinics at various locations over the next month.",
-//       "date": "2023-03-15"
-//     },
-//     {
-//       "id": 11,
-//       "title": "Historic Building Gets Renovated for Community Use",
-//       "description": "A beloved historic building is being repurposed into a community center, complete with meeting rooms and cultural spaces.",
-//       "date": "2023-09-10"
-//     },
-//     {
-//       "id": 12,
-//       "title": "Local Sports Club Launches Youth Training Program",
-//       "description": "The sports club has introduced a new training initiative aimed at nurturing local talent and promoting physical fitness among youths.",
-//       "date": "2023-06-05"
-//     },
-//     {
-//       "id": 13,
-//       "title": "City Council Debates New Zoning Laws",
-//       "description": "Council members are currently deliberating proposed zoning changes that could impact local businesses and residential areas.",
-//       "date": "2023-08-22"
-//     },
-//     {
-//       "id": 14,
-//       "title": "New Public Transit Route to Improve Connectivity",
-//       "description": "A new bus route has been announced, promising to enhance transportation options for residents in suburban areas.",
-//       "date": "2023-07-30"
-//     },
-//     {
-//       "id": 15,
-//       "title": "Local Theater Group Stages a Classic Play",
-//       "description": "The community theater is set to perform a beloved classic, inviting locals to enjoy an evening of culture and drama.",
-//       "date": "2023-05-25"
-//     },
-//     {
-//       "id": 16,
-//       "title": "Fire Department Hosts Safety Awareness Workshop",
-//       "description": "Local firefighters are offering a series of workshops to educate residents on emergency preparedness and fire safety.",
-//       "date": "2023-04-20"
-//     },
-//     {
-//       "id": 17,
-//       "title": "New Recycling Program Launched in the City",
-//       "description": "City officials have rolled out an innovative recycling initiative designed to boost environmental sustainability and reduce waste.",
-//       "date": "2023-03-01"
-//     },
-//     {
-//       "id": 18,
-//       "title": "Local Farmer's Market Returns This Weekend",
-//       "description": "After a long hiatus, the popular farmer's market is back, featuring fresh produce, artisanal goods, and community fun.",
-//       "date": "2023-09-15"
-//     },
-//     {
-//       "id": 19,
-//       "title": "City Plans to Expand Bicycle Lanes",
-//       "description": "Local government announced plans to extend bike lanes throughout the city, promoting eco-friendly transportation and healthier lifestyles.",
-//       "date": "2023-10-20"
-//     },
-//     {
-//       "id": 20,
-//       "title": "Community Raises Funds for Local Shelter",
-//       "description": "A fundraising event held over the weekend successfully raised significant funds to support the local shelter and aid community members in need.",
-//       "date": "2023-11-12"
-//     }
-//   ]
 
 function addArticleTittle (line) {
     document.getElementById("articleWindow").innerHTML +=
@@ -609,12 +508,13 @@ function gptRespondMessage(message, localMessageIDTracker) {
                 data = JSON.parse(data["Data"])
 
                 chainOfThought = data["chainOfThought"]
-                let classification = data["classification"]
                 let responses = data["response"]
+                let classification = data["classification"]
+                let intention = data["intention"]
 
                 for (let i = 0; i < responses.length; i++) {
                     setTimeout(function() {
-                        addMessageLeft(mdToHtml(responses[i]));
+                        addMessageLeft(mdToHtml(responses[i]), new Date().toISOString());
                         saveMessage(responses[i], "ChatBot", -1);
                         scrollBottom();
                     }, i * 2000);
@@ -623,10 +523,11 @@ function gptRespondMessage(message, localMessageIDTracker) {
                 // Save Chain Of Thought
                 saveChainOfThought();
 
-                // Save Classification
+                // Save Classification & Intention
                 console.log("Classification: " + classification)
-                if (classification != "") {
-                    saveClassification(localMessageIDTracker, message, classification)
+                console.log("Intention: " + intention)
+                if (classification != "" || intention != "") {
+                    saveClassAndIntent(localMessageIDTracker, message, classification, intention)
                 }
 
                 // saveClassification(message, classification)
@@ -641,7 +542,7 @@ function gptRespondMessage(message, localMessageIDTracker) {
     
 }
 
-function saveClassification(localMessageIDTracker, message, classification) {
+function saveClassAndIntent(localMessageIDTracker, message, classification, intention) {
 
     let waitForMessageID = setInterval(function() {
         if (messageIDs[localMessageIDTracker] !== undefined) {
@@ -650,26 +551,51 @@ function saveClassification(localMessageIDTracker, message, classification) {
             let messageID = messageIDs[localMessageIDTracker];
             delete messageIDs[localMessageIDTracker];
 
-            $.ajax({
-                url: 'functions/save_classification.py',
-                type: 'POST',
-                loading: false,
-                dataType: 'json',
-                data: {
-                    message: message,
-                    classification: classification,
-                    articleID: articleID,
-                    userID: userID,
-                    messageID: messageID
-                },
-                success: function (data) {
-                    console.log(data)
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert("Status: " + textStatus);
-                    alert("Error: " + errorThrown);
-                }
-            });
+            if (classification != "") {
+                $.ajax({
+                    url: 'functions/save_classification.py',
+                    type: 'POST',
+                    loading: false,
+                    dataType: 'json',
+                    data: {
+                        message: message,
+                        classification: classification,
+                        articleID: articleID,
+                        userID: userID,
+                        messageID: messageID
+                    },
+                    success: function (data) {
+                        console.log(data)
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("Status: " + textStatus);
+                        alert("Error: " + errorThrown);
+                    }
+                });
+            }
+
+            if (intention != "") {
+                $.ajax({
+                    url: 'functions/save_intention.py',
+                    type: 'POST',
+                    loading: false,
+                    dataType: 'json',
+                    data: {
+                        message: message,
+                        intention: intention,
+                        articleID: articleID,
+                        userID: userID,
+                        messageID: messageID
+                    },
+                    success: function (data) {
+                        console.log(data)
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("Status: " + textStatus);
+                        alert("Error: " + errorThrown);
+                    }
+                });
+            }
         }
     }, 100);
 }
