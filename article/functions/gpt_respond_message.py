@@ -22,7 +22,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 # Set OpenAI API key from environment variable
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 
-client = openai.OpenAI()
+client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'), organization=os.getenv("OPENAI_ORG_ID"))
 
 
 def is_classification_only_state(state):
