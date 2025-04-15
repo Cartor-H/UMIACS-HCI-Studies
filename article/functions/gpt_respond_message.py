@@ -360,11 +360,11 @@ def determine_next_state(current_state, classification_result, prev_chain_of_tho
     exit_conditions_met = False
 
     # Exit condition 1: High turn count
-    if turn_count >= 10:
+    if turn_count > 10:
         exit_conditions_met = True
 
     # Exit condition 2: Completed all flow steps
-    if flow_index >= 5:
+    if flow_index > 5:
         exit_conditions_met = True
 
     # Exit condition 3: Unrelated question (would need to be determined by classification)
