@@ -503,27 +503,27 @@ function startChatBotPipeline() {
 
 function getPrevChainOfThought() {
     // Retreive Previous Chain Of Thought
-    if(articleID && userID && articleID!="" && userID!="") {
-        $.ajax({
-            url: 'functions/get_chain_of_thought.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {articleID: articleID, userID: userID},
-            success: function (data) {
-                if (data["Status"] == "Success") {
-                    chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
-                    console.log(chainOfThought)
-                } else {
-                    console.log("No Data, Starting New Chain Of Thought");
-                }
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-    }
+    // if(articleID && userID && articleID!="" && userID!="") {
+    //     $.ajax({
+    //         url: 'functions/get_chain_of_thought.py',
+    //         type: 'POST',
+    //         loading: false,
+    //         dataType: 'json',
+    //         data: {articleID: articleID, userID: userID},
+    //         success: function (data) {
+    //             if (data["Status"] == "Success") {
+    //                 chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
+    //                 console.log(chainOfThought)
+    //             } else {
+    //                 console.log("No Data, Starting New Chain Of Thought");
+    //             }
+    //         },
+    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //             alert("Status: " + textStatus);
+    //             alert("Error: " + errorThrown);
+    //         }
+    //     });
+    // }
 }
 
 
@@ -725,9 +725,10 @@ let msgFinalTakeAways = "*Thank you for your conversation with the chatbot.\n\n"
 
 function handleStateOnLoad(data) {
     console.log(data)
-    if (data["ChatState"] == "InitialTakeaways") { setStateIninitialTakeaways() }
-    if (data["ChatState"] == "Discussion"      ) { setStateDiscussion        () }
-    if (data["ChatState"] == "FinalTakeAways"  ) { setStateFinalTakeAways    () }
+    setStateIninitialTakeaways()
+    // if (data["ChatState"] == "InitialTakeaways") { setStateIninitialTakeaways() }
+    // if (data["ChatState"] == "Discussion"      ) { setStateDiscussion        () }
+    // if (data["ChatState"] == "FinalTakeAways"  ) { setStateFinalTakeAways    () }
 }
 
 function setStateIninitialTakeaways() {
@@ -735,11 +736,11 @@ function setStateIninitialTakeaways() {
     chatState = "InitialTakeaways";
 
     // Add Initial Takeaways Message if not already added
-    if (document.getElementById("InitialTakeawaysMessage") == null) {
+    // if (document.getElementById("InitialTakeawaysMessage") == null) {
         addMessageMiddle(mdToHtml(msgInitialTakeaways),
             new Date(), "InitialTakeawaysMessage");
         saveMessage(msgInitialTakeaways, "System", -1);
-    }
+    // }
 
     // Save To SQL Server
     saveArticleAction("InitialTakeaways");
@@ -750,13 +751,13 @@ function setStateDiscussion() {
     chatState = "Discussion";
 
     // Add Discussions Message if not already added
-    if (document.getElementById("DiscussionMessage") == null) {
+    // if (document.getElementById("DiscussionMessage") == null) {
         addMessageMiddle(mdToHtml(msgDiscussion),
             new Date(), "DiscussionMessage");
         addLine();
         saveMessage(msgDiscussion, "System", -1);
         saveMessage("<hr>", "Line", -1);
-    }
+    // }
     // startChatBotPipeline();
 
     // Enable Ending Button
@@ -771,13 +772,13 @@ function setStateFinalTakeAways() {
     chatState = "FinalTakeAways";
 
     // Add Discussions Message if not already added
-    if (document.getElementById("FinalTakeAwaysMessage") == null) {
+    // if (document.getElementById("FinalTakeAwaysMessage") == null) {
         addLine();
         addMessageMiddle(mdToHtml(msgFinalTakeAways),
             new Date(), "FinalTakeAwaysMessage");
         saveMessage("<hr>", "Line", -1);
         saveMessage(msgFinalTakeAways, "System", -1);
-    }
+    // }
 
     // Dissable Ending Button
     document.getElementById("btnSetStateFinalTakeAways").classList.add("btn-disabled");
