@@ -8,10 +8,19 @@ let article = {};
 messageCount = 0;
 messageIDs = {};
 
+let chatState = "";
+
 
 //---------------------------------------------------Call Backend-----------------------------------------------------//
 
-function callFunction(functionName, data, successFunc) {
+/**
+ * Calls the provided function from the backend with the given data.
+ * Then calls callBack(responseData), where responseData is the data returned from the backend.
+ * @param {*} functionName 
+ * @param {*} data 
+ * @param {*} callBack 
+ */
+function callFunction(functionName, data, callBack) {
     $.ajax({
         url: `functions/${functionName}.py`,
         type: 'POST',
@@ -20,6 +29,13 @@ function callFunction(functionName, data, successFunc) {
         data: data,
         success: function (data) {
             console.log(data)
+            if (data["Status"] == "Success") {
+                callBack(data["Data"]);
+            } else if (data["Status"] == "Error") {
+                console.log("Py Status: " + data.Status + "\n" +
+                            "Py Error: " + data.Error + "\n" +
+                            "Py Traceback: " + data.Traceback);
+            }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log("JS Status: " + textStatus + "\n" +
@@ -46,16 +62,21 @@ function clientSendMsg() {
     let message = document.getElementById("message").innerText;
 
     if (message!="" && articleID!="-1" && userID!="-1"){
+
         //Show Message Locally
         addMessageRight(message, new Date().toISOString());
 
         //Add Message To SQL Server
         saveMessage(message, "Client", messageCount);
 
-        //Send Message to ChatBot
-        sendMessageToChatBot(message, messageCount);
-
-        messageCount = messageCount + 1;
+        
+        // Check chat state
+        if (chatState === "InitialTakeaways") { setStateDiscussion() }
+        if (chatState != "FinalTakeAways") {
+            //Send Message to ChatBot
+            sendMessageToChatBot(message, messageCount);
+            messageCount = messageCount + 1;
+        }
 
         //Clear Message and Scroll to Bottom
         document.getElementById("message").innerText = ""
@@ -125,114 +146,24 @@ function onLoad(){
     }
 
     // Get Article Content From SQL Server
-    $.ajax({
-        url: 'functions/get_article.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {articleID: articleID},
-        success: function (data) {
-            console.log(data)
-            if (data["Status"] == "Success") {
-                article = JSON.parse(data["Data"])[0]
-
-                // Add Article Content To Page
-                addArticleTittle(mdToHtml(article["Title"]));
-                addArticleAuthorAndDate(article["Author"], article["Published_Date"]);
-                addArticleLine(mdToHtml(article["Content"]));
-            } else {
-                console.log("Something Went Wrong On Data Retrieval");
-                console.log(data);
-            }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
-
-    addMessageMiddle("Loading...", new Date(), "Loading");
+    getArticleContent(articleID);
 
     // Retrieve Previously Sent Messages From SQL Server
-    if(articleID && userID && articleID!="" && userID!="") {
-        $.ajax({
-            url: 'functions/get_messages.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {articleID: articleID, userID: userID},
-            success: function (data) {
-                if (data["Status"] == "Success") {
+    getPreviousMessages( function(messages) {
 
-                    // Add Messages To Page
-                    let messages = JSON.parse(data["Data"])
-                    console.log(data["Data"])
-                    for (let i = 0; i < messages.length; i++) {
-                        console.log(messages[i]["TimeSent"])
-                        console.log(new Date(messages[i]["TimeSent"]))
-                        if (messages[i]["Sender"] == "Client") {
-                            addMessageRight(messages[i]["Message"], new Date(messages[i]["TimeSent"]));
-                        } else {
-                            addMessageLeft(mdToHtml(messages[i]["Message"]), new Date(messages[i]["TimeSent"]));
-                        }
-                    }
-                } else {
-                    console.log("Something Went Wrong On Data Retrieval");
-                    console.log(data);
-                }
-
-                scrollBottom();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-    }
-
-    // Wait until chainOfThought and article are not null
-    let checkDataInterval = setInterval(function() {
-        if (article && Object.keys(article).length !== 0) {
-            clearInterval(checkDataInterval);
-            
-            // Ensure Chain Of Thought is null for first message.
-            // let tempCOT = chainOfThought
-            chainOfThought = null;
-            // Call GPT
-            sendMessageToChatBot("");
-
-            // chainOfThought = tempCOT;
-        }
-    }, 100);
-
-    // Retreive Previous Chain Of Thought
-    if(articleID && userID && articleID!="" && userID!="") {
-        $.ajax({
-            url: 'functions/get_chain_of_thought.py',
-            type: 'POST',
-            loading: false,
-            dataType: 'json',
-            data: {articleID: articleID, userID: userID},
-            success: function (data) {
-                if (data["Status"] == "Success") {
-                    chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
-                    console.log(chainOfThought)
-                } else {
-                    console.log("No Data, Starting New Chain Of Thought");
-                }
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Status: " + textStatus);
-                alert("Error: " + errorThrown);
-            }
-        });
-    }
+    // Retrieve Previous Chain Of Thought From SQL Server
+    getPrevChainOfThought();
 
     // Add open action to ArticleOpenHistory
     saveArticleAction("open");
 
+    // State Mangeament
+    callFunction("get_article_state", {articleID: articleID, userID: userID}, handleStateOnLoad);
+
     // Focus on text input area
     document.getElementById("message").focus();
+
+    });
 }
 
 //----------------------------------------------Adding Messages To Screen---------------------------------------------//
@@ -285,6 +216,8 @@ function addMessageRight (message, time) {
         '</p>' +
         '</div>' +
         '</div>';
+
+    scrollBottom();
 }
 
 /**
@@ -306,6 +239,8 @@ function addMessageLeft (message, time) {
         '</p>' +
         '</div>' +
         '</div>';
+
+    scrollBottom();
 }
 
 /**
@@ -315,14 +250,20 @@ function addMessageMiddle(message, time, id) {
     let formattedDate = time2hm(time);
 
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card middle-color text-center offset-1 col-10 mb-3">' +
+        `<div class="card middle-color text-center offset-1 col-10 mb-3" id=${id}>` +
         '<div class="card-body pt-2 pb-2">' +
-        '<em>' + message + '</em>' +
-        '<p class="text-center mb-0">' +
-        '<small>' + formattedDate + '</small>' +
-        '</p>' +
+        message +
+        // '<p class="text-center mb-0">' +
+        // '<small>' + formattedDate + '</small>' +
+        // '</p>' +
         '</div>' +
         '</div>';
+
+    scrollBottom();
+}
+
+function addLine() {
+    document.getElementById("chatWindow").innerHTML += '<hr class="mb-3">';
 }
 
 function addTypingAlertLeft() {
@@ -339,8 +280,53 @@ function removeTypingAlertLeft() {
     document.getElementById("typingAlertLeft").remove();
 }
 
-// function addMessagesLeft (messages) {
-//     for (let i = 0; i < messages.length; i++) {
+function getPreviousMessages(callBack) {
+    if(articleID && userID && articleID!="" && userID!="") {
+        $.ajax({
+            url: 'functions/get_messages.py',
+            type: 'POST',
+            loading: false,
+            dataType: 'json',
+            data: {articleID: articleID, userID: userID},
+            success: function (data) {
+                if (data["Status"] == "Success") {
+
+                    // Add Messages To Page
+                    let messages = JSON.parse(data["Data"])
+                    console.log(data["Data"])
+                    for (let i = 0; i < messages.length; i++) {
+                        console.log(messages[i]["TimeSent"])
+                        console.log(new Date(messages[i]["TimeSent"]))
+                        if (messages[i]["Sender"] == "Client") {
+                            addMessageRight(messages[i]["Message"], new Date(messages[i]["TimeSent"]));
+                        } else if (messages[i]["Sender"] == "ChatBot") {
+                            addMessageLeft(mdToHtml(messages[i]["Message"]), new Date(messages[i]["TimeSent"]));
+                        } else if (messages[i]["Sender"] == "System") {
+                            addMessageMiddle(mdToHtml(messages[i]["Message"]), new Date(messages[i]["TimeSent"]), getIdFromMessage(messages[i]["Message"]));
+                        } else if (messages[i]["Sender"] == "Line") {
+                            addLine();
+                        }
+                    }
+                } else {
+                    console.log("Something Went Wrong On Data Retrieval");
+                    console.log(data);
+                }
+
+                
+                // Call Back Function
+                if (callBack) {
+                    callBack(data);
+                }
+
+                scrollBottom();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus);
+                alert("Error: " + errorThrown);
+            }
+        });
+    }
+}
 
 //---------------------------------------------------Scroll Bottom----------------------------------------------------//
 
@@ -434,6 +420,35 @@ function mdToHtml(text) {
 }
 
 
+function getArticleContent(articleID) {
+    $.ajax({
+        url: 'functions/get_article.py',
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: {articleID: articleID},
+        success: function (data) {
+            console.log(data)
+            if (data["Status"] == "Success") {
+                article = JSON.parse(data["Data"])[0]
+
+                // Add Article Content To Page
+                addArticleTittle(mdToHtml(article["Title"]));
+                addArticleAuthorAndDate(article["Author"], article["Published_Date"]);
+                addArticleLine(mdToHtml(article["Content"]));
+            } else {
+                console.log("Something Went Wrong On Data Retrieval");
+                console.log(data);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("Status: " + textStatus);
+            alert("Error: " + errorThrown);
+        }
+    });
+}
+
+
 //----------------------------------------- User Article History Control -------------------------------------//
 
 function saveArticleAction(action) {
@@ -463,6 +478,54 @@ function saveArticleAction(action) {
 }
 
 //------------------------------------------------- Chat Bot -------------------------------------------------//
+
+/**
+ * Start Chatbot Pipeline
+ */
+function startChatBotPipeline() {
+    
+
+    // // Wait until chainOfThought and article are not null
+    // let checkDataInterval = setInterval(function() {
+    //     if (article && Object.keys(article).length !== 0) {
+    //         clearInterval(checkDataInterval);
+            
+    //         // Ensure Chain Of Thought is null for first message.
+    //         // let tempCOT = chainOfThought
+    //         chainOfThought = null;
+    //         // Call GPT
+    //         sendMessageToChatBot("");
+
+    //         // chainOfThought = tempCOT;
+    //     }
+    // }, 100);
+}
+
+function getPrevChainOfThought() {
+    // Retreive Previous Chain Of Thought
+    if(articleID && userID && articleID!="" && userID!="") {
+        $.ajax({
+            url: 'functions/get_chain_of_thought.py',
+            type: 'POST',
+            loading: false,
+            dataType: 'json',
+            data: {articleID: articleID, userID: userID},
+            success: function (data) {
+                if (data["Status"] == "Success") {
+                    chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
+                    console.log(chainOfThought)
+                } else {
+                    console.log("No Data, Starting New Chain Of Thought");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus);
+                alert("Error: " + errorThrown);
+            }
+        });
+    }
+}
+
 
 /*
 This function should containt the logic for the chat bot pipeline.
@@ -645,3 +708,87 @@ window.addEventListener('beforeunload', function (e) {
     closeTab();
     saveArticleAction("close");
 });
+
+//---------------------------------------------------State Management-----------------------------------------------------//
+
+let msgInitialTakeaways = "*What are your main takeaways from this news article?\n"+
+"Please write down some of your thoughts before talking to the chatbot.*"
+
+let msgDiscussion = "*Thank you for sharing your thoughts.\n"+
+    "You can now start your converstation with the chatbot.*"
+
+let msgFinalTakeAways = "*Thank you for your conversation with the chatbot.\n\n"+
+    "Based on your own reading of the article and the conversation, what are your final takeaways from this news article?"+
+    "Please write down some of your thoughts before leaving this article.*"
+
+
+
+function handleStateOnLoad(data) {
+    console.log(data)
+    if (data["ChatState"] == "InitialTakeaways") { setStateIninitialTakeaways() }
+    if (data["ChatState"] == "Discussion"      ) { setStateDiscussion        () }
+    if (data["ChatState"] == "FinalTakeAways"  ) { setStateFinalTakeAways    () }
+}
+
+function setStateIninitialTakeaways() {
+    // Set Chat State
+    chatState = "InitialTakeaways";
+
+    // Add Initial Takeaways Message if not already added
+    if (document.getElementById("InitialTakeawaysMessage") == null) {
+        addMessageMiddle(mdToHtml(msgInitialTakeaways),
+            new Date(), "InitialTakeawaysMessage");
+        saveMessage(msgInitialTakeaways, "System", -1);
+    }
+
+    // Save To SQL Server
+    saveArticleAction("InitialTakeaways");
+}
+
+function setStateDiscussion() {
+    // Set Chat State
+    chatState = "Discussion";
+
+    // Add Discussions Message if not already added
+    if (document.getElementById("DiscussionMessage") == null) {
+        addMessageMiddle(mdToHtml(msgDiscussion),
+            new Date(), "DiscussionMessage");
+        addLine();
+        saveMessage(msgDiscussion, "System", -1);
+        saveMessage("<hr>", "Line", -1);
+    }
+    // startChatBotPipeline();
+
+    // Enable Ending Button
+    document.getElementById("btnSetStateFinalTakeAways").classList.remove("btn-disabled");
+
+    // Save To SQL Server
+    saveArticleAction("Discussion");
+}
+
+function setStateFinalTakeAways() {
+    // Set Chat State
+    chatState = "FinalTakeAways";
+
+    // Add Discussions Message if not already added
+    if (document.getElementById("FinalTakeAwaysMessage") == null) {
+        addLine();
+        addMessageMiddle(mdToHtml(msgFinalTakeAways),
+            new Date(), "FinalTakeAwaysMessage");
+        saveMessage("<hr>", "Line", -1);
+        saveMessage(msgFinalTakeAways, "System", -1);
+    }
+
+    // Dissable Ending Button
+    document.getElementById("btnSetStateFinalTakeAways").classList.add("btn-disabled");
+
+    saveArticleAction("FinalTakeAways");
+}
+
+function getIdFromMessage(message) {
+    console.log(message)
+    console.log(msgInitialTakeaways)
+    if (message == msgInitialTakeaways) { return "InitialTakeawaysMessage" }
+    if (message == msgDiscussion      ) { return "DiscussionMessage" }
+    if (message == msgFinalTakeAways  ) { return "FinalTakeAwaysMessage" }
+}
