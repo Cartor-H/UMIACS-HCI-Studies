@@ -82,13 +82,22 @@
 
     <div class="col-lg-6 mb-4 h-100">
       <div class="card shadow-sm h-100">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">Chat</h5>
+        <div class="card-header bg-primary text-white p-0">
+          <div class="d-flex justify-content-between p-0" style="gap: 0;">
+            <div class="progress-step flex-fill text-center py-2 disabled-tab" id="stepInitialTakeaways" style="flex: 1; border-top-left-radius: 5px;">
+              Initial Takeaways
+            </div>
+            <div class="progress-step flex-fill text-center py-2 disabled-tab" id="stepDiscussionMessage" style="flex: 1; border-right: 0px solid;">
+              Discussion With Chatbot
+            </div>
+            <div class="progress-step flex-fill text-center py-2 disabled-tab" id="stepStateFinalTakeAways" style="flex: 1; border-top-right-radius: 5px;">
+              Final Takeaways
+            </div>
+          </div>
         </div>
         <div class="card-body overflow-auto pb-0" id="chatWindow">
             <!-- Chat content goes here -->
         </div>
-        
         <div class="card-footer">
             <!-- <div class="alert alert-primary p-1 ps-2" role="alert" id="typingAlert" hidden style="animation: pulse 1.5s infinite;">
             Bot is typing...

@@ -76,6 +76,8 @@ function clientSendMsg() {
             //Send Message to ChatBot
             sendMessageToChatBot(message, messageCount);
             messageCount = messageCount + 1;
+        } else {
+            setStateCompleted()
         }
 
         //Clear Message and Scroll to Bottom
@@ -687,27 +689,194 @@ function saveChainOfThought() {
 
 //---------------------------------------------------Close Page-----------------------------------------------------//
 
-function closeTab() {
-    if (window.opener && !window.opener.closed) {
 
-        window.opener.location.href = '/home';
-        
-        window.opener.focus();
+// Comprehensive page closure and navigation prevention
+class NavigationPrevention {
+    constructor(options = {}) {
+        // Configuration options
+        this.options = {
+            confirmationMessage: options.confirmationMessage || 
+                "Are you sure you want to leave this page? You have not shared your final takeaways yet.",
+            preventUnload: options.preventUnload ?? true
+        };
 
-        
-        window.opener.postMessage({ action: 'focusHome', url: '/home' }, '*');
+        // Bind methods to maintain correct context
+        this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
+        this.handleLinkClick = this.handleLinkClick.bind(this);
+        this.createCloseModal = this.createCloseModal.bind(this);
+
+        // Set up event listeners
+        this.init();
     }
-    window.close();
-    
-    saveChainOfThought();
 
-    return false;
+    init() {
+        if (this.options.preventUnload) {
+            // Prevent tab/window closure
+            window.addEventListener('beforeunload', this.handleBeforeUnload);
+            
+            // Prevent link navigation
+            document.addEventListener('click', this.handleLinkClick, true);
+        }
+    }
+
+    createCloseModal(onLeave) {
+        // Create modal container
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
+
+        // Modal content
+        const modalContent = document.createElement('div');
+        modalContent.style.backgroundColor = '#fff';
+        modalContent.style.padding = '20px';
+        modalContent.style.borderRadius = '8px';
+        modalContent.style.textAlign = 'center';
+        modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+        modalContent.style.maxWidth = '400px';
+        modalContent.style.width = '90%';
+
+        // Modal title
+        const modalTitle = document.createElement('h2');
+        modalTitle.innerText = 'Confirm Navigation';
+        modalTitle.style.marginBottom = '15px';
+        modalContent.appendChild(modalTitle);
+
+        // Modal message
+        const modalMessage = document.createElement('p');
+        modalMessage.innerText = this.options.confirmationMessage;
+        modalMessage.style.marginBottom = '20px';
+        modalContent.appendChild(modalMessage);
+
+        // Button container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '10px';
+
+        // Stay button
+        const stayButton = document.createElement('button');
+        stayButton.innerText = 'Stay on Page';
+        stayButton.style.backgroundColor = '#007bff';
+        stayButton.style.color = '#fff';
+        stayButton.style.border = 'none';
+        stayButton.style.padding = '10px 20px';
+        stayButton.style.borderRadius = '4px';
+        stayButton.style.cursor = 'pointer';
+        stayButton.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+
+        // Leave button
+        const leaveButton = document.createElement('button');
+        leaveButton.innerText = 'Leave Page';
+        leaveButton.style.backgroundColor = '#dc3545';
+        leaveButton.style.color = '#fff';
+        leaveButton.style.border = 'none';
+        leaveButton.style.padding = '10px 20px';
+        leaveButton.style.borderRadius = '4px';
+        leaveButton.style.cursor = 'pointer';
+        leaveButton.addEventListener('click', () => {
+            document.body.removeChild(modal);
+            // Call the provided onLeave callback
+            if (typeof onLeave === 'function') {
+                onLeave();
+            }
+        });
+
+        // Add buttons to container
+        buttonContainer.appendChild(stayButton);
+        buttonContainer.appendChild(leaveButton);
+        modalContent.appendChild(buttonContainer);
+
+        // Add modal to body
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        return false;
+    }
+
+    handleBeforeUnload(e) {
+        // Prevent the default unload behavior
+        e.preventDefault();
+        
+        // Show the custom modal
+        this.createCloseModal(() => {
+            // If window.opener exists, handle opener navigation
+            if (window.opener && !window.opener.closed) {
+                window.opener.location.href = '/home';
+                window.opener.focus();
+                window.opener.postMessage({ action: 'focusHome', url: '/home' }, '*');
+            }
+            
+            // Perform any necessary save actions
+            if (typeof saveChainOfThought === 'function') {
+                saveChainOfThought();
+            }
+            
+            if (typeof saveArticleAction === 'function') {
+                saveArticleAction("close");
+            }
+            
+            // Attempt to close the window
+            window.close();
+        });
+        
+        // Required for some browsers
+        e.returnValue = '';
+    }
+
+    handleLinkClick(e) {
+        // Check if the click was on a link or inside a link
+        const link = e.target.closest('a');
+        
+        if (link && link.href) {
+            // Prevent default navigation
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Show modal with navigation callback
+            this.createCloseModal(() => {
+                // Navigate to the link
+                window.location.href = link.href;
+            });
+        }
+    }
+
+    // Method to enable/disable prevention
+    setPreventNavigation(prevent) {
+        this.options.preventUnload = prevent;
+        
+        // Remove or add event listeners based on the setting
+        if (prevent) {
+            window.addEventListener('beforeunload', this.handleBeforeUnload);
+            document.addEventListener('click', this.handleLinkClick, true);
+        } else {
+            window.removeEventListener('beforeunload', this.handleBeforeUnload);
+            document.removeEventListener('click', this.handleLinkClick, true);
+        }
+    }
 }
 
-window.addEventListener('beforeunload', function (e) {
-    closeTab();
-    saveArticleAction("close");
-});
+// Create an instance with default settings
+const navigationPrevention = new NavigationPrevention();
+
+// Example of customization
+// const customNavigationPrevention = new NavigationPrevention({
+//     confirmationMessage: 'Custom leave message',
+//     preventUnload: true
+// });
+
+// To dynamically enable/disable:
+// navigationPrevention.setPreventNavigation(false);
+// navigationPrevention.setPreventNavigation(true);
 
 //---------------------------------------------------State Management-----------------------------------------------------//
 
@@ -742,6 +911,9 @@ function setStateIninitialTakeaways() {
         saveMessage(msgInitialTakeaways, "System", -1);
     // }
 
+    document.getElementById("stepInitialTakeaways").classList.remove("disabled-tab");
+    document.getElementById("stepInitialTakeaways").classList.add("active-tab");
+
     // Save To SQL Server
     saveArticleAction("InitialTakeaways");
 }
@@ -763,6 +935,10 @@ function setStateDiscussion() {
     // Enable Ending Button
     document.getElementById("btnSetStateFinalTakeAways").classList.remove("btn-disabled");
 
+    
+    document.getElementById("stepDiscussionMessage").classList.remove("disabled-tab");
+    document.getElementById("stepDiscussionMessage").classList.add("active-tab");
+
     // Save To SQL Server
     saveArticleAction("Discussion");
 }
@@ -783,7 +959,21 @@ function setStateFinalTakeAways() {
     // Dissable Ending Button
     document.getElementById("btnSetStateFinalTakeAways").classList.add("btn-disabled");
 
+    
+    document.getElementById("stepStateFinalTakeAways").classList.remove("disabled-tab");
+    document.getElementById("stepStateFinalTakeAways").classList.add("active-tab");
+
     saveArticleAction("FinalTakeAways");
+}
+
+function setStateCompleted() {
+    // Set Chat State
+    chatState = "Completed";
+
+    // Send a popup message to the user
+    createPopUp("Article Completed", "You have completed reading this news article. You can now close this page or return to the home page.");
+
+    saveArticleAction("Completed");
 }
 
 function getIdFromMessage(message) {
@@ -792,4 +982,53 @@ function getIdFromMessage(message) {
     if (message == msgInitialTakeaways) { return "InitialTakeawaysMessage" }
     if (message == msgDiscussion      ) { return "DiscussionMessage" }
     if (message == msgFinalTakeAways  ) { return "FinalTakeAwaysMessage" }
+}
+
+
+
+function createPopUp(title, message) {
+        // Use a modal dialog for a better user experience
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
+    
+        const modalContent = document.createElement('div');
+        modalContent.style.backgroundColor = '#fff';
+        modalContent.style.padding = '20px';
+        modalContent.style.borderRadius = '8px';
+        modalContent.style.textAlign = 'center';
+        modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    
+        const modalTitle = document.createElement('h2');
+        modalTitle.innerText = title;
+        modalContent.appendChild(modalTitle);
+    
+        const modalMessage = document.createElement('p');
+        modalMessage.innerText = message; // 
+        modalContent.appendChild(modalMessage);
+    
+        const closeButton = document.createElement('button');
+        closeButton.innerText = 'Close';
+        closeButton.style.marginTop = '10px';
+        closeButton.style.padding = '10px 20px';
+        closeButton.style.border = 'none';
+        closeButton.style.borderRadius = '4px';
+        closeButton.style.backgroundColor = '#007bff';
+        closeButton.style.color = '#fff';
+        closeButton.style.cursor = 'pointer';
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        modalContent.appendChild(closeButton);
+    
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
 }

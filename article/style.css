@@ -16,3 +16,14 @@
     cursor: not-allowed;
     pointer-events: none;
 }
+
+.active-tab {
+    background-color: rgb(13 110 253) !important;
+    color: white !important;
+}
+
+
+.disabled-tab {
+    background-color: rgb(114, 170, 253) !important;
+    color: white !important;
+}
