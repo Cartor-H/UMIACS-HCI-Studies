@@ -846,8 +846,8 @@ def outputSQLQuery(form):
             cleaned_response = [cleaned_response]
 
         data = json.dumps({
-            "response": cleaned_response + [f"current state: {current_state} \n next state: {next_state} \n turn count: {turn_count} \n category: {category_value} \n category explanation: {intention_value}"],
-            # "response": cleaned_response,
+            # "response": cleaned_response + [f"current state: {current_state} \n next state: {next_state} \n turn count: {turn_count} \n category: {category_value} \n category explanation: {intention_value}"],
+            "response": cleaned_response,
             "chainOfThought": chain_of_thought,
             "classification": current_state,
             "intention": "",
