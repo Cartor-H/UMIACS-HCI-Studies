@@ -1,10 +1,53 @@
 //---------------------------------------------------Global Variables-----------------------------------------------------//
-let articleID = "-1";
 let userID = "-1";
 
 let chainOfThought = null;
 let article = {};
 
+messageCount = 0;
+messageIDs = {};
+
+let chatState = "";
+
+let sendMsgEnabled = true;
+
+//---------------------------------------------------Call Backend-----------------------------------------------------//
+
+/**
+ * Calls the provided function from the backend with the given data.
+ * Then calls callBack(responseData), where responseData is the data returned from the backend.
+ * @param {*} functionName 
+ * @param {*} data 
+ * @param {*} callBack 
+ */
+function callFunction(functionName, data, callBack) {
+    $.ajax({
+        url: `functions/${functionName}.py`,
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: data,
+        success: function (data) {
+            console.log(data)
+            if (data["Status"] == "Success") {
+                callBack(data["Data"]);
+            } else if (data["Status"] == "Error") {
+                console.log("Py Status: " + data.Status + "\n" +
+                            "Py Error: " + data.Error + "\n" +
+                            "Py Traceback: " + data.Traceback);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log("JS Status: " + textStatus + "\n" +
+                        "JS Error: " + errorThrown);
+            if (data["Status"] == "Error") {
+                console.log("Py Status: " + data.Status + "\n" +
+                            "Py Error: " + data.Error + "\n" +
+                            "Py Traceback: " + data.Traceback);
+            }
+        }
+    });
+}
 
 //---------------------------------------------------Send Message-----------------------------------------------------//
 
@@ -18,15 +61,26 @@ function clientSendMsg() {
 
     let message = document.getElementById("message").innerText;
 
-    if (message!="" && articleID!="-1" && userID!="-1"){
-        //Show Message Locally
-        addMessageRight(message);
+    if (message!="" && articleID!="-1" && userID!="-1" && sendMsgEnabled){
 
-        //Send Message to ChatBot
-        sendMessageToChatBot(message);
+        sendMsgEnabled = false;
+
+        //Show Message Locally
+        addMessageRight(message, new Date().toISOString());
 
         //Add Message To SQL Server
-        saveMessage(message, "Client");
+        saveMessage(message, "Client", messageCount);
+
+        
+        // Check chat state
+        if (chatState === "InitialTakeaways") { setStateDiscussion() }
+        if (chatState != "FinalTakeAways") {
+            //Send Message to ChatBot
+            sendMessageToChatBot(message, messageCount);
+            messageCount = messageCount + 1;
+        } else {
+            setStateCompleted()
+        }
 
         //Clear Message and Scroll to Bottom
         document.getElementById("message").innerText = ""
@@ -35,8 +89,9 @@ function clientSendMsg() {
 }
 
 //---------------------------------------------------Save Message-----------------------------------------------------//
-function saveMessage(message, sender) {
+function saveMessage(message, sender, localMessageIDTracker) {
     //Ajax Call To Serverside Python
+
     $.ajax({
         url: 'functions/save_message.py',
         type: 'POST',
@@ -51,6 +106,14 @@ function saveMessage(message, sender) {
         },
         success: function (data) {
             console.log(data)
+            if (data["Status"] == "Success") {
+                messageID = data["Data"]["MessageID"]
+                messageIDs[localMessageIDTracker] = messageID
+                console.log("Message ID: " + messageID + " Local Message ID: " + localMessageIDTracker)
+            } else {
+                console.log("Something Went Wrong On Data Retrieval");
+                console.log(data);
+            }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             alert("Status: " + textStatus);
@@ -58,45 +121,6 @@ function saveMessage(message, sender) {
         }
     });
 }
-
-{/* <div class="accordion" id="questionsAccordion">
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-            Question 1
-        </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#questionsAccordion">
-        <div class="accordion-body">
-            Answer to question 1.
-        </div>
-        </div>
-    </div>
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingTwo">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-            Question 2
-        </button>
-        </h2>
-        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#questionsAccordion">
-        <div class="accordion-body">
-            Answer to question 2.
-        </div>
-        </div>
-    </div>
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingThree">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-            Question 3
-        </button>
-        </h2>
-        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#questionsAccordion">
-        <div class="accordion-body">
-            Answer to question 3.
-        </div>
-        </div>
-    </div>
-</div> */}
 
 
 //------------------------------------------------------On Load-------------------------------------------------------//
@@ -120,307 +144,11 @@ function onLoad(){
         document.getElementById("historyNav").href = "../history?userID=" + userID;
     }
 
-    // Get Article ID From URL
-    if (params.get('articleID') != null) {
-        articleID = params.get('articleID');
-    }
 
-//---------------------------------------------------------------------------------------------------Get Articles
-    //Ajax Python Call To Get Messages From SQL Server
-    $.ajax({
-        url: 'functions/get_questions.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {userID: userID},
-        success: function (data) {
-            console.log(data)
-            if (data["Status"] == "Success") {
-                let articleData = data["Data"]
-
-                //---------------------------------------------------------------------------------------------------Add Articles
-
-                questions = JSON.parse(articleData["Questions"]);
-                articles = JSON.parse(articleData["Articles"]);
-
-                console.log("Questions" + questions);
-                console.log("Questions" + articles);
-
-                for (let i = 0; i < articles.length; i++) {
-                    let title = articles[i]["Title"];
-                    let articleID = articles[i]["ID"];
-
-                    console.log(title)
-                    console.log(articleID)
-
-                    document.getElementById("questionsAccordion").innerHTML += `
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading${articleID}">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${articleID}" aria-expanded="false" aria-controls="collapse${articleID}">
-                                ${title}
-                            </button>
-                            </h2>
-                            <div id="collapse${articleID}" class="accordion-collapse collapse" aria-labelledby="heading${articleID}">
-                                <div class="accordion-body" id="accordionBody${articleID}">
-
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-
-                for (let i = 0; i < questions.length; i++) {
-                    // let articleDate = new Date(articles[i]["Published_Date"]);
-                    // let formattedDate = articleDate.toLocaleDateString();
-                    // let category = articles[i]["Category"]
-                    let articleID = questions[i]["articleID"];
-                    let message = questions[i]["message"];
-
-                    console.log(articleID)
-                    console.log(message)
-
-                    if (article != null && document.getElementById(`accordionBody${articleID}`) != null) {
-                        // addArticle(strToID(category), articles[i]["Title"], articles[i]["Description"], formattedDate, articles[i]["ID"]);
-                        document.getElementById(`accordionBody${articleID}`).innerHTML += `
-                            <div class="card left-color mb-3">
-                                <div class="card-body pt-2 pb-2">
-                                    ${message}
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-            } else {
-                console.log("Something Went Wrong On Data Retrieval");
-                console.log(data);
-            }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
-        }
-    });
-
-    // // Retrieve Previously Sent Messages From SQL Server
-    // if(articleID && userID && articleID!="" && userID!="") {
-    //     $.ajax({
-    //         url: 'functions/get_messages.py',
-    //         type: 'POST',
-    //         loading: false,
-    //         dataType: 'json',
-    //         data: {articleID: articleID, userID: userID},
-    //         success: function (data) {
-    //             if (data["Status"] == "Success") {
-
-    //                 // Add Messages To Page
-    //                 let messages = JSON.parse(data["Data"])
-    //                 for (let i = 0; i < messages.length; i++) {
-    //                     if (messages[i]["Sender"] == "Client") {
-    //                         addMessageRight(messages[i]["Message"]);
-    //                     } else {
-    //                         addMessageLeft(mdToHtml(messages[i]["Message"]));
-    //                     }
-    //                 }
-    //             } else {
-    //                 console.log("Something Went Wrong On Data Retrieval");
-    //                 console.log(data);
-    //             }
-
-    //             scrollBottom();
-    //         },
-    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
-    //             alert("Status: " + textStatus);
-    //             alert("Error: " + errorThrown);
-    //         }
-    //     });
-    // }
-
-    // // Wait until chainOfThought and article are not null
-    // let checkDataInterval = setInterval(function() {
-    //     if (article && Object.keys(article).length !== 0) {
-    //         clearInterval(checkDataInterval);
-            
-    //         // Ensure Chain Of Thought is null for first message.
-    //         // let tempCOT = chainOfThought
-    //         chainOfThought = null;
-    //         // Call GPT
-    //         sendMessageToChatBot("");
-
-    //         // chainOfThought = tempCOT;
-    //     }
-    // }, 100);
-
-    // // Retreive Previous Chain Of Thought
-    // if(articleID && userID && articleID!="" && userID!="") {
-    //     $.ajax({
-    //         url: 'functions/get_chain_of_thought.py',
-    //         type: 'POST',
-    //         loading: false,
-    //         dataType: 'json',
-    //         data: {articleID: articleID, userID: userID},
-    //         success: function (data) {
-    //             if (data["Status"] == "Success") {
-    //                 chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
-    //                 console.log(chainOfThought)
-    //             } else {
-    //                 console.log("No Data, Starting New Chain Of Thought");
-    //             }
-    //         },
-    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
-    //             alert("Status: " + textStatus);
-    //             alert("Error: " + errorThrown);
-    //         }
-    //     });
-    // }
-
-    // // Focus on text input area
-    // document.getElementById("message").focus();
+    getAndDisplayImages();
 }
-
-//--------------------------------------------------Typing Detection--------------------------------------------------//
-
-// // MICHT NOT BE RELEVANT ANYMORE - DELETE LATER
-// // Might be useful to display a notice of typing when chat gpt is thinking.
-
-function checkCursor() {
-
-}
-
-
-// var typingTimeout;
-
-// /*
-// A function that detects when the user is typing, and sends a notification to the server.
-// */
-// function notifyTyping () {
-//     if (typingTimeout != undefined) {
-//         clearTimeout(typingTimeout);
-//     } else {
-//         notifyTypingHelper(document.getElementById("receiverID").value,"Start")
-//     }
-//     typingTimeout = setTimeout(function() {
-//         notifyTypingHelper(document.getElementById("receiverID").value,"Stop");
-//         typingTimeout = undefined;
-//     }, 1000);
-// }
-
-// function notifyTypingHelper(to, status){
-//     fetch(`http://52.15.204.7:8080/notify-typing?to=${to}&status=${status}&section=${document.title}`)
-//         .then(response => response.text())
-//         .then(result => {
-//             console.log(result);
-//         })
-//         .catch(error => {
-//             console.error(error);
-//         });
-//     console.log(typingTimeout)
-//     console.log("Typing " + status + " to " + to)
-// }
-
-//----------------------------------------------Adding Messages To Screen---------------------------------------------//
-
-/*
-Add's a txt msg as if the client sent it.
-*/
-function addMessageRight (message) {
-    document.getElementById("chatWindow").innerHTML +=
-        '<div class="card right-color offset-2 mb-3">' +
-        '<div class="card-body pt-2 pb-2">' +
-        message +
-        '</div>' +
-        '</div>';
-}
-
-/*
-Add's a txt msg as if the client was sent a msg by someone else.
-*/
-function addMessageLeft (message) {
-    document.getElementById("chatWindow").innerHTML +=
-        '<div class="card left-color col-10 mb-3">' +
-        '<div class="card-body pt-2 pb-2">' +
-        message +
-        '</div>' +
-        '</div>';
-}
-
-function addTypingAlertLeft() {
-    document.getElementById("chatWindow").innerHTML += `
-        <div class="card left-color mb-3" id="typingAlertLeft" style="display: inline-block; animation: pulse 1.5s infinite; transform-origin: left;">
-            <div class="card-body pt-2 pb-2">
-                <strong>. . .</strong>
-            </div>
-        </div>
-        `
-    }
-
-function removeTypingAlertLeft() {
-    document.getElementById("typingAlertLeft").remove();
-}
-
-// function addMessagesLeft (messages) {
-//     for (let i = 0; i < messages.length; i++) {
-
-//---------------------------------------------------Scroll Bottom----------------------------------------------------//
-
-function scrollBottom() {
-    var messageBody = document.querySelector('#chatWindow');
-    messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
-}
-
-
-
-//-------------------------------------------------Multiline Textbox--------------------------------------------------//
-
-let shift = false;
-
-function keyDown(e, func, element) {
-    // Prevent default behavior of the Enter key
-    if (e.keyCode === 13) {
-        if (!shift) {
-            e.preventDefault();
-            func();
-        }
-    } else if (e.keyCode === 8 && !e.shiftKey) {
-        // Handle backspace key
-        const spanElement = document.getElementById(element.id);
-        const content = spanElement.innerHTML;
-
-        if (content === '<br>' || content === '<br><br>') {
-            e.preventDefault();
-            spanElement.innerHTML = '';
-        }
-    } else if (e.keyCode === 16) {
-        shift = true;
-    }
-}
-
-function keyUp(e) {
-    if (e.keyCode == 16) {
-        shift = false;
-    }
-}
-
 
 //------------------------------------------------- Artilce Control -------------------------------------------------//
-
-let articles = [];
-
-function addArticleLine (line) {
-    document.getElementById("articleWindow").innerHTML +=
-        '<div class="text-left mb-3 pt-2 pb-2">' +
-        line +
-        '</div>';
-}
-
-function addArticleTittle (line) {
-    document.getElementById("articleWindow").innerHTML +=
-        '<div class="text-center mb-3 pt-2 pb-2">' +
-        '<p class="fs-4 font-weight-bold">' +
-        line +
-        '</p>' +
-        '</div>';
-}
 
 function mdToHtml(text) {
     text = text.replace( /(?:\r\n|\r|\n)/g         , '<br>');                // New Line
@@ -433,135 +161,128 @@ function mdToHtml(text) {
     return text;
 }
 
-function strToID(str){
-    return str.charAt(0).toLowerCase() + str.slice(1).replace(/\s+/g, '');
-}
 
-//------------------------------------------------- Chat Bot -------------------------------------------------//
-
-/*
-This function should containt the logic for the chat bot pipeline.
-Each different prompt should be a different function.
-It is also possible to have one function that takes prompt type as a parameter, or have the python script take
-the prompt type as a parameter.
-Just MAKE SURE that the python script never takes a prompt as a parameter. Otherwise people can use our api key
-without having to know it.
-*/
-function sendMessageToChatBot(message) {
-    // Commented Out For Now - Bc Not Implemented Yet //
-
-    gptRespondMessage(message);
-    // document.getElementById("typingAlert").hidden = false
-    addTypingAlertLeft();
-
-    // let context, classification = classifyMessage(message);
+//-------------------------------------------------- Display Images --------------------------------------------------//
+/**
+ * Retrieves images for a user and displays them in the questionDistributionBody div
+ */
+function getAndDisplayImages() {
+    // Show loading indicator
+    const questionDistributionBody = document.getElementById('questionDistributionBody');
+    const discussionFlowBody = document.getElementById('discussionFlowBody');
+    const takeawayMessagesBody = document.getElementById('takeawayMessagesBody');
+    const loadingIndicator = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    questionDistributionBody.innerHTML = loadingIndicator;
+    discussionFlowBody.innerHTML = loadingIndicator;
+    takeawayMessagesBody.innerHTML = loadingIndicator;
     
-    // if (classification == "PRACTICAL_GUIDANCE") {
 
-    // } else if (classification == "BROADER IMPACT") {
-    // } else if (classification == "REFERENTIAL_FACT") {
-    // } else if (classification == "VIEWPOINT_SYNTHESIS") {
-    // } else if (classification == "LITERARY_COMPREHENSION") {
-    // }
-    
-}
-
-/*
-Demo of how to run a prompt on the gpt api.
-    chainOfThought: json {} | Contains the chain of thought as a json. Or any
-                            | other data format you need for the msg history.
-    promptVariant: string | The variant of the prompt you want to run.
-                          | DO NOT SEND THE PROMPT ITSELF. JUST THE VARIANT.
-                          | This is to prevent people from using our website
-                          | as a free chat gpt api.
-*/
-function gptRespondMessage(message) {
-    $.ajax({
-        url: 'functions/gpt_respond_message.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {
-            message: message,
-            article: JSON.stringify(article),
-            chainOfThought: JSON.stringify(chainOfThought)
-        },
-        success: function (data) {
-            // document.getElementById("typingAlert").hidden = true
-            removeTypingAlertLeft();
-
-            if (data["Status"] == "Success") {
-
-                data = JSON.parse(data["Data"])
-
-                chainOfThought = data["chainOfThought"]
-                let classification = data["classification"]
-                let responses = data["response"]
-
-                for (let i = 0; i < responses.length; i++) {
-                    setTimeout(function() {
-                        addMessageLeft(mdToHtml(responses[i]));
-                        saveMessage(responses[i], "ChatBot");
-                        scrollBottom();
-                    }, i * 500);
-                }
+    // Call the get_images function
+    callFunction('get_images', { ID: userID }, function(responseData) {
+        // Loop through each image and add it to the container
+        responseData.forEach(image => {
+            // Create a card element for each image
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            
+            // Create card header with image info
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
+            
+            // Add header text
+            const headerText = document.createElement('h5');
+            headerText.className = 'mb-0';
+            headerText.textContent = image.header;
+            cardHeader.appendChild(headerText);
+            
+            // Add card header to card
+            card.appendChild(cardHeader);
+            
+            // Create card body with the image
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body text-center';
+            
+            // Create and set up the image element
+            const imgElement = document.createElement('img');
+            imgElement.className = 'img-fluid';
+            imgElement.style.maxHeight = '300px';
+            
+            // Set the image source from base64 data
+            // Determine if base64 data already has the data URL prefix
+            if (image.fileData.startsWith('data:')) {
+                imgElement.src = image.fileData;
+            } else {
+                // If not, add appropriate prefix based on file extension
+                const fileExt = image.fileName.split('.').pop().toLowerCase();
+                let mimeType = 'image/jpeg'; // Default mime type
                 
-                //Save Chain Of Thought
-                saveChainOfThought();
-
-                // saveClassification(message, classification)
-                scrollBottom();
+                // Set appropriate mime type based on file extension
+                if (fileExt === 'png') mimeType = 'image/png';
+                else if (fileExt === 'gif') mimeType = 'image/gif';
+                else if (fileExt === 'svg') mimeType = 'image/svg+xml';
+                else if (fileExt === 'webp') mimeType = 'image/webp';
+                
+                imgElement.src = `data:${mimeType};base64,${image.fileData}`;
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
+            
+            // Add image to card body
+            cardBody.appendChild(imgElement);
+            card.appendChild(cardBody);
+            
+            // Create card footer with date and filename
+            const cardFooter = document.createElement('div');
+            cardFooter.className = 'card-footer text-muted d-flex justify-content-between';
+            
+            // Add date
+            const dateElement = document.createElement('small');
+            dateElement.textContent = `Uploaded: ${new Date(image.date).toLocaleString()}`;
+            cardFooter.appendChild(dateElement);
+            
+            // Add filename
+            const filenameElement = document.createElement('small');
+            filenameElement.textContent = image.fileName;
+            cardFooter.appendChild(filenameElement);
+            
+            // Add footer to card
+            card.appendChild(cardFooter);
+            // Add the card to the container
+            switch(parseInt(image.subpage)) {
+                case 1:
+                    // Clear loading indicators if present & this is the first time images are being loaded
+                    if (questionDistributionBody.innerHTML === loadingIndicator) {
+                        questionDistributionBody.innerHTML = '';
+                    }
+                    questionDistributionBody.appendChild(card);
+                    break;
+                case 2:
+                    // Clear loading indicators if present & this is the first time images are being loaded
+                    if (discussionFlowBody.innerHTML === loadingIndicator) {
+                        discussionFlowBody.innerHTML = '';
+                    }
+                    discussionFlowBody.appendChild(card);
+                    break;
+                case 3:
+                    // Clear loading indicators if present & this is the first time images are being loaded
+                    if (takeawayMessagesBody.innerHTML === loadingIndicator) {
+                        takeawayMessagesBody.innerHTML = '';
+                    }
+                    takeawayMessagesBody.appendChild(card);
+                    break;
+            }
+        });
+
+        // If the container still is just the loading indicator, display a message
+        const noImgsMsg = '<div class="alert alert-info mb-0">No Graphs Found.</div>';
+        if (questionDistributionBody.innerHTML === loadingIndicator) {
+            questionDistributionBody.innerHTML = noImgsMsg;
         }
-    });
-    
-}
-
-function saveChainOfThought() {
-    $.ajax({
-        url: 'functions/save_chain_of_thought.py',
-        type: 'POST',
-        loading: false,
-        dataType: 'json',
-        data: {
-            chainOfThought: JSON.stringify(chainOfThought),
-            articleID: articleID,
-            userID: userID
-        },
-        success: function (data) {
-            console.log(data)
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert("Status: " + textStatus);
-            alert("Error: " + errorThrown);
+        if (discussionFlowBody.innerHTML === loadingIndicator) {
+            discussionFlowBody.innerHTML = noImgsMsg;
         }
+        if (takeawayMessagesBody.innerHTML === loadingIndicator) {
+            takeawayMessagesBody.innerHTML = noImgsMsg;
+        }
+        return;
     });
+
 }
-
-
-//---------------------------------------------------Close Page-----------------------------------------------------//
-
-function closeTab() {
-    if (window.opener && !window.opener.closed) {
-
-        window.opener.location.href = '/home';
-        
-        window.opener.focus();
-
-        
-        window.opener.postMessage({ action: 'focusHome', url: '/home' }, '*');
-    }
-    window.close();
-    
-    saveChainOfThought();
-
-    return false;
-}
-
-window.addEventListener('beforeunload', function (e) {
-    closeTab();
-});

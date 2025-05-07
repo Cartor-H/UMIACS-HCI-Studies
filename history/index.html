@@ -39,108 +39,133 @@
     </div>
   </nav>
 
-  <div class="row m-5 mt-1 mb-5" style="height:90vh">
-    <div class="col-lg-4 mb-4 h-100">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">User Question Pool</h5>
-        </div>
-        <div class="card-body overflow-auto" id="questionsWindow">
-          <div class="accordion" id="questionsAccordion">
+  <div class="container mt-4">
+    <!-- Main Navigation Tabs -->
+    <ul class="nav nav-tabs" id="reflectionTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="question-distribution-tab" data-bs-toggle="tab" data-bs-target="#question-distribution" type="button" role="tab">
+          Question Type Distribution
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="discussion-flow-tab" data-bs-toggle="tab" data-bs-target="#discussion-flow" type="button" role="tab">
+          Discussion Flow
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="takeaway-messages-tab" data-bs-toggle="tab" data-bs-target="#takeaway-messages" type="button" role="tab">
+          Takeaway Messages
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="reflectionTabsContent">
+      <!-- Question Type Distribution Tab -->
+      <div class="tab-pane fade show active" id="question-distribution" role="tabpanel">
+        <div class="card">
+          <div class="card-body" id="questionDistributionBody">
+
+            <h2>Question Type Distribution</h2>
+            <div class="description-box">
+              <p>This visualization shows the distribution of different types of questions you asked during your conversations with the AI. Understanding your question patterns can help you identify your reading focus and information needs.</p>
+              <p>The chart displays the frequency of each question type you used, helping you reflect on your interaction style and information-seeking behaviors.</p>
+            </div>
             
+            <!-- Current Week Section -->
+            <div class="subsection-header">Current Week</div>
+            <div class="chart-container" id="question-distribution-current">
+              <h4 class="chart-header">Week of April 21-27, 2025</h4>
+              <div class="chart-placeholder">Question distribution chart will appear here</div>
+            </div>
+            
+            <!-- Prior Weeks Section -->
+            <div class="subsection-header">Prior Week(s)</div>
+            <div class="chart-container" id="question-distribution-prior-1">
+              <h4 class="chart-header">Week of April 14-20, 2025</h4>
+              <div class="chart-placeholder">Previous week's question distribution chart will appear here</div>
+            </div>
+            <div class="chart-container" id="question-distribution-prior-2">
+              <h4 class="chart-header">Week of April 7-13, 2025</h4>
+              <div class="chart-placeholder">Question distribution chart from 2 weeks ago will appear here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Discussion Flow Tab -->
+      <div class="tab-pane fade" id="discussion-flow" role="tabpanel">
+        <div class="card">
+          <div class="card-body" id="discussionFlowBody">
+            <h2>Discussion Flow</h2>
+            <div class="description-box">
+              <p>These chord diagrams visualize the flow of your conversations with the AI. They help you understand how different topics and question types connect and evolve during your discussions.</p>
+              <p>The first chart shows topic transitions, while the four subplots in the second chart illustrate different aspects of your conversation dynamics. Thicker lines indicate more frequent transitions between elements.</p>
+            </div>
+            
+            <!-- Current Week Section -->
+            <div class="subsection-header">Current Week</div>
+            <div class="chart-container" id="discussion-flow-current-1">
+              <h4 class="chart-header">Week of April 21-27, 2025: Topic Transitions</h4>
+              <div class="chart-placeholder">Chord diagram of topic transitions will appear here</div>
+            </div>
+            <div class="chart-container" id="discussion-flow-current-2">
+              <h4 class="chart-header">Week of April 21-27, 2025: Conversation Dynamics</h4>
+              <div class="chart-placeholder">Four subplots of conversation dynamics will appear here</div>
+            </div>
+            
+            <!-- Prior Weeks Section -->
+            <div class="subsection-header">Prior Week(s)</div>
+            <div class="chart-container" id="discussion-flow-prior-1-1">
+              <h4 class="chart-header">Week of April 14-20, 2025: Topic Transitions</h4>
+              <div class="chart-placeholder">Previous week's chord diagram will appear here</div>
+            </div>
+            <div class="chart-container" id="discussion-flow-prior-1-2">
+              <h4 class="chart-header">Week of April 14-20, 2025: Conversation Dynamics</h4>
+              <div class="chart-placeholder">Previous week's four subplots will appear here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Takeaway Messages Tab -->
+      <div class="tab-pane fade" id="takeaway-messages" role="tabpanel">
+        <div class="card">
+          <div class="card-body" id="takeawayMessagesBody">
+            <h2>Users' Takeaway Messages</h2>
+            <div class="description-box">
+              <p>These visualizations summarize the key takeaways and insights you gained from your interactions. They help you reflect on what knowledge and perspectives you've acquired through your conversations.</p>
+              <p>The charts display patterns in your takeaway messages, highlighting the main themes and concepts that emerged from your discussions.</p>
+            </div>
+            
+            <!-- Current Week Section -->
+            <div class="subsection-header">Current Week</div>
+            <div class="chart-container" id="takeaway-current-1">
+              <h4 class="chart-header">Week of April 21-27, 2025: Takeaway Themes</h4>
+              <div class="chart-placeholder">Takeaway themes bar chart will appear here</div>
+            </div>
+            <div class="chart-container" id="takeaway-current-2">
+              <h4 class="chart-header">Week of April 21-27, 2025: Sentiment Analysis</h4>
+              <div class="chart-placeholder">Sentiment analysis bar chart will appear here</div>
+            </div>
+            
+            <!-- Prior Weeks Section -->
+            <div class="subsection-header">Prior Week(s)</div>
+            <div class="chart-container" id="takeaway-prior-1-1">
+              <h4 class="chart-header">Week of April 14-20, 2025: Takeaway Themes</h4>
+              <div class="chart-placeholder">Previous week's takeaway themes chart will appear here</div>
+            </div>
+            <div class="chart-container" id="takeaway-prior-1-2">
+              <h4 class="chart-header">Week of April 14-20, 2025: Sentiment Analysis</h4>
+              <div class="chart-placeholder">Previous week's sentiment analysis chart will appear here</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="col-lg-4 mb-4 h-100">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">Synthesize Thoughts</h5>
-        </div>
-        <div class="card-body overflow-auto" id="thoughtWindow">
-
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4 mb-4 h-100">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">Question Insights and Recomendations</h5>
-        </div>
-        <div class="card-body overflow-auto" id="insightsWindow">
-
-        </div>
-      </div>
-    </div>
+  </div>
   
   </div>
 </body>
 
 </html>
-
-
-<!-- ----------------------------------------------------- OLD STYLE ------------------------------------------------------ -->
-
-
-
-<!-- <!DOCTYPE html>
-<html>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>1</title>
-  <link href="../style.css" rel="stylesheet" type="text/css" />
-
-  <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
-  <script src="../js/bootstrap.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-  <link rel="stylesheet" href="../css/bootstrap.css">
-</head>
-
-<body onload="onLoad()">
-<script src="script.js"></script>
-<div class="row m-0 mt-5 mb-5" style="height:90vh">
-  <div class="col-6 ps-4 h-100">
-    <div class="card h-100">
-      <div class="card-header">
-        <div class="row">
-        </div>
-      </div>
-
-      <div class="card-body overflow-auto" id="articleWindow">
-      </div>
-    </div>
-  </div>
-
-  <div class="col-6 pe-4 h-100">
-    <div class="card h-100">
-      <div class="card-header">
-        <div class="row">
-        </div>
-      </div>
-
-      <div class="card-body overflow-auto" id="chatWindow">
-      </div>
-      <div class="card-footer ps-2 pe-2">
-        <div class="alert alert-primary p-1" style="padding-left: 12px !important;
-         padding-right: 12px !important; margin: 0px; margin-bottom: 8px" role="alert" id="typingAlert" hidden>
-          alert!
-        </div>
-        <div class="input-group">
-          <span class="textarea form-control" role="textbox" placeholder="Type a message..." id="message"
-                oninput="notifyTyping()" onkeydown="keyDown(event,clientSendMsg,this)" onkeyup="keyUp(event)" tabindex="1"
-                onmouseup="checkCursor()" contenteditable></span>
-          <button class="btn btn-primary" type="button" onclick="clientSendMsg()" tabindex="2">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</body>
-
-</html> -->

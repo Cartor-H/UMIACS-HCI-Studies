@@ -18,64 +18,8 @@
 
 <body onload="onLoad()">
   <script src="script.js"></script>
-  <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
-    <div class="container-fluid">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav w-100 d-flex justify-content-between">
-          <li class="nav-item flex-fill text-center">
-            <a class="nav-link" href="..">Users</a>
-          </li>
-          <li class="nav-item flex-fill text-center">
-            <a class="nav-link" href="" style="background-color: #e2e6ef;">Articles</a>
-          </li>
-          <li class="nav-item flex-fill text-center">
-            <span class="navbar-text">
-              User ID: <span id="userId">12345</span>
-            </span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav> -->
   
   <div class="container mt-5">
-    <!-- <div class="row mb-4">
-      <div class="col">
-        <h2>Admin Dashboard</h2>
-        <div class="d-flex">
-          <input type="text" id="searchBar" class="form-control flex-grow-1 me-2" placeholder="Search users...">
-          <select id="sortOptions" class="form-control flex-shrink-1 me-2">
-            <option value="articles">Sort by Articles Read</option>
-            <option value="messages">Sort by Messages Sent</option>
-            <option value="screentime">Sort by Screentime</option>
-          </select>
-          <select id="sortOrder" class="form-control flex-shrink-1">
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="row mb-4">
-      <div class="col text-end">
-        <a class="btn btn-primary btn-lg">
-          <i class="fas fa-plus"></i> Create Article
-        </a>
-      </div>
-      <div class="col text-end">
-        <a class="btn btn-primary btn-lg" onclick="downloadArticles()">
-          <i class="fas fa-plus"></i> Download Articles Excel
-        </a>
-      </div>
-      <div class="col text-end">
-        <button type="button" class="btn btn-primary btn-lg" onclick="uploadArticles()">
-          <i class="fas fa-upload"></i> Upload Articles Excel
-        </button>
-      </div>
-    </div> -->
 
     <div class="d-flex justify-content-center">
       <!-- <div class="col-lg-5 col-md-7 col-sm-11"> -->
@@ -85,8 +29,8 @@
           <div class="card-body d-flex justify-content-between align-items-center w-100">
             <div class="d-flex align-items-center">
               <input type="checkbox" class="form-check-input me-3 mt-0" onchange="selectAll()" id="selectAll">
-                <h5 class="mb-0 text-start d-md-none" style="font-size: 0.8rem;"><strong>All</strong></h5>
-                <h5 class="mb-0 text-start d-none d-md-block"><strong>All</strong></h5>
+              <h5 class="mb-0 text-start d-md-none" style="font-size: 0.8rem;"><strong>All</strong></h5>
+              <h5 class="mb-0 text-start d-none d-md-block"><strong>All</strong></h5>
             </div>
             <div class="ms-auto">
               <button type="button" class="btn btn-primary btn-sm ms-3" onclick="downloadData('all')">
@@ -96,55 +40,63 @@
                 <i class="fas fa-download"></i> Selected
               </button>
             </div>
-
-
-            <!-- <div class="card d-flex align-items-center mb-2 w-100 flex-shrink-1">
-              <div class="card-body d-flex justify-content-between align-items-center w-100">
-                <div class="d-flex align-items-center">
-                  <input type="checkbox" class="form-check-input table-name-check me-3 mt-0">
-                  <h5 class="mb-0 text-start d-md-none" style="font-size: 0.8rem;">Unified Messages</h5>
-                  <h5 class="mb-0 text-start d-none d-md-block">Unified Messages</h5>
-                </div>
-                <div class="ms-auto">
-          
-                  <button type="button" class="btn btn-primary btn-sm ms-3" onclick="downloadData('UnifiedMessages')">
-                      <i class="fas fa-download" aria-hidden="true"></i> Download
-                  </button>
-              
-                </div>
-              </div>
-            </div> -->
-
           </div>
-
-
-
-          <!-- <div class="card d-flex align-items-center mb-2 w-100 flex-shrink-1">
-            <div class="card-body d-flex justify-content-between align-items-center w-100">
-              <div class="d-flex align-items-center">
-                <input type="checkbox" class="form-check-input table-name-check me-3 mt-0">
-                <h5 class="mb-0 text-start d-md-none" style="font-size: 0.8rem;">Article</h5>
-                <h5 class="mb-0 text-start d-none d-md-block">Article</h5>
-              </div>
-              <div class="ms-auto">
-                <button type="button" class="btn btn-primary btn-sm ms-3" onclick="uploadArticles()">
-                  <i class="fas fa-upload"></i> Upload
-                </button>
-                <button type="button" class="btn btn-primary btn-sm ms-3" onclick="downloadArticles()">
-                  <i class="fas fa-download"></i> Download
-                </button>
-              </div>
-            </div>
-          </div> -->
-
-
-
-
         </div>
+      </div>
 
         
 
+      <div class="card d-flex align-items-center mb-2 p-3 flex-shrink-1" style="background-color: #f8f9fa;">
+        <div class="card-body w-100">
+          <div class="input-group mb-3">
+              <input type="text" class="form-control" id="userID" placeholder="UserID - Text Input">
+          </div>
+          <div class="input-group mb-3">
+              <input type="text" class="form-control" id="header" placeholder="Header - Text Input">
+          </div>
+          <div class="subpage-select mb-3">
+              <div class="btn-group w-100" role="group" aria-label="Subpage selection">
+                  <input type="radio" class="btn-check" name="subpage" id="subPage1" autocomplete="off" checked>
+                  <label class="btn btn-outline-primary" for="subPage1">subPage1</label>
+                  
+                  <input type="radio" class="btn-check" name="subpage" id="subPage2" autocomplete="off">
+                  <label class="btn btn-outline-primary" for="subPage2">subPage2</label>
+                  
+                  <input type="radio" class="btn-check" name="subpage" id="subPage3" autocomplete="off">
+                  <label class="btn btn-outline-primary" for="subPage3">subPage3</label>
+              </div>
+          </div>
+          <div class="file-upload-container mb-3 input-group">
+              <input type="file" class="form-control file-upload-input" accept="image/*" id="fileUpload">
+              <label for="fileUpload" class="input-group-text">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                  </svg>
+              </label>
+          </div>
+          <div class="mt-3">
+              <button class="btn btn-primary form-control" id="uploadBtn" onClick="uploadImg()">Upload</button>
+          </div>
+        </div>
+
+        
+        <div class="card-body w-100">
+          <div class="file-upload-container mb-3 input-group">
+              <input type="file" class="form-control file-upload-input" id="folderUpload" webkitdirectory directory multiple>
+              <label for="folderUpload" class="input-group-text">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                  </svg>
+              </label>
+          </div>
+          <div class="mt-3">
+              <button class="btn btn-primary form-control" id="uploadBtn" onClick="uploadDir()">Upload Folder</button>
+          </div>
       </div>
+
+
     </div>
   </div>
 

@@ -217,7 +217,30 @@ CREATE TABLE MessageIntentions
     FOREIGN KEY (articleID) REFERENCES Articles(ID),
     FOREIGN KEY (messageID) REFERENCES Messages(messageID)
 );
+
+
+-- Make a table called Images with the folloiwing columns:
+-- id (integer, primary key, auto-increment)
+-- userId
+-- fileName (varchar(max))
+-- subPage (int)
+-- date (datetime2(7)) (default to the current date and time unless specified)
+-- header (varchar(max))
+
+
+CREATE TABLE Images (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    userId NVARCHAR(50),
+    fileName VARCHAR(MAX),
+    subPage INT,
+    date DATETIME2(7) DEFAULT GETDATE(),
+    header VARCHAR(MAX),
+);
+
 ```
+
+
+# S3 Bucket
 
 # SSL / https
 Certificate: /etc/pki/tls/certs/ssl_cert.pem

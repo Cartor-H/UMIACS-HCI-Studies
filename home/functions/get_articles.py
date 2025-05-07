@@ -47,18 +47,29 @@ def outputSQLQuery(form):
     # read_articles = [row[0] for row in read_articles]
 
     # Make sure we don't select any pre-asined category 2 articles
+    """
+    SELECT TOP 1 [Action] as ChatState FROM ArticleOpenHistory
+    WHERE [Action]!= 'open' AND [Action] != 'close'
+    AND ArticleID=%s AND UserID=%s
+    ORDER BY ActionDate DESC FOR JSON AUTO
+    """
     cursor.execute("""
         SELECT *, 
             CASE 
-                WHEN ID IN (SELECT ArticleID FROM ArticleOpenHistory WHERE UserID=%s) 
-                THEN (SELECT Category FROM ArticleCategories WHERE [Order]=2) 
+                -- If Completed -> Third Category
+                WHEN ID IN (SELECT ArticleID FROM ArticleOpenHistory WHERE UserID=%s AND [Action]='Completed')
+                    THEN (SELECT Category FROM ArticleCategories WHERE [Order]=3)
+                -- If In Progress -> Second Category 
+                WHEN ID IN (SELECT ArticleID FROM ArticleOpenHistory WHERE UserID=%s AND [Action]='open') 
+                    THEN (SELECT Category FROM ArticleCategories WHERE [Order]=2) 
                 ELSE Category 
             END as Category
         FROM Articles
         WHERE Category != (SELECT Category FROM ArticleCategories WHERE [Order]=2)
+          AND Category != (SELECT Category FROM ArticleCategories WHERE [Order]=3)
         ORDER BY Published_Date DESC
         FOR JSON AUTO
-    """, (userID))
+    """, (userID, userID))
     articles_data = cursor.fetchall()
     # print(articles_data)
 

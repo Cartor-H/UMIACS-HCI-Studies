@@ -13,6 +13,44 @@ let tables = [
     { name: "ChainOfThought"         , upload: false, download: true  },
 ];
 
+//---------------------------------------------------Call Backend-----------------------------------------------------//
+
+/**
+ * Calls the provided function from the backend with the given data.
+ * Then calls callBack(responseData), where responseData is the data returned from the backend.
+ * @param {*} functionName 
+ * @param {*} data 
+ * @param {*} callBack 
+ */
+function callFunction(functionName, data, callBack) {
+    $.ajax({
+        url: `functions/${functionName}.py`,
+        type: 'POST',
+        loading: false,
+        dataType: 'json',
+        data: data,
+        success: function (data) {
+            console.log(data)
+            if (data["Status"] == "Success") {
+                callBack(data["Data"]);
+            } else if (data["Status"] == "Error") {
+                console.log("Py Status: " + data.Status + "\n" +
+                            "Py Error: " + data.Error + "\n" +
+                            "Py Traceback: " + data.Traceback);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log("JS Status: " + textStatus + "\n" +
+                        "JS Error: " + errorThrown + "\n" +
+                        "Full Response: " + jqXHR.responseText);
+            if (data["Status"] == "Error") {
+                console.log("Py Status: " + data.Status + "\n" +
+                            "Py Error: " + data.Error + "\n" +
+                            "Py Traceback: " + data.Traceback);
+            }
+        }
+    });
+}
 
 //------------------------------------------------------On Load-------------------------------------------------------//
 
@@ -471,4 +509,214 @@ function downloadData(tableName) {
             alert("Error: " + errorThrown);
         }
     });
+}
+
+
+
+//------------------------------------------------------Upload Images-------------------------------------------------------//
+
+// Request file input
+// let fileInput = document.createElement('input');
+// fileInput.type = 'file';
+// fileInput.accept = 'image/*';
+// fileInput.click();
+// fileInput.addEventListener('change', function() {
+//     let file = fileInput.files[0];
+//     let reader = new FileReader();
+//     reader.onload = function(e) {
+//         document.querySelector('#profPic img').setAttribute('src', e.target.result);
+//     }
+//     reader.readAsDataURL(file);
+// });
+// fileInput.remove();
+
+
+/**
+ * Uploads the image and form data to the server
+ * Collects data from form fields and passes it to the save_image function
+ * Includes base64-encoded file data
+ */
+function uploadImg() {
+    // Get form field values
+    const userId = document.getElementById('userID').value;
+    const header = document.getElementById('header').value;
+    
+    // Get selected subpage
+    let selectedSubpage = '';
+    if (document.getElementById('subPage1').checked) {
+        selectedSubpage = 1;
+    } else if (document.getElementById('subPage2').checked) {
+        selectedSubpage = 2;
+    } else if (document.getElementById('subPage3').checked) {
+        selectedSubpage = 3;
+    }
+    
+    // Get the file from file input
+    const fileInput = document.getElementById('fileUpload');
+    
+    // Validate inputs
+    if (!userId || !header || fileInput.files.length === 0) {
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    
+    // Use FileReader to convert the file to base64
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    
+    reader.onload = function() {
+        // Create the form data object with all information including the base64 data
+        const formData = {
+            ID: userId,
+            Header: header,
+            Subpage: selectedSubpage,
+            FileName: file.name,
+            FileType: file.type,
+            FileSize: file.size,
+            FileData: reader.result // This contains the base64-encoded file data
+        };
+        
+        // Log the data being sent
+        console.log('Sending data:');
+        console.log('- User ID:', userId);
+        console.log('- Header:', header);
+        console.log('- Selected Subpage:', selectedSubpage);
+        console.log('- File name:', file.name);
+        console.log('- File size:', file.size, 'bytes');
+        console.log('- Base64 data included (truncated):', reader.result.substring(0, 50) + '...');
+        
+        // Call the save_image function using the callFunction utility
+        callFunction('save_image', formData, function(responseData) {
+            // This is the callback function that will be executed when the server responds
+            console.log('Upload successful!', responseData);
+            
+            // // Show success message to user
+            // alert('Image uploaded successfully!');
+            
+            // // Optionally clear the form
+            // document.getElementById('userID').value = '';
+            // document.getElementById('header').value = '';
+            // document.getElementById('subPage1').checked = true;
+            // document.getElementById('fileUpload').value = '';
+        });
+    };
+    
+    reader.onerror = function(error) {
+        console.error('Error reading file:', error);
+        // alert('Error reading file. Please try again.');
+    };
+}
+
+
+/**
+ * Uploads the entire directory structure to the server
+ * Extracts metadata from folder structure and sends all files to save_images function
+ */
+function uploadDir() {
+    // Get the folder input element
+    const folderInput = document.getElementById('folderUpload');
+    
+    // Validate input
+    if (folderInput.files.length === 0) {
+        console.error('No files selected');
+        return;
+    }
+    
+    // Convert FileList to array for easier manipulation
+    const files = Array.from(folderInput.files);
+    
+    console.log(`Processing ${files.length} files...`);
+    
+    // Organize files by their paths to validate the structure
+    let fileStructure = {};
+    let validStructure = true;
+    
+    // Process each file to build the structure
+    for (const file of files) {
+        // Split the path to get the directory structure
+        const pathParts = file.webkitRelativePath.split('/');
+        
+        // Check if structure follows the expected pattern:
+        // [userID]/[weekNumber]/[subPage]-[header].png
+        if (pathParts.length !== 3) {
+            console.error('Invalid file structure:', file.webkitRelativePath);
+            validStructure = false;
+            continue;
+        }
+        
+        // Get components from the path
+        const userId = pathParts[0];
+        const weekNumber = pathParts[1];
+        
+        // Add to structure
+        if (!fileStructure[userId]) {
+            fileStructure[userId] = {};
+        }
+        if (!fileStructure[userId][weekNumber]) {
+            fileStructure[userId][weekNumber] = [];
+        }
+        
+        fileStructure[userId][weekNumber].push(file);
+    }
+    
+    if (!validStructure) {
+        alert('Invalid folder structure. Please ensure folders are organized as [userID]/[weekNumber]/[subPage]-[header].png');
+        return;
+    }
+    
+    // Process all files and prepare them for upload
+    let filePromises = [];
+    let fileData = [];
+    
+    for (const file of files) {
+        const promise = new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            
+            reader.onload = function() {
+                fileData.push({
+                    path: file.webkitRelativePath,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    data: reader.result
+                });
+                resolve();
+            };
+            
+            reader.onerror = function(error) {
+                console.error('Error reading file:', error);
+                reject(error);
+            };
+        });
+        
+        filePromises.push(promise);
+    }
+    
+    // When all files are processed, send to server
+    Promise.all(filePromises)
+        .then(() => {
+            console.log('All files processed successfully!');
+            const formData = {
+                ID: userID,
+                files: JSON.stringify(fileData)
+            };
+    
+            console.log(`Sending ${fileData.length} files to server...`);
+            
+            // Call the save_images function
+            callFunction('save_images', formData, function(responseData) {
+                // console.log('Upload successful!', responseData);
+                // alert('Folder uploaded successfully!');
+                
+                // // Clear the form
+                // document.getElementById('folderUpload').value = '';
+            });
+        })
+        // .catch(error => {
+        //     console.error('Error processing files:', error);
+        //     alert('Error processing files. Please try again.');
+        // });
 }
