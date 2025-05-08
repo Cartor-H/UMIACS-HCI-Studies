@@ -163,126 +163,176 @@ function mdToHtml(text) {
 
 
 //-------------------------------------------------- Display Images --------------------------------------------------//
+
+headerList = {
+    "G D" : "Question Distribution",
+    "M P" : "Main Plot",
+    "S P" : "Sub Plot",
+    "I T" : "Initial Takeaways",
+    "F T" : "Final Takeaways"
+}
+
+
 /**
  * Retrieves images for a user and displays them in the questionDistributionBody div
  */
 function getAndDisplayImages() {
-    // Show loading indicator
+    // Get the containers
     const questionDistributionBody = document.getElementById('questionDistributionBody');
     const discussionFlowBody = document.getElementById('discussionFlowBody');
     const takeawayMessagesBody = document.getElementById('takeawayMessagesBody');
-    const loadingIndicator = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-    questionDistributionBody.innerHTML = loadingIndicator;
-    discussionFlowBody.innerHTML = loadingIndicator;
-    takeawayMessagesBody.innerHTML = loadingIndicator;
     
-
+    // Create loading indicators with unique IDs
+    const loadingIndicatorHTML = '<div class="text-center loading-indicator"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    // Append loading indicators to existing content
+    questionDistributionBody.insertAdjacentHTML('beforeend', loadingIndicatorHTML);
+    discussionFlowBody.insertAdjacentHTML('beforeend', loadingIndicatorHTML);
+    takeawayMessagesBody.insertAdjacentHTML('beforeend', loadingIndicatorHTML);
+    
     // Call the get_images function
     callFunction('get_images', { ID: userID }, function(responseData) {
-        // Loop through each image and add it to the container
+        // Sort images alphabetically by their headers
+        // responseData.sort((a, b) => {
+        //     return headerList[a.header].localeCompare(headerList[b.header]);
+        // });
+        
+        // Remove all loading indicators
+        document.querySelectorAll('.loading-indicator').forEach(indicator => {
+            indicator.remove();
+        });
+        
+        // Group images by subpage and weekNumber for counting
+        const imageGroups = {};
         responseData.forEach(image => {
-            // Create a card element for each image
-            const card = document.createElement('div');
-            card.className = 'card mb-3';
-            
+            const key = `${image.subpage}_${image.weekNumber}`;
+            if (!imageGroups[key]) {
+                imageGroups[key] = [];
+            }
+            imageGroups[key].push(image);
+        });
+        
+        // Loop through each image and add it to the container
+        responseData.forEach(image => {            
             // Create card header with image info
-            const cardHeader = document.createElement('div');
-            cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
+            let card;
+            let cardHeader;
+            let cardBody;
+            const cardKey = `card_${image.subpage}_${image.weekNumber}`;
             
-            // Add header text
-            const headerText = document.createElement('h5');
-            headerText.className = 'mb-0';
-            headerText.textContent = image.header;
-            cardHeader.appendChild(headerText);
+            if (document.getElementById(cardKey) != null) {
+                console.log("Card already exists: " + image.subpage + "_" + image.weekNumber);
+
+                card = document.getElementById(cardKey);
+                cardHeader = card.querySelector('.card-header');
+                cardBody = card.querySelector('.card-body');
+            } else {
+                console.log("Creating new card: " + image.subpage + "_" + image.weekNumber);
+                
+                card = document.createElement('div');
+                card.className = 'card mb-3';
+                card.id = cardKey;
+                
+                cardHeader = document.createElement('div');
+                cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
+
+                // Add header text
+                const headerText = document.createElement('h5');
+                headerText.className = 'mb-0';
+                headerText.textContent = "Week " + image.weekNumber;
             
-            // Add card header to card
-            card.appendChild(cardHeader);
+                cardHeader.appendChild(headerText);
+
+                // Create card body with flex layout for images
+                cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                // Use flex layout to make images arrange in a row
+                cardBody.style.display = 'flex';
+                cardBody.style.flexWrap = 'nowrap'; // Keep all in one row
+                cardBody.style.justifyContent = 'center'; // Center the images
+                cardBody.style.overflow = 'auto'; // Add scroll if needed
+
+                card.appendChild(cardHeader);
+                card.appendChild(cardBody);
+            }
             
-            // Create card body with the image
-            const cardBody = document.createElement('div');
-            cardBody.className = 'card-body text-center';
+            // Get total image count for this card to calculate flex basis
+            const imageCount = imageGroups[`${image.subpage}_${image.weekNumber}`].length;
             
             // Create and set up the image element
             const imgElement = document.createElement('img');
-            imgElement.className = 'img-fluid';
-            imgElement.style.maxHeight = '300px';
+            imgElement.className = 'img-fluid'; // Keep responsive
             
+            // Create a container for the image and its label
+            const imgContainer = document.createElement('div');
+            // Use flex to control sizing based on image count
+            imgContainer.style.flex = `0 0 ${Math.floor(100 / imageCount)}%`; // Divide space evenly
+            imgContainer.style.padding = '10px';
+            imgContainer.style.textAlign = 'center';
+            imgContainer.style.minWidth = '0'; // Allow container to shrink below content size
+
+            // Add a header above the image
+            const imgHeader = document.createElement('div');
+            imgHeader.style.fontWeight = 'bold';
+            imgHeader.textContent = headerList[image.header] || image.header;
+            imgContainer.appendChild(imgHeader);
+
             // Set the image source from base64 data
-            // Determine if base64 data already has the data URL prefix
             if (image.fileData.startsWith('data:')) {
                 imgElement.src = image.fileData;
             } else {
-                // If not, add appropriate prefix based on file extension
                 const fileExt = image.fileName.split('.').pop().toLowerCase();
                 let mimeType = 'image/jpeg'; // Default mime type
-                
-                // Set appropriate mime type based on file extension
+
                 if (fileExt === 'png') mimeType = 'image/png';
                 else if (fileExt === 'gif') mimeType = 'image/gif';
                 else if (fileExt === 'svg') mimeType = 'image/svg+xml';
                 else if (fileExt === 'webp') mimeType = 'image/webp';
-                
+
                 imgElement.src = `data:${mimeType};base64,${image.fileData}`;
             }
             
-            // Add image to card body
-            cardBody.appendChild(imgElement);
-            card.appendChild(cardBody);
-            
-            // Create card footer with date and filename
-            const cardFooter = document.createElement('div');
-            cardFooter.className = 'card-footer text-muted d-flex justify-content-between';
-            
-            // Add date
-            const dateElement = document.createElement('small');
-            dateElement.textContent = `Uploaded: ${new Date(image.date).toLocaleString()}`;
-            cardFooter.appendChild(dateElement);
-            
-            // Add filename
-            const filenameElement = document.createElement('small');
-            filenameElement.textContent = image.fileName;
-            cardFooter.appendChild(filenameElement);
-            
-            // Add footer to card
-            card.appendChild(cardFooter);
-            // Add the card to the container
+            // Make sure images can scale down properly
+            imgElement.style.maxWidth = '100%';
+            imgElement.style.objectFit = 'contain';
+
+            // Add the image to the container
+            imgContainer.appendChild(imgElement);
+
+            // Add the container to the card body
+            cardBody.appendChild(imgContainer);
+        
+            // Add the card to the container if it doesn't already exist
             switch(parseInt(image.subpage)) {
                 case 1:
-                    // Clear loading indicators if present & this is the first time images are being loaded
-                    if (questionDistributionBody.innerHTML === loadingIndicator) {
-                        questionDistributionBody.innerHTML = '';
+                    if (document.getElementById(cardKey) == null) {
+                        questionDistributionBody.appendChild(card);
                     }
-                    questionDistributionBody.appendChild(card);
                     break;
                 case 2:
-                    // Clear loading indicators if present & this is the first time images are being loaded
-                    if (discussionFlowBody.innerHTML === loadingIndicator) {
-                        discussionFlowBody.innerHTML = '';
+                    if (document.getElementById(cardKey) == null) {
+                        discussionFlowBody.appendChild(card);
                     }
-                    discussionFlowBody.appendChild(card);
                     break;
                 case 3:
-                    // Clear loading indicators if present & this is the first time images are being loaded
-                    if (takeawayMessagesBody.innerHTML === loadingIndicator) {
-                        takeawayMessagesBody.innerHTML = '';
+                    if (document.getElementById(cardKey) == null) {
+                        takeawayMessagesBody.appendChild(card);
                     }
-                    takeawayMessagesBody.appendChild(card);
                     break;
             }
         });
 
-        // If the container still is just the loading indicator, display a message
-        const noImgsMsg = '<div class="alert alert-info mb-0">No Graphs Found.</div>';
-        if (questionDistributionBody.innerHTML === loadingIndicator) {
-            questionDistributionBody.innerHTML = noImgsMsg;
+        // If no images were found for a subpage, display a message
+        // Only add the message if there are no cards in the container
+        if (questionDistributionBody.querySelectorAll('.card').length === 0) {
+            questionDistributionBody.insertAdjacentHTML('beforeend', '<div class="alert alert-info mb-0">No Graphs Found.</div>');
         }
-        if (discussionFlowBody.innerHTML === loadingIndicator) {
-            discussionFlowBody.innerHTML = noImgsMsg;
+        if (discussionFlowBody.querySelectorAll('.card').length === 0) {
+            discussionFlowBody.insertAdjacentHTML('beforeend', '<div class="alert alert-info mb-0">No Graphs Found.</div>');
         }
-        if (takeawayMessagesBody.innerHTML === loadingIndicator) {
-            takeawayMessagesBody.innerHTML = noImgsMsg;
+        if (takeawayMessagesBody.querySelectorAll('.card').length === 0) {
+            takeawayMessagesBody.insertAdjacentHTML('beforeend', '<div class="alert alert-info mb-0">No Graphs Found.</div>');
         }
         return;
     });
-
 }

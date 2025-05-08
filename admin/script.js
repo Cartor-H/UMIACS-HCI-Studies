@@ -72,6 +72,12 @@ function onLoad(){
     for (let i = 0; i < tables.length; i++) {
         addTableRow(tables[i]);
     }
+
+    // Set Up The Drop Downs
+    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl)
+    });
 }
 
 //----------------------------------------------------Clock Update----------------------------------------------------//
@@ -634,6 +640,12 @@ function uploadDir() {
     
     // Process each file to build the structure
     for (const file of files) {
+        // Ignore files starting with a dot
+        if (file.name.startsWith('.')) {
+            console.warn('Ignoring hidden file:', file.webkitRelativePath);
+            continue;
+        }
+
         // Split the path to get the directory structure
         const pathParts = file.webkitRelativePath.split('/');
         
@@ -670,6 +682,11 @@ function uploadDir() {
     let fileData = [];
     
     for (const file of files) {
+        // Ignore files starting with a dot
+        if (file.name.startsWith('.')) {
+            continue;
+        }
+
         const promise = new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -708,15 +725,32 @@ function uploadDir() {
             
             // Call the save_images function
             callFunction('save_images', formData, function(responseData) {
-                // console.log('Upload successful!', responseData);
-                // alert('Folder uploaded successfully!');
+                console.log('Upload successful!', responseData);
+                alert('Folder uploaded successfully!');
                 
-                // // Clear the form
-                // document.getElementById('folderUpload').value = '';
+                // Clear the form
+                document.getElementById('folderUpload').value = '';
             });
         })
-        // .catch(error => {
-        //     console.error('Error processing files:', error);
-        //     alert('Error processing files. Please try again.');
-        // });
+        .catch(error => {
+            console.error('Error processing files:', error);
+            alert('Error processing files. Please try again.');
+        });
+}
+
+
+//----------------------------------User ID Input--------------------------------------------------//
+// function updateUserIDInput() {
+//     const dropdown = document.getElementById('userDropdown');
+//     const customInput = document.getElementById('userID');
+//     customInput.value = dropdown.value;
+// }
+
+function selectUser(userId) {
+    document.getElementById('userID').value = userId;
+}
+
+function clearDropdownSelection() {
+    // const dropdown = document.getElementById('userDropdown');
+    // dropdown.selectedIndex = 0;
 }

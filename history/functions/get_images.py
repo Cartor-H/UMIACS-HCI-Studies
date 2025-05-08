@@ -35,10 +35,10 @@ def outputSQLQuery(form):
     ID = form["ID"]
 
     query = """
-            SELECT fileName, header, subpage, date
+            SELECT fileName, header, subpage, date, weekNumber, rowOrder
             FROM Images
             WHERE userId = %s
-            ORDER BY date DESC
+            ORDER BY weekNumber DESC, rowOrder ASC
             """
             
     cursor.execute(query, (ID,))
@@ -82,6 +82,8 @@ def outputSQLQuery(form):
                 'header': row['header'],
                 'subpage': row['subpage'],
                 'date': row['date'].strftime('%Y-%m-%d %H:%M:%S') if isinstance(row['date'], datetime.datetime) else str(row['date']),
+                'weekNumber': row['weekNumber'],
+                'rowOrder': row['rowOrder'],
                 'fileData': encoded_string,
                 # Uncomment the line below if you want to include the file data
                 # 'fileData': encoded_string

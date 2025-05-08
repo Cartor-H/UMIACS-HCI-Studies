@@ -35,7 +35,6 @@ def outputSQLQuery(form):
     
     # Check if this is a batch upload (folder) or single file
 
-    print(form.keys())
     ID = form["ID"]
     files_data = json.loads(form["files"])
     
@@ -66,7 +65,7 @@ def outputSQLQuery(form):
             
             # Extract subPage and header from filename
             # Expected format: [subPage]-[header].png
-            filename_pattern = r'^(\d+)-(.+)\.\w+$'
+            filename_pattern = r'^(\d+)-(\d+)-(.+)\.\w+$'
             filename_match = re.match(filename_pattern, path_parts[2])
             
             if not filename_match:
@@ -77,7 +76,8 @@ def outputSQLQuery(form):
                 continue
                 
             sub_page = filename_match.group(1)
-            header = filename_match.group(2).replace('_', ' ')
+            order = filename_match.group(2)
+            header = filename_match.group(3).replace('_', ' ')
             
             # Get file metadata
             last_modified = datetime.datetime.fromtimestamp(file_info["lastModified"]/1000)  # Convert ms to seconds
@@ -91,13 +91,13 @@ def outputSQLQuery(form):
             
             # Generate S3 filename with structure: userID/weekNumber/subPage-header.extension
             extension = file_data.split("/")[1].split(";")[0]
-            s3_key = f"{user_id}/{week_number}/{sub_page}-{header.replace(' ', '_')}.{extension}"
+            s3_key = f"{user_id}/{week_number}/{sub_page}-{order}-{header.replace(' ', '_')}.{extension}"
             
             # Check if image already exists in the database
             cursor.execute("""
                 SELECT fileName, date FROM Images 
-                WHERE userId=%s AND header=%s AND subPage=%s AND weekNumber=%s
-            """, (user_id, header, sub_page, week_number))
+                WHERE userId=%s AND header=%s AND subPage=%s AND weekNumber=%s AND rowOrder=%s
+            """, (user_id, header, sub_page, week_number, order))
             
             existing_image = cursor.fetchone()
             
@@ -119,8 +119,8 @@ def outputSQLQuery(form):
                     cursor.execute("""
                         UPDATE Images 
                         SET fileName=%s, date=%s 
-                        WHERE userId=%s AND header=%s AND subPage=%s AND weekNumber=%s
-                    """, (s3_key, last_modified, user_id, header, sub_page, week_number))
+                        WHERE userId=%s AND header=%s AND subPage=%s AND weekNumber=%s AND rowOrder=%s
+                    """, (s3_key, last_modified, user_id, header, sub_page, week_number, order))
                     
                     results["updated"].append(s3_key)
                 else:
@@ -136,9 +136,9 @@ def outputSQLQuery(form):
                 
                 # Add new record to database
                 cursor.execute("""
-                    INSERT INTO Images (userId, fileName, subPage, header, weekNumber, date)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (user_id, s3_key, sub_page, header, week_number, last_modified))
+                    INSERT INTO Images (userId, fileName, subPage, header, weekNumber, date, rowOrder)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (user_id, s3_key, sub_page, header, week_number, last_modified, order))
                 
                 results["success"].append(s3_key)
                 
