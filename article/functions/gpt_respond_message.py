@@ -182,7 +182,7 @@ Guide the user to consider the perspective behind the current framing—whether 
 Then, offer directions for continuing the inquiry through deeper or alternative perspectives. Suggest follow-up questions that the user can ask you for these directions
 
 Example response:
-That’s a valuable angle to consider. Here’s what I can share: [insert broader information—comparative case, historical context, precedent].
+That’s a valuable angle to consider. Here’s what I can share: [insert broader information—comparative case, historical context, precedent]. I am not connected to the internet, but you can check out [resources, e.g., government website, other news articles] for more up-to-date information.
 
 Given that, I’d interpret the current situation as [insert interpretation]. That ties back to your earlier point about [user's interest] and helps us see how this fits into a bigger picture.
 
@@ -328,7 +328,7 @@ Guide the user to consider the perspective behind the current framing—whether 
 
 Example response:
 That’s a valuable angle to consider. Here’s what I can share: [insert broader information—comparative case, historical context, precedent].
-
+You can also search [external sources, e.g., government website, other news articles] for more up-to-date information.
 Given that, I’d interpret the current situation as [insert interpretation]. That ties back to your earlier point about [user's interest] and helps us see how this fits into a bigger picture.
 
 So far, we’ve been looking at this from [insert perspective—e.g., policy-level consequences, individual experience]. That comes with some assumptions—like [explain briefly].
@@ -421,6 +421,7 @@ Example response:
 That’s a strong starting point—this topic is central to the article, and exploring how it's discussed helps us build a solid foundation for understanding it more deeply.
 Here’s what I found: [insert clear, factual answer based on article or general knowledge].
 I pulled this from [brief source explanation—e.g., the article itself, or what’s generally known]. 
+I am not connected to the internet, but you can check out [resources, e.g., government website, other news articles] for more up-to-date information.
 I wonder what prompted your interest in this question? Perhaps you can ask me some questions for us to begin exploring deeper meaning of these viewpoints or information. For example, you might ask:
 “What are the possible consequences of this [topic mentioned in the question]?”
 “What are the underlying factors or pressures that might have led to [topic mentioned in the question]?”
@@ -453,7 +454,7 @@ Then, offer directions for continuing the inquiry through deeper or alternative 
 
 Example response:
 That’s a valuable angle to consider. Here’s what I can share: [insert broader information—comparative case, historical context, precedent].
-
+You can also search [external sources, e.g., government website, other news articles] for more up-to-date information.
 Given that, I’d interpret the current situation as [insert interpretation]. That ties back to your earlier point about [user's interest] and helps us see how this fits into a bigger picture.
 
 So far, we’ve been looking at this from [insert perspective—e.g., policy-level consequences, individual experience]. That comes with some assumptions—like [explain briefly].
@@ -773,6 +774,8 @@ def outputSQLQuery(form):
             if next_state == current_state:
                 # If staying in the same flow, increment the flow index
                 turn_count += 2
+                if turn_count >= 12:
+                    turn_count = 2
             elif next_state == "Waiting_User_Input":
                 # If exiting the flow, reset the flow index
                 turn_count = 2
