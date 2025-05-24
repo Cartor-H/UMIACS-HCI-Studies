@@ -754,3 +754,23 @@ function clearDropdownSelection() {
     // const dropdown = document.getElementById('userDropdown');
     // dropdown.selectedIndex = 0;
 }
+
+function updateUserID() {
+    userID = document.getElementById('userID').value;
+}
+
+
+
+function changeReflectionNavState() {
+    const reflectionNav = document.getElementById('showReflectionNav');
+    
+    if (reflectionNav.checked) {
+        callFunction('save_reflection_nav', { userID: userID, state: 'True' }, function(responseData) {
+            console.log('Reflection navigation state changed to True');
+        });
+    } else {
+        callFunction('save_reflection_nav', { userID: userID, state: 'False' }, function(responseData) {
+            console.log('Reflection navigation state changed to False');
+        });
+    }
+}

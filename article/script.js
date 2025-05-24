@@ -491,44 +491,44 @@ function startChatBotPipeline() {
     
 
     // // Wait until chainOfThought and article are not null
-    // let checkDataInterval = setInterval(function() {
-    //     if (article && Object.keys(article).length !== 0) {
-    //         clearInterval(checkDataInterval);
+    let checkDataInterval = setInterval(function() {
+        if (article && Object.keys(article).length !== 0) {
+            clearInterval(checkDataInterval);
             
-    //         // Ensure Chain Of Thought is null for first message.
-    //         // let tempCOT = chainOfThought
-    //         chainOfThought = null;
-    //         // Call GPT
-    //         sendMessageToChatBot("");
+            // Ensure Chain Of Thought is null for first message.
+            // let tempCOT = chainOfThought
+            chainOfThought = null;
+            // Call GPT
+            sendMessageToChatBot("");
 
-    //         // chainOfThought = tempCOT;
-    //     }
-    // }, 100);
+            // chainOfThought = tempCOT;
+        }
+    }, 100);
 }
 
 function getPrevChainOfThought() {
     // Retreive Previous Chain Of Thought
-    // if(articleID && userID && articleID!="" && userID!="") {
-    //     $.ajax({
-    //         url: 'functions/get_chain_of_thought.py',
-    //         type: 'POST',
-    //         loading: false,
-    //         dataType: 'json',
-    //         data: {articleID: articleID, userID: userID},
-    //         success: function (data) {
-    //             if (data["Status"] == "Success") {
-    //                 chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
-    //                 console.log(chainOfThought)
-    //             } else {
-    //                 console.log("No Data, Starting New Chain Of Thought");
-    //             }
-    //         },
-    //         error: function (XMLHttpRequest, textStatus, errorThrown) {
-    //             alert("Status: " + textStatus);
-    //             alert("Error: " + errorThrown);
-    //         }
-    //     });
-    // }
+    if(articleID && userID && articleID!="" && userID!="") {
+        $.ajax({
+            url: 'functions/get_chain_of_thought.py',
+            type: 'POST',
+            loading: false,
+            dataType: 'json',
+            data: {articleID: articleID, userID: userID},
+            success: function (data) {
+                if (data["Status"] == "Success") {
+                    chainOfThought = JSON.parse(JSON.parse(data["Data"])[0]["Content"])
+                    console.log(chainOfThought)
+                } else {
+                    console.log("No Data, Starting New Chain Of Thought");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus);
+                alert("Error: " + errorThrown);
+            }
+        });
+    }
 }
 
 
@@ -728,17 +728,19 @@ let msgDiscussion = "*Thank you for sharing your thoughts.\n"+
     "You can now start your converstation with the chatbot.*"
 
 let msgFinalTakeAways = "*Thank you for your conversation with the chatbot.\n\n"+
-    "Based on your own reading of the article and the conversation, what are your final takeaways from this news article?"+
+    "Based on your own reading of the article and the conversation, what are your final takeaways from this news article? "+
     "Please write down some of your thoughts before leaving this article.*"
+
 
 
 
 function handleStateOnLoad(data) {
     console.log(data)
-    setStateIninitialTakeaways()
-    // if (data["ChatState"] == "InitialTakeaways") { setStateIninitialTakeaways() }
-    // if (data["ChatState"] == "Discussion"      ) { setStateDiscussion        () }
-    // if (data["ChatState"] == "FinalTakeAways"  ) { setStateFinalTakeAways    () }
+    // setStateIninitialTakeaways()
+    if (data["ChatState"] == "InitialTakeaways") { setStateIninitialTakeaways() }
+    if (data["ChatState"] == "Discussion"      ) { setStateDiscussion        () }
+    if (data["ChatState"] == "FinalTakeAways"  ) { setStateFinalTakeAways    () }
+    if (data["ChatState"] == "Completed"       ) { setStateAlreadyCompleted  () }
 }
 
 function setStateIninitialTakeaways() {
@@ -746,11 +748,11 @@ function setStateIninitialTakeaways() {
     chatState = "InitialTakeaways";
 
     // Add Initial Takeaways Message if not already added
-    // if (document.getElementById("InitialTakeawaysMessage") == null) {
+    if (document.getElementById("InitialTakeawaysMessage") == null) {
         addMessageMiddle(mdToHtml(msgInitialTakeaways),
             new Date(), "InitialTakeawaysMessage");
         saveMessage(msgInitialTakeaways, "System", -1);
-    // }
+    }
 
     document.getElementById("stepInitialTakeaways").classList.remove("disabled-tab");
     document.getElementById("stepInitialTakeaways").classList.add("active-tab");
@@ -766,13 +768,15 @@ function setStateDiscussion() {
     chatState = "Discussion";
 
     // Add Discussions Message if not already added
-    // if (document.getElementById("DiscussionMessage") == null) {
+    if (document.getElementById("DiscussionMessage") == null) {
         addMessageMiddle(mdToHtml(msgDiscussion),
             new Date(), "DiscussionMessage");
         addLine();
         saveMessage(msgDiscussion, "System", -1);
-        saveMessage("<hr>", "Line", -1);
-    // }
+        setTimeout(() => {
+            saveMessage("<hr>", "Line", -1);
+        }, 500);
+    }
     // startChatBotPipeline();
 
     // Enable Ending Button
@@ -793,13 +797,13 @@ function setStateFinalTakeAways() {
     chatState = "FinalTakeAways";
 
     // Add Discussions Message if not already added
-    // if (document.getElementById("FinalTakeAwaysMessage") == null) {
+    if (document.getElementById("FinalTakeAwaysMessage") == null) {
         addLine();
         addMessageMiddle(mdToHtml(msgFinalTakeAways),
             new Date(), "FinalTakeAwaysMessage");
         saveMessage("<hr>", "Line", -1);
         saveMessage(msgFinalTakeAways, "System", -1);
-    // }
+    }
 
     // Dissable Ending Button
     document.getElementById("btnSetStateFinalTakeAways").classList.add("btn-disabled");
@@ -819,6 +823,23 @@ function setStateCompleted() {
 
     // Send a popup message to the user
     createPopUp("Article Completed", "You have completed reading this news article. You can now close this page or return to the home page.");
+
+    
+    document.getElementById("stepStateFinalTakeAways").classList.add("disabled-tab");
+    document.getElementById("stepDiscussionMessage").classList.add("disabled-tab");
+    document.getElementById("stepInitialTakeaways").classList.add("disabled-tab");
+
+    saveArticleAction("Completed");
+
+    sendMsgEnabled = false;
+}
+
+function setStateAlreadyCompleted() {
+    // Set Chat State
+    chatState = "Completed";
+
+    // Send a popup message to the user
+    createPopUp("Article Completed", "You have already completed reading this news article. You can now close this page or return to the home page.");
 
     
     document.getElementById("stepStateFinalTakeAways").classList.add("disabled-tab");
@@ -885,4 +906,8 @@ function createPopUp(title, message) {
     
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
+}
+
+function checkCursor() {
+    console.log("Delete This Function")
 }

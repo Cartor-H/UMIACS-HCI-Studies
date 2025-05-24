@@ -237,7 +237,8 @@ function getAndDisplayImages() {
                 cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
 
                 // Add header text
-                const headerText = document.createElement('h5');
+                const headerText = document.createElement('h4');
+                headerText.fontWeight = 'bold';
                 headerText.className = 'mb-0';
                 headerText.textContent = "Week " + image.weekNumber;
             
@@ -270,9 +271,10 @@ function getAndDisplayImages() {
             imgContainer.style.padding = '10px';
             imgContainer.style.textAlign = 'center';
             imgContainer.style.minWidth = '0'; // Allow container to shrink below content size
+            imgContainer.style.maxWidth = '70%'; // Prevent overflow
 
             // Add a header above the image
-            const imgHeader = document.createElement('div');
+            const imgHeader = document.createElement('h3');
             imgHeader.style.fontWeight = 'bold';
             imgHeader.textContent = headerList[image.header] || image.header;
             imgContainer.appendChild(imgHeader);

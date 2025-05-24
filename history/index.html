@@ -4,13 +4,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Modern Webpage</title>
+  <title>Summary</title>
   <link href="../style.css" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="../css/bootstrap.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://kit.fontawesome.com/1dc4eaece6.js" crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
   <script src="../js/bootstrap.js"></script>
+  <script src="../universal_news_functions.js"></script>
 </head>
 
 <body onload="onLoad()">
@@ -27,7 +28,7 @@
             <a class="nav-link" href="" id="homeNav">Home</a>
           </li>
           <li class="nav-item flex-fill text-center">
-            <a class="nav-link" href="" id="historyNav">History</a>
+            <a class="nav-link" href="" id="historyNav">Summary</a>
           </li>
           <li class="nav-item flex-fill text-center">
             <span class="navbar-text">
@@ -44,17 +45,17 @@
     <ul class="nav nav-tabs" id="reflectionTabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="question-distribution-tab" data-bs-toggle="tab" data-bs-target="#question-distribution" type="button" role="tab">
-          Question Type Distribution
+          What Types of Questions Do You Ask?
         </button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="discussion-flow-tab" data-bs-toggle="tab" data-bs-target="#discussion-flow" type="button" role="tab">
-          Discussion Flow
+          What Is Your Thinking Flow?
         </button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="takeaway-messages-tab" data-bs-toggle="tab" data-bs-target="#takeaway-messages" type="button" role="tab">
-          Takeaway Messages
+          What Kind of News Reader Are You?
         </button>
       </li>
     </ul>
@@ -66,8 +67,27 @@
         <div class="card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
           <div class="card-body" id="questionDistributionBody">
 
-            <div class="d-flex justify-content-center align-items-center text-center mb-3">
-              <h3>Explanation</h3>
+            <div class="d-flex align-items-center text-center mb-3">
+
+              <div class="content-div text-start w-100">
+
+                <h2 class="text-center">What Types of Questions Do You Ask?</h2>
+                
+                <p>Everyone brings different curiosities to their discussions with the chatbot. What kinds of questions do you bring to yours?</p>
+                
+                <p>This page shows a chart that breaks down the questions you've asked into four types.</p>
+                
+                <ul>
+                    <li><b>Article Viewpoints:</b> You stayed grounded, asking about the different perspectives presented in the news article.</li>
+                    
+                    <li><b>Relevant Facts:</b> You focused on concrete facts, asking for clarification or elaboration on key details.</li>
+                    
+                    <li><b>Broader Implications:</b> You zoomed out, asking about the bigger picture or larger impact of the news.</li>
+                    
+                    <li><b>Personal Relevance:</b> You made it personal, asking how the news connects to your own life, experiences, or actions.</li>
+                </ul>
+            </div>
+
             </div>
           </div>
         </div>
@@ -78,8 +98,31 @@
         <div class="card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
           <div class="card-body" id="discussionFlowBody">
 
-            <div class="d-flex justify-content-center align-items-center text-center mb-3">
-              <h3>Explanation</h3>
+            <div class="d-flex align-items-center text-center mb-3">
+
+              <div class="content-div text-start">
+
+                <h2 class="text-center">What Is Your Thinking Flow?</h2>
+
+                <p>Everyone’s mind moves through thoughts and ideas in its own way. What does your thinking flow look like in your discussions with the chatbot?</p>
+                
+                <p>This page turns your conversations into a colorful map of your thinking flow. The large chart shows your overall flow — how you moved from one
+                  question type to another while exploring a topic. The smaller charts zoom in on specific question types.</p>
+                
+                <b>How to read the charts:</b>
+
+                <ul>
+                  
+                    <li><b>Each ribbon</b> shows a transition from one question type to the next.
+                      Your thinking flow moves from the question type that matches the ribbon’s color to the question type at the other end.</li>
+                    
+                    <li>Your thinking flow moves from the question type that matches the <b>ribbon’s color</b> to the question type at the other end.</li>
+                    
+                    <li><b>Brighter ribbons</b> mean you asked the next question; <b>lighter ribbons</b> mean the chatbot suggested it.</li>
+                    
+                    <li><b>Wider ribbons</b> mean you made that transition more often.</li>
+                </ul>
+            </div>
             </div>
           </div>
         </div>
@@ -90,8 +133,33 @@
         <div class="card" style="border-top-left-radius: 0; border-top-right-radius: 0;">
           <div class="card-body" id="takeawayMessagesBody">
 
-            <div class="d-flex justify-content-center align-items-center text-center mb-3">
-              <h3>Explanation</h3>
+            <div class="d-flex align-items-center text-center mb-3">
+
+              <div class="content-div text-start">
+
+                <h2 class="text-center">What Kind of News Reader Are You?</h2>
+                
+                <p>Everyone reads the news a little differently. What’s your style?</p>
+                
+                <p>This page reveals your <b>News Reader Profile</b> based on the takeaways you’ve written.
+                   The chart below highlights five unique news reader styles and shows how closely you align with each one in your <b>Initial</b> and <b>Final Takeaways</b>.
+                   Styles that extend farther from the center mean that you align more with them.</p>
+                
+                <b>The five news reader styles are:</b>
+
+                <ul>
+
+                  <li><b>The Bridge Builder:</b> “I bridge and weigh different viewpoints to form a balanced perspective.”</li>
+                    
+                  <li><b>The Fact Seeker:</b> “I identify and collect key facts and background details to ground my understanding.”</li>
+                  
+                  <li><b>The Life Weaver:</b> “I connect the news to my own life and experience to make it relevant and relatable.”</li>
+                  
+                  <li><b>The Ripple Tracker:</b> “I trace how one thing leads to another to explain causes, outcomes, and consequences.”</li>
+
+                  <li><b>The Horizon Watcher:</b> “I assess what’s happening and why it matters to form a judgment or assessment.”</li>
+                </ul>
+            </div>
             </div>
           </div>
         </div>

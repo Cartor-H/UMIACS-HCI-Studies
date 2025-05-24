@@ -237,6 +237,18 @@ CREATE TABLE Images (
     header VARCHAR(MAX),
 );
 
+-- Make a new table
+-- Table name TabState
+-- UserID nvarchar(50)
+-- Enabled bit
+
+
+
+CREATE TABLE TabState (
+    UserID NVARCHAR(50) NOT NULL,
+    [Enabled] BIT NOT NULL
+);
+
 ```
 
 
