@@ -726,7 +726,13 @@ function uploadDir() {
             // Call the save_images function
             callFunction('save_images', formData, function(responseData) {
                 console.log('Upload successful!', responseData);
-                alert('Folder uploaded successfully!');
+                alert('Folder uploaded successfully!\n' + 
+                      `Added: ${responseData["Added"]}\n` +
+                      `Failed: ${responseData["Failed"]}\n` +
+                      `Processed: ${responseData["Processed"]}\n` +
+                      `Skipped: ${responseData["Skipped"]}\n` +
+                      `Updated: ${responseData["Updated"]}\n`
+                );
                 
                 // Clear the form
                 document.getElementById('folderUpload').value = '';

@@ -96,52 +96,55 @@ def outputSQLQuery(form):
             # Check if image already exists in the database
             cursor.execute("""
                 SELECT fileName, date FROM Images 
-                WHERE userId=%s AND header=%s AND subPage=%s AND weekNumber=%s AND rowOrder=%s
-            """, (user_id, header, sub_page, week_number, order))
+                WHERE userId=%s AND subPage=%s AND weekNumber=%s AND rowOrder=%s
+            """, (user_id, sub_page, week_number, order))
             
-            existing_image = cursor.fetchone()
+            existing_images = cursor.fetchall()
             
-            if existing_image:
+            print(existing_images)
+
+
+            for existing_image in existing_images:
                 existing_filename, existing_upload_date = existing_image
                 
                 # Check if the new image is newer
-                if last_modified > existing_upload_date:
+                # if last_modified > existing_upload_date:
                     # Delete old image from S3
-                    try:
-                        s3.delete_object(Bucket=os.getenv('BUCKET_NAME'), Key=existing_filename)
-                    except Exception as e:
-                        print(f"Warning: Could not delete old file {existing_filename}: {str(e)}")
-                    
-                    # Upload new image to S3
-                    s3.put_object(Bucket=os.getenv('BUCKET_NAME'), Key=s3_key, Body=image_data)
-                    
-                    # Update record in database
-                    cursor.execute("""
-                        UPDATE Images 
-                        SET fileName=%s, date=%s 
-                        WHERE userId=%s AND header=%s AND subPage=%s AND weekNumber=%s AND rowOrder=%s
-                    """, (s3_key, last_modified, user_id, header, sub_page, week_number, order))
-                    
-                    results["updated"].append(s3_key)
-                else:
-                    # Skip this file as it's older than the existing one
-                    results["skipped"].append({
-                        "file": file_info["path"],
-                        "reason": "Existing file is newer"
-                    })
-                    continue
-            else:
-                # New file - upload to S3
+                try:
+                    s3.delete_object(Bucket=os.getenv('BUCKET_NAME'), Key=existing_filename)
+                except Exception as e:
+                    print(f"Warning: Could not delete old file {existing_filename}: {str(e)}")
+                
+                # Upload new image to S3
                 s3.put_object(Bucket=os.getenv('BUCKET_NAME'), Key=s3_key, Body=image_data)
                 
-                # Add new record to database
+                # Update record in database
                 cursor.execute("""
-                    INSERT INTO Images (userId, fileName, subPage, header, weekNumber, date, rowOrder)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (user_id, s3_key, sub_page, header, week_number, last_modified, order))
+                    DELETE FROM Images 
+                    WHERE userId=%s AND subPage=%s AND weekNumber=%s AND rowOrder=%s
+                """, (user_id, sub_page, week_number, order))
                 
-                results["success"].append(s3_key)
-                
+                results["updated"].append(s3_key)
+                # else:
+                #     # Skip this file as it's older than the existing one
+                #     results["skipped"].append({
+                #         "file": file_info["path"],
+                #         "reason": "Existing file is newer"
+                #     })
+                #     continue
+
+            # if len(existing_images) < 0:
+            # New file - upload to S3
+            s3.put_object(Bucket=os.getenv('BUCKET_NAME'), Key=s3_key, Body=image_data)
+            
+            # Add new record to database
+            cursor.execute("""
+                INSERT INTO Images (userId, fileName, subPage, header, weekNumber, date, rowOrder)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (user_id, s3_key, sub_page, header, week_number, last_modified, order))
+            
+            results["success"].append(s3_key)
+
             con.commit()
                 
         except Exception as e:

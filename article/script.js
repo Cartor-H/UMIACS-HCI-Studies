@@ -157,18 +157,21 @@ function onLoad(){
     getPreviousMessages( function(messages) {
 
     // Retrieve Previous Chain Of Thought From SQL Server
-    getPrevChainOfThought();
+    getPrevChainOfThought( function(chot) {
 
     // Add open action to ArticleOpenHistory
     saveArticleAction("open");
 
     // State Mangeament
-    callFunction("get_article_state", {articleID: articleID, userID: userID}, handleStateOnLoad);
+    callFunction("get_article_state", {articleID: articleID, userID: userID}, function(data) {
+        handleStateOnLoad(data);
+        checkLastMessageWasSent();
+    });
 
     // Focus on text input area
     document.getElementById("message").focus();
 
-    });
+    });});
 }
 
 //----------------------------------------------Adding Messages To Screen---------------------------------------------//
@@ -236,7 +239,7 @@ function addMessageLeft (message, time) {
 
 
     document.getElementById("chatWindow").innerHTML +=
-        '<div class="card left-color col-10 mb-3">' +
+        '<div class="card left-color col-10 mb-3" side="left">' +
         '<div class="card-body pt-2 pb-2">' +
         message +
         '<p class="text-start mb-0">' +
@@ -255,7 +258,7 @@ function addMessageMiddle(message, time, id) {
     let formattedDate = time2hm(time);
 
     document.getElementById("chatWindow").innerHTML +=
-        `<div class="card middle-color text-center offset-1 col-10 mb-3" id=${id}>` +
+        `<div class="card middle-color text-center offset-1 col-10 mb-3" id=${id} side="middle">` +
         '<div class="card-body pt-2 pb-2">' +
         message +
         // '<p class="text-center mb-0">' +
@@ -506,7 +509,7 @@ function startChatBotPipeline() {
     }, 100);
 }
 
-function getPrevChainOfThought() {
+function getPrevChainOfThought( callBack) {
     // Retreive Previous Chain Of Thought
     if(articleID && userID && articleID!="" && userID!="") {
         $.ajax({
@@ -522,6 +525,7 @@ function getPrevChainOfThought() {
                 } else {
                     console.log("No Data, Starting New Chain Of Thought");
                 }
+                callBack(data);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 alert("Status: " + textStatus);
@@ -910,4 +914,29 @@ function createPopUp(title, message) {
 
 function checkCursor() {
     console.log("Delete This Function")
+}
+
+
+
+
+
+
+function checkLastMessageWasSent() {
+    let lastMessage = document.getElementById("chatWindow").lastElementChild;
+    
+    // If the last message is an hr and the chat state is Discussion
+    if (lastMessage && lastMessage.tagName == "HR" && chatState == "Discussion") {
+        sendMessageToChatBot(null, messageCount);
+        messageCount = messageCount + 1;
+
+    // Check if last message if from the user and the chat state is Discussion
+    } else if ((lastMessage && lastMessage.getAttribute("side") != "left") && chatState == "Discussion") {
+        // Resend the last message to the chatbot
+        let lastMessageContent = lastMessage.querySelector(".card-body").innerHTML;
+        lastMessageContent = lastMessageContent.replace(/<br>/g, "\n").replace(/<small.*?<\/small>/g, "").trim();
+        console.log("Last Message: " + lastMessageContent);
+
+        sendMessageToChatBot(lastMessageContent, messageCount);
+        messageCount = messageCount + 1;
+    }   
 }
