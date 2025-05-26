@@ -97,7 +97,7 @@ Hi! I'm your Thinking Partner Chatbot, here to help you explore news articles th
 
     elif state == "Meta_message":
         return f"""The user has sent you a meta message.
-- If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. Your response should be in English. 
+- If the user enters a message that is not in English, do NOT answer their question. Politely explain to them that you can only process English messages. Provide an English translation of their message to them and let them know maybe this can help them express their ideas in English. Do not provide any answer to the user if their message is not in English. Your response should be in English.
 
 - If the user has sent you a message that belong to the following categories: 
 Asking for clarification on your previous response,
@@ -219,7 +219,8 @@ You could ask:
 ---
 Handling Meta Messages for Coordination  
 If the user sends a coordination message, such as asking for clarification, requesting a word explanation, instructing you to change your style or acknowledging your response, briefly respond to the coordination and then return to the conversational framework. Suggest similar follow-up questions that the user can ask you from your previous message. 
-If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. Your response should be in English. 
+
+If the user enters a message that is not in English, do NOT answer their question. Politely explain to them that you can only process English messages. Provide an English translation of their message to them and let them know maybe this can help them express their ideas in English. Do not provide any answer to the user if their message is not in English. Your response should be in English.
 
 ---
 Overall Guidance  
@@ -359,7 +360,7 @@ Handling Meta Messages for Coordination
 
 If the user sends a coordination message, such as asking for clarification, requesting a word explanation, instructing you to change your style or acknowledging your response, briefly respond to the coordination and then return to the conversational framework. Suggest similar follow-up questions that the user can ask you from your previous message. 
 
-If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. Your response should be in English. 
+If the user enters a message that is not in English, do NOT answer their question. Politely explain to them that you can only process English messages. Provide an English translation of their message to them and let them know maybe this can help them express their ideas in English. Do not provide any answer to the user if their message is not in English. Your response should be in English.
 
 ---
 Overall Guidance  
@@ -491,7 +492,7 @@ You could ask:
 Handling Meta Messages for Coordination  
 If the user sends a coordination message, such as asking for clarification, requesting a word explanation, instructing you to change your style or acknowledging your response, briefly respond to the coordination and then return to the conversational framework. Suggest similar follow-up questions that the user can ask you from your previous message. 
 
-If the user enters a message that is not in English, explain to them that you can only process English message. Provide an English translation to them and let them know maybe this can help them express their ideas in English. Your response should be in English. 
+If the user enters a message that is not in English, do NOT answer their question. Politely explain to them that you can only process English messages. Provide an English translation of their message to them and let them know maybe this can help them express their ideas in English. Do not provide any answer to the user if their message is not in English. Your response should be in English.
 
 ---
 Overall Guidance  
