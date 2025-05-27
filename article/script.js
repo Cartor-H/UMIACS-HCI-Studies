@@ -305,12 +305,17 @@ function getPreviousMessages(callBack) {
                     for (let i = 0; i < messages.length; i++) {
                         console.log(messages[i]["TimeSent"])
                         console.log(new Date(messages[i]["TimeSent"]))
+
+                        // UTC to EST
+                        let adjustedTime = new Date(messages[i]["TimeSent"]);
+                        adjustedTime.setHours(adjustedTime.getHours() - 4);
+
                         if (messages[i]["Sender"] == "Client") {
-                            addMessageRight(messages[i]["Message"], new Date(messages[i]["TimeSent"]));
+                            addMessageRight(messages[i]["Message"], adjustedTime);
                         } else if (messages[i]["Sender"] == "ChatBot") {
-                            addMessageLeft(mdToHtml(messages[i]["Message"]), new Date(messages[i]["TimeSent"]));
+                            addMessageLeft(mdToHtml(messages[i]["Message"]), adjustedTime);
                         } else if (messages[i]["Sender"] == "System") {
-                            addMessageMiddle(mdToHtml(messages[i]["Message"]), new Date(messages[i]["TimeSent"]), getIdFromMessage(messages[i]["Message"]));
+                            addMessageMiddle(mdToHtml(messages[i]["Message"]), adjustedTime, getIdFromMessage(messages[i]["Message"]));
                         } else if (messages[i]["Sender"] == "Line") {
                             addLine();
                         }
