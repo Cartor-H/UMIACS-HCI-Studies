@@ -1,0 +1,29 @@
+@keyframes pulse {
+    0% {
+    transform: scale(1);
+    }
+    50% {
+    transform: scale(0.95);
+    }
+    100% {
+    transform: scale(1);
+    }
+  }
+
+
+.btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.active-tab {
+    background-color: rgb(13 110 253) !important;
+    color: white !important;
+}
+
+
+.disabled-tab {
+    background-color: rgb(114, 170, 253) !important;
+    color: white !important;
+}

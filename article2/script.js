@@ -74,6 +74,9 @@ function clientSendMsg() {
 
         
         // Check chat state
+        if (chatState === "Discussion") {
+            document.getElementById("btnSetStateFinalTakeAways").classList.remove("btn-disabled");
+        }
         if (chatState === "InitialTakeaways") { setStateDiscussion() }
         if (chatState != "FinalTakeAways") {
             //Send Message to ChatBot
@@ -141,8 +144,8 @@ function onLoad(){
     if (params.get('userID') != null) {
         userID = params.get('userID');
         document.getElementById("userID").innerText = userID;
-        document.getElementById("homeNav").href = "../home?userID=" + userID;
-        document.getElementById("historyNav").href = "../history?userID=" + userID;
+        document.getElementById("homeNav").href = "../home2?userID=" + userID;
+        document.getElementById("historyNav").href = "../history2?userID=" + userID;
     }
 
     // Get Article ID From URL
@@ -789,7 +792,14 @@ function setStateDiscussion() {
     // startChatBotPipeline();
 
     // Enable Ending Button
-    document.getElementById("btnSetStateFinalTakeAways").classList.remove("btn-disabled");
+    // Only enable if the chatwindow contains two messages with side= "right"
+    // -- This is a mildly janky fix as if the user manages to send two messages
+    //    really fast during the InitialTakeaways state then the button will be enabled
+    //    when it shouldn't be, but this should be a very rare case.
+    let rightMessages = document.querySelectorAll('#chatWindow .card.right-color');
+    if (rightMessages.length >= 2) {
+        document.getElementById("btnSetStateFinalTakeAways").classList.remove("btn-disabled");
+    }
 
     
     document.getElementById("stepDiscussionMessage").classList.remove("disabled-tab");

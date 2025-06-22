@@ -1,0 +1,39 @@
+@keyframes pulse {
+    0% {
+    transform: scale(1);
+    }
+    50% {
+    transform: scale(0.95);
+    }
+    100% {
+    transform: scale(1);
+    }
+  }
+
+  body {
+    background-color: #f8f9fa;
+  }
+
+  .card {
+    border-radius: 15px;
+  }
+
+  .input-group .form-control {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+  }
+
+  .input-group .btn {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+
+  .textarea {
+    min-height: 50px;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  ::selection {
+    background-color: rgb(154, 204, 154);
+    color: rgb(0, 0, 0);
+  }
