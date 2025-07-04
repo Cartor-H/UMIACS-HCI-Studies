@@ -108,7 +108,7 @@ Hi! I’m your news reading assistant. I’m here to help you understand the new
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
-                messages=[{"role": "user", "content": prompt}],
+                messages=messages_payload,
                 temperature=0.7
             )
             assistant_message = response.choices[0].message.content
