@@ -88,6 +88,9 @@ def outputSQLQuery(form):
         if user_message:
             stored_messages.append({"role": "user", "content": user_message})
 
+        if len(stored_messages) >= 1:
+            stored_messages = stored_messages[1:]
+
         system_prompt = f"""You are a chatbot that answers a news reader's question given the context of the article they are reading. Your job is only to answer the question based on the article and your own knowledge base. Do not suggest things for the person to consider at the end of your answer.
 
 Overall rules:
